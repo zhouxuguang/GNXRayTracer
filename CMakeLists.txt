@@ -31,9 +31,15 @@ core/UnitTest.h
 core/UnitTest.cpp
 )
 
+set(SHAPE_FILES 
+shape/Sphere.h
+shape/Sphere.cpp
+)
+
 add_executable(GNXRayTracer
              ${PROJECT_SOURCES}
              ${CORE_FILES}
+             ${SHAPE_FILES}
         )
 
 target_link_libraries(GNXRayTracer PRIVATE "-framework CoreVideo" "-framework QuartzCore")
