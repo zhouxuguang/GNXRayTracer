@@ -21,7 +21,9 @@ set(PROJECT_SOURCES
 
 set(CORE_FILES 
 core/Geometry.h 
-core/Geometry.cpp 
+core/Geometry.cpp
+core/Transform.h 
+core/Transform.cpp 
 core/GNXRayTracer.h
 core/UnitTest.h
 core/UnitTest.cpp

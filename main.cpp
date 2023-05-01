@@ -6,6 +6,7 @@
 int main(int argc, char *argv[])
 {
     testGeometry();
+    testTransform();
     QApplication a(argc, argv);
     MainWindow w;
     w.show();

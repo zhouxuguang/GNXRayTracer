@@ -12,4 +12,6 @@
 
 void testGeometry();
 
+void testTransform();
+
 #endif /* UnitTest_hpp */

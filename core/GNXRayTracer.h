@@ -28,6 +28,13 @@
 #define DCHECK_STRNE(str1, str2) 
 #define DCHECK_STRCASENE(str1, str2) 
 
+#define CHECK_EQ(val1, val2) 
+#define CHECK_NE(val1, val2) 
+#define CHECK_LE(val1, val2) 
+#define CHECK_LT(val1, val2) 
+#define CHECK_GE(val1, val2) 
+#define CHECK_GT(val1, val2) 
+
 // Global Macros
 #define ALLOCA(TYPE, COUNT) (TYPE *) alloca((COUNT) * sizeof(TYPE))
 
