@@ -4,10 +4,6 @@ project(GNXRayTracer VERSION 0.1 LANGUAGES C CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -27,12 +23,12 @@ add_executable(GNXRayTracer
 
 target_link_libraries(GNXRayTracer PRIVATE "-framework CoreVideo" "-framework QuartzCore")
 #target_link_libraries(GNXRayTracer PRIVATE Qt6::Widgets)
-target_link_libraries(GNXRayTracer LINK_PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(GNXRayTracer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 #target_link_libraries(GNXRayTracer PRIVATE "-framework Qt6::Widgets")
 
-set_target_properties(GNXRayTracer PROPERTIES
-    LINK_DEPENDS Qt6::Widgets
-)
+# set_target_properties(GNXRayTracer PROPERTIES
+#     LINK_DEPENDS Qt6::Widgets
+# )
 
 set_target_properties(GNXRayTracer PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
@@ -41,6 +37,9 @@ set_target_properties(GNXRayTracer PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
+set_target_properties(GNXRayTracer PROPERTIES AUTOUIC ON)
+set_target_properties(GNXRayTracer PROPERTIES AUTOMOC ON)
+set_target_properties(GNXRayTracer PROPERTIES AUTORCC ON)
 
 install(TARGETS GNXRayTracer
     BUNDLE DESTINATION .
