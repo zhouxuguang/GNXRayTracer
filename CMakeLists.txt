@@ -18,11 +18,11 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 
-set(PROJECT_SOURCES
-       main.cpp
-       mainwindow.cpp
-       mainwindow.h
-)
+# set(PROJECT_SOURCES
+#        main.cpp
+#        mainwindow.cpp
+#        mainwindow.h
+# )
 
 set(CORE_FILES 
 core/GNXRayTracer.h
@@ -66,11 +66,19 @@ ui/RenderStatus.h
 ui/RenderStatus.cpp
 ui/IMAGraphicsView.h
 ui/IMAGraphicsView.cpp
+ui/DisplayWidget.h
+ui/DisplayWidget.cpp
+ui/RenderThread.h
+ui/RenderThread.cpp
+ui/InteractionDockWidget.h
+ui/InteractionDockWidget.cpp
+ui/MainWindow.h
+ui/MainWindow.cpp
+ui/main.cpp
 )
 source_group("ui" FILES ${UI_FILES})
 
 add_executable(GNXRayTracer
-             ${PROJECT_SOURCES}
              ${CORE_FILES}
              ${SHAPE_FILES}
              ${ACCELERATOR_FILES}
