@@ -1,4 +1,4 @@
-﻿#include "DebugText.hpp"
+#include "DebugText.h"
 #include <iostream>
 #include <vector>
 #include <string>

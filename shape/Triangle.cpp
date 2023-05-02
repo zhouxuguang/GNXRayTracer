@@ -67,8 +67,6 @@ Bounds3f Triangle::WorldBound() const
     return Union(Bounds3f(p0, p1), p2);
 }
 
-#if 0
-
 bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect, bool testAlphaTexture) const
 {
 //    ProfilePhase p(Prof::TriIntersect);
@@ -150,163 +148,11 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
     Float b1 = e1 * invDet;
     Float b2 = e2 * invDet;
     Float t = tScaled * invDet;
-
-    // Ensure that computed triangle $t$ is conservatively greater than zero
-
-    // Compute $\delta_z$ term for triangle $t$ error bounds
-    Float maxZt = MaxComponent(Abs(Vector3f(p0t.z, p1t.z, p2t.z)));
-    Float deltaZ = gamma(3) * maxZt;
-
-    // Compute $\delta_x$ and $\delta_y$ terms for triangle $t$ error bounds
-    Float maxXt = MaxComponent(Abs(Vector3f(p0t.x, p1t.x, p2t.x)));
-    Float maxYt = MaxComponent(Abs(Vector3f(p0t.y, p1t.y, p2t.y)));
-    Float deltaX = gamma(5) * (maxXt + maxZt);
-    Float deltaY = gamma(5) * (maxYt + maxZt);
-
-    // Compute $\delta_e$ term for triangle $t$ error bounds
-    Float deltaE = 2 * (gamma(2) * maxXt * maxYt + deltaY * maxXt + deltaX * maxYt);
-
-    // Compute $\delta_t$ term for triangle $t$ error bounds and check _t_
-    Float maxE = MaxComponent(Abs(Vector3f(e0, e1, e2)));
-    Float deltaT = 3 *
-                   (gamma(3) * maxE * maxZt + deltaE * maxZt + deltaZ * maxE) *
-                   std::abs(invDet);
-    if (t <= deltaT) return false;
-
-    // Compute triangle partial derivatives
-    Vector3f dpdu, dpdv;
-    Point2f uv[3];
-    GetUVs(uv);
-
-    // Compute deltas for triangle partial derivatives
-    Vector2f duv02 = uv[0] - uv[2], duv12 = uv[1] - uv[2];
-    Vector3f dp02 = p0 - p2, dp12 = p1 - p2;
-    Float determinant = duv02[0] * duv12[1] - duv02[1] * duv12[0];
-    bool degenerateUV = std::abs(determinant) < 1e-8;
-    if (!degenerateUV) {
-        Float invdet = 1 / determinant;
-        dpdu = (duv12[1] * dp02 - duv02[1] * dp12) * invdet;
-        dpdv = (-duv12[0] * dp02 + duv02[0] * dp12) * invdet;
-    }
-    if (degenerateUV || Cross(dpdu, dpdv).LengthSquared() == 0) {
-        // Handle zero determinant for triangle partial derivative matrix
-        Vector3f ng = Cross(p2 - p0, p1 - p0);
-        if (ng.LengthSquared() == 0)
-            // The triangle is actually degenerate; the intersection is
-            // bogus.
-            return false;
-
-        CoordinateSystem(Normalize(ng), &dpdu, &dpdv);
-    }
-
-    // Compute error bounds for triangle intersection
-    Float xAbsSum =
-        (std::abs(b0 * p0.x) + std::abs(b1 * p1.x) + std::abs(b2 * p2.x));
-    Float yAbsSum =
-        (std::abs(b0 * p0.y) + std::abs(b1 * p1.y) + std::abs(b2 * p2.y));
-    Float zAbsSum =
-        (std::abs(b0 * p0.z) + std::abs(b1 * p1.z) + std::abs(b2 * p2.z));
-    Vector3f pError = gamma(7) * Vector3f(xAbsSum, yAbsSum, zAbsSum);
-
-    // Interpolate $(u,v)$ parametric coordinates and hit point
-    Point3f pHit = b0 * p0 + b1 * p1 + b2 * p2;
-    Point2f uvHit = b0 * uv[0] + b1 * uv[1] + b2 * uv[2];
-
-    // Test intersection against alpha texture, if present
-    if (testAlphaTexture && mesh->alphaMask) {
-        SurfaceInteraction isectLocal(pHit, Vector3f(0, 0, 0), uvHit, -ray.d,
-                                      dpdu, dpdv, Normal3f(0, 0, 0),
-                                      Normal3f(0, 0, 0), ray.time, this);
-        if (mesh->alphaMask->Evaluate(isectLocal) == 0) return false;
-    }
-
-    // Fill in _SurfaceInteraction_ from triangle hit
-    *isect = SurfaceInteraction(pHit, pError, uvHit, -ray.d, dpdu, dpdv,
-                                Normal3f(0, 0, 0), Normal3f(0, 0, 0), ray.time,
-                                this, faceIndex);
-
-    // Override surface normal in _isect_ for triangle
-    isect->n = isect->shading.n = Normal3f(Normalize(Cross(dp02, dp12)));
-    if (reverseOrientation ^ transformSwapsHandedness)
-        isect->n = isect->shading.n = -isect->n;
-
-    if (mesh->n || mesh->s) {
-        // Initialize _Triangle_ shading geometry
-
-        // Compute shading normal _ns_ for triangle
-        Normal3f ns;
-        if (mesh->n) {
-            ns = (b0 * mesh->n[v[0]] + b1 * mesh->n[v[1]] + b2 * mesh->n[v[2]]);
-            if (ns.LengthSquared() > 0)
-                ns = Normalize(ns);
-            else
-                ns = isect->n;
-        } else
-            ns = isect->n;
-
-        // Compute shading tangent _ss_ for triangle
-        Vector3f ss;
-        if (mesh->s) {
-            ss = (b0 * mesh->s[v[0]] + b1 * mesh->s[v[1]] + b2 * mesh->s[v[2]]);
-            if (ss.LengthSquared() > 0)
-                ss = Normalize(ss);
-            else
-                ss = Normalize(isect->dpdu);
-        } else
-            ss = Normalize(isect->dpdu);
-
-        // Compute shading bitangent _ts_ for triangle and adjust _ss_
-        Vector3f ts = Cross(ss, ns);
-        if (ts.LengthSquared() > 0.f) {
-            ts = Normalize(ts);
-            ss = Cross(ts, ns);
-        } else
-            CoordinateSystem((Vector3f)ns, &ss, &ts);
-
-        // Compute $\dndu$ and $\dndv$ for triangle shading geometry
-        Normal3f dndu, dndv;
-        if (mesh->n) {
-            // Compute deltas for triangle partial derivatives of normal
-            Vector2f duv02 = uv[0] - uv[2];
-            Vector2f duv12 = uv[1] - uv[2];
-            Normal3f dn1 = mesh->n[v[0]] - mesh->n[v[2]];
-            Normal3f dn2 = mesh->n[v[1]] - mesh->n[v[2]];
-            Float determinant = duv02[0] * duv12[1] - duv02[1] * duv12[0];
-            bool degenerateUV = std::abs(determinant) < 1e-8;
-            if (degenerateUV) {
-                // We can still compute dndu and dndv, with respect to the
-                // same arbitrary coordinate system we use to compute dpdu
-                // and dpdv when this happens. It's important to do this
-                // (rather than giving up) so that ray differentials for
-                // rays reflected from triangles with degenerate
-                // parameterizations are still reasonable.
-                Vector3f dn = Cross(Vector3f(mesh->n[v[2]] - mesh->n[v[0]]),
-                                    Vector3f(mesh->n[v[1]] - mesh->n[v[0]]));
-                if (dn.LengthSquared() == 0)
-                    dndu = dndv = Normal3f(0, 0, 0);
-                else {
-                    Vector3f dnu, dnv;
-                    CoordinateSystem(dn, &dnu, &dnv);
-                    dndu = Normal3f(dnu);
-                    dndv = Normal3f(dnv);
-                }
-            } else {
-                Float invDet = 1 / determinant;
-                dndu = (duv12[1] * dn1 - duv02[1] * dn2) * invDet;
-                dndv = (-duv12[0] * dn1 + duv02[0] * dn2) * invDet;
-            }
-        } else
-            dndu = dndv = Normal3f(0, 0, 0);
-        if (reverseOrientation) ts = -ts;
-        isect->SetShadingGeometry(ss, ts, dndu, dndv, true);
-    }
-
+    
     *tHit = t;
-    ++nHits;
+    //++nHits;
     return true;
 }
-
-#endif
 
 bool Triangle::IntersectP(const Ray &ray, bool testAlphaTexture) const
 {
