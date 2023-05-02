@@ -60,6 +60,10 @@ ui/FrameBuffer.h
 ui/FrameBuffer.cpp
 ui/DebugText.h
 ui/DebugText.cpp
+ui/DataTreeWidget.h
+ui/DataTreeWidget.cpp
+ui/RenderStatus.h
+ui/RenderStatus.cpp
 )
 source_group("ui" FILES ${UI_FILES})
 
