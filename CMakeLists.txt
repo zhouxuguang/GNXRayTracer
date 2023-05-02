@@ -39,6 +39,7 @@ core/Transform.cpp
 core/UnitTest.h
 core/UnitTest.cpp
 )
+source_group("core" FILES ${CORE_FILES})
 
 set(SHAPE_FILES 
 shape/Sphere.h
@@ -46,11 +47,13 @@ shape/Sphere.cpp
 shape/Triangle.h
 shape/Triangle.cpp
 )
+source_group("shape" FILES ${SHAPE_FILES})
 
 set(ACCELERATOR_FILES 
 accelerator/BVHAccel.h
 accelerator/BVHAccel.cpp
 )
+source_group("accelerator" FILES ${ACCELERATOR_FILES})
 
 add_executable(GNXRayTracer
              ${PROJECT_SOURCES}
