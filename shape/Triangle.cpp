@@ -6,7 +6,7 @@
 //#include "sampling.h"
 //#include "efloat.h"
 //#include "ext/rply.h"
-//#include <array>
+#include <array>
 
 namespace pbr
 {
@@ -499,12 +499,13 @@ Interaction Triangle::Sample(const Point2f &u, Float *pdf) const
     return it;
 }
 
-
+#endif
 
 Float Triangle::SolidAngle(const Point3f &p, int nSamples) const 
 {
     // Project the vertices into the unit sphere around p.
-    std::array<Vector3f, 3> pSphere = {
+    std::array<Vector3f, 3> pSphere =
+    {
         Normalize(mesh->p[v[0]] - p), Normalize(mesh->p[v[1]] - p),
         Normalize(mesh->p[v[2]] - p)
     };
@@ -539,7 +540,5 @@ Float Triangle::SolidAngle(const Point3f &p, int nSamples) const
         std::acos(Clamp(Dot(cross12, -cross20), -1, 1)) +
         std::acos(Clamp(Dot(cross20, -cross01), -1, 1)) - Pi);
 }
-
-#endif
 
 }  // namespace pbr
