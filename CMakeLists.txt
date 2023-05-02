@@ -7,6 +7,11 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+macro (set_xcode_property TARGET XCODE_PROPERTY XCODE_VALUE)
+    set_property (TARGET ${TARGET} PROPERTY 
+        XCODE_ATTRIBUTE_${XCODE_PROPERTY} ${XCODE_VALUE})
+endmacro (set_xcode_property)
+
 set (CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -g")
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
@@ -38,6 +43,8 @@ core/UnitTest.cpp
 set(SHAPE_FILES 
 shape/Sphere.h
 shape/Sphere.cpp
+shape/Triangle.h
+shape/Triangle.cpp
 )
 
 set(ACCELERATOR_FILES 
@@ -65,6 +72,13 @@ set_target_properties(GNXRayTracer PROPERTIES
 set_target_properties(GNXRayTracer PROPERTIES AUTOUIC ON)
 set_target_properties(GNXRayTracer PROPERTIES AUTOMOC ON)
 set_target_properties(GNXRayTracer PROPERTIES AUTORCC ON)
+
+if (APPLE)
+    set_xcode_property(GNXRayTracer CLANG_CXX_LANGUAGE_STANDARD "c++17")
+    set_xcode_property(GNXRayTracer CLANG_CXX_LIBRARY "libc++")
+    set_xcode_property(GNXRayTracer GCC_ENABLE_CPP_EXCEPTIONS NO)
+    set_xcode_property(GNXRayTracer GCC_ENABLE_CPP_RTTI NO)
+endif (APPLE)
 
 install(TARGETS GNXRayTracer
     BUNDLE DESTINATION .

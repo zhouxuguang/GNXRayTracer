@@ -19,7 +19,7 @@ struct LinearBVHNode;
 // BVHAccel Declarations
 class BVHAccel : public Aggregate
 {
-  public:
+public:
     // BVHAccel Public Types
     enum class SplitMethod { SAH, HLBVH, Middle, EqualCounts };
 
@@ -32,7 +32,7 @@ class BVHAccel : public Aggregate
     bool Intersect(const Ray &ray, SurfaceInteraction *isect) const;
     bool IntersectP(const Ray &ray) const;
 
-  private:
+private:
     // BVHAccel Private Methods
     BVHBuildNode *recursiveBuild(
         std::vector<BVHPrimitiveInfo> &primitiveInfo,

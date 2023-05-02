@@ -6,7 +6,8 @@ namespace pbr
 {
 
 // BVHAccel Local Declarations
-struct BVHPrimitiveInfo {
+struct BVHPrimitiveInfo
+{
     BVHPrimitiveInfo() {}
     BVHPrimitiveInfo(size_t primitiveNumber, const Bounds3f &bounds)
         : primitiveNumber(primitiveNumber),
@@ -17,7 +18,8 @@ struct BVHPrimitiveInfo {
     Point3f centroid;
 };
 
-struct BVHBuildNode {
+struct BVHBuildNode
+{
     // BVHBuildNode Public Methods
     void InitLeaf(int first, int n, const Bounds3f &b) {
         firstPrimOffset = first;
@@ -37,19 +39,23 @@ struct BVHBuildNode {
     int splitAxis, firstPrimOffset, nPrimitives;
 };
 
-struct MortonPrimitive {
+struct MortonPrimitive
+{
     int primitiveIndex;
     uint32_t mortonCode;
 };
 
-struct LBVHTreelet {
+struct LBVHTreelet
+{
     int startIndex, nPrimitives;
     BVHBuildNode *buildNodes;
 };
 
-struct LinearBVHNode {
+struct LinearBVHNode
+{
     Bounds3f bounds;
-    union {
+    union
+    {
         int primitivesOffset;   // leaf
         int secondChildOffset;  // interior
     };
