@@ -23,6 +23,8 @@ set(CORE_FILES
 core/GNXRayTracer.h
 core/Geometry.h 
 core/Geometry.cpp
+core/Primitive.h
+core/Primitive.cpp
 core/Shape.h
 core/Shape.cpp
 core/Transform.h 
