@@ -23,6 +23,8 @@ set(CORE_FILES
 core/GNXRayTracer.h
 core/Geometry.h 
 core/Geometry.cpp
+core/Interaction.h
+core/Interaction.cpp
 core/Primitive.h
 core/Primitive.cpp
 core/Shape.h
@@ -38,10 +40,16 @@ shape/Sphere.h
 shape/Sphere.cpp
 )
 
+set(ACCELERATOR_FILES 
+accelerator/BVHAccel.h
+accelerator/BVHAccel.cpp
+)
+
 add_executable(GNXRayTracer
              ${PROJECT_SOURCES}
              ${CORE_FILES}
              ${SHAPE_FILES}
+             ${ACCELERATOR_FILES}
         )
 
 target_link_libraries(GNXRayTracer PRIVATE "-framework CoreVideo" "-framework QuartzCore")
