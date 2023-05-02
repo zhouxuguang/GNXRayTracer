@@ -55,14 +55,23 @@ accelerator/BVHAccel.cpp
 )
 source_group("accelerator" FILES ${ACCELERATOR_FILES})
 
+set(UI_FILES 
+ui/FrameBuffer.h
+ui/FrameBuffer.cpp
+ui/DebugText.h
+ui/DebugText.cpp
+)
+source_group("ui" FILES ${UI_FILES})
+
 add_executable(GNXRayTracer
              ${PROJECT_SOURCES}
              ${CORE_FILES}
              ${SHAPE_FILES}
              ${ACCELERATOR_FILES}
+             ${UI_FILES}
         )
 
-target_link_libraries(GNXRayTracer PRIVATE "-framework CoreVideo" "-framework QuartzCore")
+#target_link_libraries(GNXRayTracer PRIVATE "-framework CoreVideo" "-framework QuartzCore")
 target_link_libraries(GNXRayTracer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
 set_target_properties(GNXRayTracer PROPERTIES
