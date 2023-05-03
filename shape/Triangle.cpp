@@ -1,5 +1,6 @@
 // shapes/triangle.cpp*
 #include "Triangle.h"
+#include "core/Interaction.h"
 //#include "texture.h"
 //#include "textures/constant.h"
 //#include "paramset.h"
@@ -151,6 +152,9 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
     
     *tHit = t;
     //++nHits;
+    
+    isect->n = Normal3f(Normalize(Cross(p1 - p0, p2 - p0)));
+    
     return true;
 }
 

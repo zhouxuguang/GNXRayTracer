@@ -100,7 +100,7 @@ void RenderThread::run()
         
         double start = omp_get_wtime();
 
-        //#pragma omp parallel for
+        #pragma omp parallel for
 		for (int i = 0; i < WIDTH; i++) {
 			for(int j = 0; j < HEIGHT; j++) {
 
@@ -127,12 +127,16 @@ void RenderThread::run()
 //                    }
 //                }
                 
-                Spectrum colObj(0.0f); colObj[0] = 1.0f; colObj[1] = 1.0f;
+                Vector3f Light(1.0, 1.0, 1.0);
+                Light = Normalize(Light);
+                
+                Spectrum colObj(0.0f); //colObj[0] = 1.0f; colObj[1] = 1.0f;
                 
                 if (agg->Intersect(r, &isect))
                 {
                     //colObj = Vector3f(1.0, 0.0, 0.0);
-                    colObj[1] = 0.0f;
+                    Float Li = Dot(Light, isect.n);
+                    colObj[1] = std::abs(Li);   //取绝对值，防止出现负值
                 }
 
                 m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 0, renderCount, colObj[0]);
