@@ -40,6 +40,7 @@ shape/Sphere.h
 shape/Sphere.cpp
 shape/Triangle.h
 shape/Triangle.cpp
+shape/plyRead.h
 )
 source_group("shape" FILES ${SHAPE_FILES})
 

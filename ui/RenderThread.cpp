@@ -21,6 +21,7 @@
 #include <time.h>
 
 #include "shape/Triangle.h"
+#include "shape/plyRead.h"
 #include "core/Interaction.h"
 
 using namespace pbr;
@@ -65,6 +66,7 @@ void RenderThread::run()
     Point3f P[6] = {
     Point3f(-1.0 ,1.0 ,0.0) , Point3f(-1.0, -1.0, 0.0), Point3f(0.0 ,1.0 ,0.0) , Point3f(1.0 ,1.0 ,0.0), Point3f(1.0, -1.0, 0.0), Point3f(0.0 , -1.0 ,0.0)
     };
+    
     //存入mesh里，该行代码可以从triangle .cpp中找到
     std::shared_ptr<TriangleMesh> mesh = std::make_shared<TriangleMesh>(
     tri_Object2World, nTriangles, vertexIndices, nVertices, P, nullptr, nullptr, nullptr, nullptr);
