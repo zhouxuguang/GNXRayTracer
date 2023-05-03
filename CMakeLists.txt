@@ -34,6 +34,8 @@ core/Primitive.h
 core/Primitive.cpp
 core/Shape.h
 core/Shape.cpp
+core/Spectrum.h
+core/Spectrum.cpp
 core/Transform.h 
 core/Transform.cpp 
 core/UnitTest.h

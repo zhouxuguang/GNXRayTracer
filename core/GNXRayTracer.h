@@ -28,6 +28,7 @@
 #define DCHECK_STRNE(str1, str2) 
 #define DCHECK_STRCASENE(str1, str2) 
 
+#define CHECK(condition) 
 #define CHECK_EQ(val1, val2) 
 #define CHECK_NE(val1, val2) 
 #define CHECK_LE(val1, val2) 
@@ -265,6 +266,21 @@ inline int64_t RoundUpPow2(int64_t v) {
     v |= v >> 16;
     v |= v >> 32;
     return v + 1;
+}
+
+template <typename Predicate>
+int FindInterval(int size, const Predicate &pred) {
+    int first = 0, len = size;
+    while (len > 0) {
+        int half = len >> 1, middle = first + half;
+        // Bisect range based on value of _pred_ at _middle_
+        if (pred(middle)) {
+            first = middle + 1;
+            len -= half + 1;
+        } else
+            len = half;
+    }
+    return Clamp(first - 1, 0, size - 2);
 }
 
 inline Float Lerp(Float t, Float v1, Float v2) { return (1 - t) * v1 + t * v2; }

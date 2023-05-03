@@ -10,6 +10,7 @@
 #include "shape/Triangle.h"
 #include "shape/plyRead.h"
 #include "core/Interaction.h"
+#include "core/Spectrum.h"
 #include "accelerator/BVHAccel.h"
 #include <omp.h>
 
@@ -99,7 +100,7 @@ void RenderThread::run()
         
         double start = omp_get_wtime();
 
-        #pragma omp parallel for
+        //#pragma omp parallel for
 		for (int i = 0; i < WIDTH; i++) {
 			for(int j = 0; j < HEIGHT; j++) {
 
@@ -111,7 +112,7 @@ void RenderThread::run()
 				SurfaceInteraction isect;
                 
                 Float tHit;
-                Vector3f colObj;
+                //Vector3f colObj;
 //                if (tris[0]->Intersect(r, &tHit, &isect) || tris[1]->Intersect(r, &tHit, &isect))
 //                {
 //                    colObj = Vector3f(1.0 , 0.0 , 0.0);
@@ -126,14 +127,17 @@ void RenderThread::run()
 //                    }
 //                }
                 
+                Spectrum colObj(0.0f); colObj[0] = 1.0f; colObj[1] = 1.0f;
+                
                 if (agg->Intersect(r, &isect))
                 {
-                    colObj = Vector3f(1.0, 0.0, 0.0);
+                    //colObj = Vector3f(1.0, 0.0, 0.0);
+                    colObj[1] = 0.0f;
                 }
 
-                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 0, renderCount, colObj.x);
-                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 1, renderCount, colObj.y);
-                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 2, renderCount, colObj.z);
+                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 0, renderCount, colObj[0]);
+                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 1, renderCount, colObj[1]);
+                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 2, renderCount, colObj[2]);
                 m_pFramebuffer->set_uc(i, HEIGHT - j - 1, 3, 255);
 			}
 		}
