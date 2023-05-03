@@ -4,13 +4,6 @@
 
 #if 0
 
-#include "Core\FeimosRender.h"
-#include "Shape\Triangle.h"
-#include "Shape\plyRead.h"
-#include "Core\primitive.h"
-#include "Accelerator\BVHAccel.h"
-#include "Core\interaction.h"
-
 #include <omp.h>
 
 #endif
@@ -23,6 +16,7 @@
 #include "shape/Triangle.h"
 #include "shape/plyRead.h"
 #include "core/Interaction.h"
+#include "accelerator/BVHAccel.h"
 
 using namespace pbr;
 
@@ -60,23 +54,39 @@ void RenderThread::run()
 
     m_pFramebuffer->bufferResize(WIDTH, HEIGHT);
     
-    Transform tri_Object2World , tri_World2Object ; int nTriangles = 2;
-    int vertexIndices [6] = { 0,1,2,3,4,5 };
-    int nVertices = 6;
-    Point3f P[6] = {
-    Point3f(-1.0 ,1.0 ,0.0) , Point3f(-1.0, -1.0, 0.0), Point3f(0.0 ,1.0 ,0.0) , Point3f(1.0 ,1.0 ,0.0), Point3f(1.0, -1.0, 0.0), Point3f(0.0 , -1.0 ,0.0)
-    };
+    Transform tri_Object2World , tri_World2Object ;
+//    int vertexIndices [6] = { 0,1,2,3,4,5 };
+//    int nVertices = 6;
+//    Point3f P[6] = {
+//    Point3f(-1.0 ,1.0 ,0.0) , Point3f(-1.0, -1.0, 0.0), Point3f(0.0 ,1.0 ,0.0) , Point3f(1.0 ,1.0 ,0.0), Point3f(1.0, -1.0, 0.0), Point3f(0.0 , -1.0 ,0.0)
+//    };
+//
+//    //存入mesh里，该行代码可以从triangle .cpp中找到
+//    std::shared_ptr<TriangleMesh> mesh = std::make_shared<TriangleMesh>(
+//    tri_Object2World, nTriangles, vertexIndices, nVertices, P, nullptr, nullptr, nullptr, nullptr);
+//    std::vector<std::shared_ptr<Shape>> tris;
     
-    //存入mesh里，该行代码可以从triangle .cpp中找到
-    std::shared_ptr<TriangleMesh> mesh = std::make_shared<TriangleMesh>(
-    tri_Object2World, nTriangles, vertexIndices, nVertices, P, nullptr, nullptr, nullptr, nullptr);
+    tri_Object2World = Translate(Vector3f(0.0, -2.5, 0.0)) * tri_Object2World;
+    tri_World2Object = Inverse(tri_Object2World);
+    plyInfo *plyi = new plyInfo("/Users/zhouxuguang/work/opensource/pbrt/pdf/模型文件-1/dragon.3d");
+    std::shared_ptr<TriangleMesh> mesh = std::make_shared<TriangleMesh>(tri_Object2World, plyi->nTriangles, plyi->vertexIndices, plyi->nVertices, plyi->vertexArray, nullptr, nullptr, nullptr, nullptr);
     std::vector<std::shared_ptr<Shape>> tris;
+    std::vector<std::shared_ptr<Primitive>> prims;
+    tris.reserve(plyi->nTriangles);
     
-    //从mesh转为Shape类型，该代码可以从triangle .cpp文件里找到 tris .reserve(nTriangles);
-    for (int i = 0; i < nTriangles; ++i)
+    //从mesh转为Shape类型，该代码可以从triangle .cpp文件里找到 tris.reserve(nTriangles);
+    for (int i = 0; i < plyi->nTriangles; ++i)
     {
         tris.push_back(std::make_shared<Triangle>(&tri_Object2World, &tri_World2Object, false , mesh, i));
     }
+    
+    prims.reserve(plyi->nTriangles);
+    for (int i = 0; i < plyi->nTriangles; ++i)
+    {
+        prims.push_back(std::make_shared<GeometricPrimitive>(tris[i]));
+    }
+        
+    Aggregate *agg = new BVHAccel(prims, 1);
     
     //相机参数
     Vector3f lower_left_corner(-2.0, -2.0, -2.0);
@@ -105,9 +115,23 @@ void RenderThread::run()
                 
                 Float tHit;
                 Vector3f colObj;
-                if (tris[0]->Intersect(r, &tHit, &isect) || tris[1]->Intersect(r, &tHit, &isect))
+//                if (tris[0]->Intersect(r, &tHit, &isect) || tris[1]->Intersect(r, &tHit, &isect))
+//                {
+//                    colObj = Vector3f(1.0 , 0.0 , 0.0);
+//                }
+                
+//                for (int count = 0; count < plyi->nTriangles; ++count)
+//                {
+//                    if (tris[count]->Intersect(r, &tHit, &isect))
+//                    {
+//                        colObj = Vector3f(1.0, 0.0, 0.0) ;
+//                        break;
+//                    }
+//                }
+                
+                if (agg->Intersect(r, &isect))
                 {
-                    colObj = Vector3f(1.0 , 0.0 , 0.0);
+                    colObj = Vector3f(1.0, 0.0, 0.0);
                 }
 
                 m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 0, renderCount, colObj.x);

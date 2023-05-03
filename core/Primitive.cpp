@@ -1,18 +1,16 @@
 #include "Primitive.h"
 #include "Shape.h"
-//#include "Core\interaction.h"
 
 
 namespace pbr 
 {
-
 	static long long primitiveMemory = 0;
 
 	Primitive::~Primitive() {}
     
 	// GeometricPrimitive Method Definitions
-	GeometricPrimitive::GeometricPrimitive(const std::shared_ptr<Shape> &shape)
-		: shape(shape) {
+	GeometricPrimitive::GeometricPrimitive(const std::shared_ptr<Shape> &shape) : shape(shape)
+    {
 		primitiveMemory += sizeof(*this);
 	}
 
