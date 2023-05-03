@@ -20,6 +20,11 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "shape/Triangle.h"
+#include "core/Interaction.h"
+
+using namespace pbr;
+
 
 inline void ClockRandomInit()
 {
@@ -44,7 +49,7 @@ RenderThread::~RenderThread()
 
 void RenderThread::run()
 {
-#if 0
+#if 1
 	emit PrintString("Prepared to Render");
 
 	ClockRandomInit();
@@ -52,48 +57,40 @@ void RenderThread::run()
 	int WIDTH = 500;
 	int HEIGHT = 500;
 
-	p_framebuffer->bufferResize(WIDTH, HEIGHT);
-
-
-	// Ïà»ú²ÎÊı³õÊ¼»¯£º¹â×·Èı²¿ÇúµÄ·ç¸ñ
-	Feimos::Vector3f lower_left_corner(-2.0, -2.0, -2.0);
-	Feimos::Vector3f horizontal(4.0, 0.0, 0.0);
-	Feimos::Vector3f vertical(0.0, 4.0, 0.0);
-	Feimos::Point3f origin(0.0, 0.0, -4.0);
-
-	// Éú³ÉMesh¼ÓËÙ½á¹¹
-	std::shared_ptr<Feimos::TriangleMesh> mesh;
-	std::vector<std::shared_ptr<Feimos::Shape>> tris;
-	std::vector<std::shared_ptr<Feimos::Primitive>> prims;
-	Feimos::plyInfo *plyi;
-	Feimos::Aggregate *agg;
-	Feimos::Transform tri_Object2World, tri_World2Object;
-
-	tri_Object2World = Feimos::Translate(Feimos::Vector3f(0.0, -2.5, 0.0))*tri_Object2World;
-	tri_World2Object = Inverse(tri_Object2World);
-	plyi = new Feimos::plyInfo("Resources/dragon.3d");
-	mesh = std::make_shared<Feimos::TriangleMesh>(tri_Object2World, plyi->nTriangles, plyi->vertexIndices, plyi->nVertices, plyi->vertexArray, nullptr, nullptr, nullptr, nullptr);
-	tris.reserve(plyi->nTriangles);
-	for (int i = 0; i < plyi->nTriangles; ++i)
-		tris.push_back(std::make_shared<Feimos::Triangle>(&tri_Object2World, &tri_World2Object, false, mesh, i));
-	for (int i = 0; i < plyi->nTriangles; ++i)
-		prims.push_back(std::make_shared<Feimos::GeometricPrimitive>(tris[i]));
-	agg = new Feimos::BVHAccel(prims, 1);
-
-
-	// ¿ªÊ¼Ö´ĞĞäÖÈ¾
+    m_pFramebuffer->bufferResize(WIDTH, HEIGHT);
+    
+    Transform tri_Object2World , tri_World2Object ; int nTriangles = 2;
+    int vertexIndices [6] = { 0,1,2,3,4,5 };
+    int nVertices = 6;
+    Point3f P[6] = {
+    Point3f(-1.0 ,1.0 ,0.0) , Point3f(-1.0, -1.0, 0.0), Point3f(0.0 ,1.0 ,0.0) , Point3f(1.0 ,1.0 ,0.0), Point3f(1.0, -1.0, 0.0), Point3f(0.0 , -1.0 ,0.0)
+    };
+    //å­˜å…¥meshé‡Œï¼Œè¯¥è¡Œä»£ç å¯ä»¥ä»triangle .cppä¸­æ‰¾åˆ°
+    std::shared_ptr<TriangleMesh> mesh = std::make_shared<TriangleMesh>(
+    tri_Object2World, nTriangles, vertexIndices, nVertices, P, nullptr, nullptr, nullptr, nullptr);
+    std::vector<std::shared_ptr<Shape>> tris;
+    
+    //ä»meshè½¬ä¸ºShapeç±»å‹ï¼Œè¯¥ä»£ç å¯ä»¥ä»triangle .cppæ–‡ä»¶é‡Œæ‰¾åˆ° tris .reserve(nTriangles);
+    for (int i = 0; i < nTriangles; ++i)
+    {
+        tris.push_back(std::make_shared<Triangle>(&tri_Object2World, &tri_World2Object, false , mesh, i));
+    }
+    
+    //ç›¸æœºå‚æ•°
+    Vector3f lower_left_corner(-2.0, -2.0, -2.0);
+    Vector3f horizontal(4.0, 0.0, 0.0);
+    Vector3f vertical(0.0, 4.0, 0.0);
+    Point3f origin(0.0, 0.0, -4.0);
+    
+    
 	int renderCount = 0;
 	while (renderFlag) {
-		QTime t;
+        QElapsedTimer t;
 		t.start();
-		
-		omp_set_num_threads(20); //ÉèÖÃÏß³ÌµÄ¸öÊı
-		double start = omp_get_wtime();//»ñÈ¡ÆğÊ¼Ê±¼ä  
 
 		//emit PrintString("Rendering");
 		renderCount++;
 
-#pragma omp parallel for
 		for (int i = 0; i < WIDTH; i++) {
 			for(int j = 0; j < HEIGHT; j++) {
 
@@ -101,27 +98,29 @@ void RenderThread::run()
 				float v = float(j + getClockRandom()) / float(HEIGHT);
 				int offset = (WIDTH * j + i);
 
-				Feimos::Ray r(origin, (lower_left_corner + u*horizontal + v*vertical) - Feimos::Vector3f(origin));
-				Feimos::SurfaceInteraction isect;
-				Feimos::Vector3f colObj(1.0, 1.0, 0.0);
-				if (agg->Intersect(r, &isect)) {
-					colObj = Feimos::Vector3f(1.0, 0.0, 0.0);
-				}
+				Ray r(origin, (lower_left_corner + u*horizontal + v*vertical) - Vector3f(origin));
+				SurfaceInteraction isect;
+                
+                Float tHit;
+                Vector3f colObj;
+                if (tris[0]->Intersect(r, &tHit, &isect) || tris[1]->Intersect(r, &tHit, &isect))
+                {
+                    colObj = Vector3f(1.0 , 0.0 , 0.0);
+                }
 
-				p_framebuffer->update_f_u_c(i, HEIGHT - j - 1, 0, renderCount, colObj.x);
-				p_framebuffer->update_f_u_c(i, HEIGHT - j - 1, 1, renderCount, colObj.y);
-				p_framebuffer->update_f_u_c(i, HEIGHT - j - 1, 2, renderCount, colObj.z);
-				p_framebuffer->set_uc(i, HEIGHT - j - 1, 3, 255);
+                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 0, renderCount, colObj.x);
+                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 1, renderCount, colObj.y);
+                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 2, renderCount, colObj.z);
+                m_pFramebuffer->set_uc(i, HEIGHT - j - 1, 3, 255);
 			}
 		}
 
-		// ¼ÆËã²¢ÏÔÊ¾Ê±¼ä
-		double end = omp_get_wtime();
-		double frameTime = end - start;
-		m_RenderStatus.setDataChanged("Performance", "One Frame Time", QString::number(frameTime), "");
-		m_RenderStatus.setDataChanged("Performance", "Frame pre second", QString::number(1.0f / (float)frameTime), "");
+		//double end = omp_get_wtime();
+		double frameTime = 1;
+        g_RenderStatus.setDataChanged("Performance", "One Frame Time", QString::number(frameTime), "");
+        g_RenderStatus.setDataChanged("Performance", "Frame pre second", QString::number(1.0f / (float)frameTime), "");
 
-		emit PaintBuffer(p_framebuffer->getUCbuffer(), WIDTH, HEIGHT, 4);
+		emit PaintBuffer(m_pFramebuffer->getUCbuffer(), WIDTH, HEIGHT, 4);
 			
 		while (t.elapsed() < 1);
 	}

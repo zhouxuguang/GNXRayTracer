@@ -18,12 +18,6 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 
-# set(PROJECT_SOURCES
-#        main.cpp
-#        mainwindow.cpp
-#        mainwindow.h
-# )
-
 set(CORE_FILES 
 core/GNXRayTracer.h
 core/Geometry.h 
@@ -106,8 +100,8 @@ if (APPLE)
     set_xcode_property(GNXRayTracer GCC_ENABLE_CPP_RTTI NO)
 endif (APPLE)
 
-FILE(GLOB Icons ${CMAKE_CURRENT_SOURCE_DIR}/Icons/*.png)
-SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
+file(GLOB Icons ${CMAKE_CURRENT_SOURCE_DIR}/Icons/*.png)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${Icons} DESTINATION ${EXECUTABLE_OUTPUT_PATH}/Icons/)
 
 install(TARGETS GNXRayTracer

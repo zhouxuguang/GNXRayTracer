@@ -26,16 +26,16 @@ void DisplayWidget::startRenderThread()
 {
 	if (!rThread)
     {
-//		rThread = new RenderThread;
-//		renderFlag = true;
-//		rThread->renderFlag = true;
-//		rThread->p_framebuffer = &framebuffer;
-//
-//		connect(rThread, SIGNAL(PrintString(char*)), this, SLOT(PrintString(char*)));
-//		connect(rThread, SIGNAL(PrintDataD(const char*, const double)), this, SLOT(PrintDataD(const char*, const double)));
-//		connect(rThread, SIGNAL(PaintBuffer(unsigned char*, int, int, int)), &m_IMAGraphicsView, SLOT(PaintBuffer(unsigned char*, int, int, int)));
-//
-//		rThread->start();
+		rThread = new RenderThread;
+		renderFlag = true;
+		rThread->renderFlag = true;
+		rThread->m_pFramebuffer = &framebuffer;
+
+		connect(rThread, SIGNAL(PrintString(char*)), this, SLOT(PrintString(char*)));
+		connect(rThread, SIGNAL(PrintDataD(const char*, const double)), this, SLOT(PrintDataD(const char*, const double)));
+		connect(rThread, SIGNAL(PaintBuffer(unsigned char*, int, int, int)), &m_IMAGraphicsView, SLOT(PaintBuffer(unsigned char*, int, int, int)));
+
+		rThread->start();
 	}
 
 	renderFlag = true;
@@ -43,7 +43,6 @@ void DisplayWidget::startRenderThread()
 
 void DisplayWidget::killRenderThread()
 {
-#if 0
 	if (!rThread)
 		return;
 	renderFlag = false;
@@ -56,7 +55,6 @@ void DisplayWidget::killRenderThread()
 	delete rThread;
 
 	rThread = nullptr;
-#endif
 }
 
 void DisplayWidget::PrintString(char* s)
