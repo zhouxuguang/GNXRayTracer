@@ -2,12 +2,6 @@
 #include "DebugText.h"
 #include <QTime>
 
-#if 0
-
-#include <omp.h>
-
-#endif
-
 #include "RenderStatus.h"
 
 #include <stdlib.h>
@@ -17,6 +11,7 @@
 #include "shape/plyRead.h"
 #include "core/Interaction.h"
 #include "accelerator/BVHAccel.h"
+#include <omp.h>
 
 using namespace pbr;
 
@@ -44,7 +39,6 @@ RenderThread::~RenderThread()
 
 void RenderThread::run()
 {
-#if 1
 	emit PrintString("Prepared to Render");
 
 	ClockRandomInit();
@@ -102,7 +96,10 @@ void RenderThread::run()
 
 		//emit PrintString("Rendering");
 		renderCount++;
+        
+        double start = omp_get_wtime();
 
+        #pragma omp parallel for
 		for (int i = 0; i < WIDTH; i++) {
 			for(int j = 0; j < HEIGHT; j++) {
 
@@ -141,8 +138,8 @@ void RenderThread::run()
 			}
 		}
 
-		//double end = omp_get_wtime();
-		double frameTime = 1;
+        double end = omp_get_wtime();
+        double frameTime = end - start;
         g_RenderStatus.setDataChanged("Performance", "One Frame Time", QString::number(frameTime), "");
         g_RenderStatus.setDataChanged("Performance", "Frame pre second", QString::number(1.0f / (float)frameTime), "");
 
@@ -150,7 +147,5 @@ void RenderThread::run()
 			
 		while (t.elapsed() < 1);
 	}
-    
-#endif
 	
 }

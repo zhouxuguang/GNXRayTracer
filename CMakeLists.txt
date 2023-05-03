@@ -12,6 +12,12 @@ macro (set_xcode_property TARGET XCODE_PROPERTY XCODE_VALUE)
         XCODE_ATTRIBUTE_${XCODE_PROPERTY} ${XCODE_VALUE})
 endmacro (set_xcode_property)
 
+include_directories(thirdparty/libomp/include)
+link_directories(thirdparty/libomp/lib/mac)
+
+set (CMAKE_C_FLAGS "-Xclang -fopenmp")
+set (CMAKE_CXX_FLAGS "-Xclang -fopenmp")
+
 set (CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -g")
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
@@ -82,6 +88,7 @@ add_executable(GNXRayTracer
 
 #target_link_libraries(GNXRayTracer PRIVATE "-framework CoreVideo" "-framework QuartzCore")
 target_link_libraries(GNXRayTracer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(GNXRayTracer PRIVATE omp)
 
 set_target_properties(GNXRayTracer PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
