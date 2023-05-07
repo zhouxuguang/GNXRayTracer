@@ -289,6 +289,19 @@ inline int64_t RoundUpPow2(int64_t v) {
     return v + 1;
 }
 
+inline int CountTrailingZeros(uint32_t v)
+{
+//#if defined(PBRT_IS_MSVC)
+//    unsigned long index;
+//    if (_BitScanForward(&index, v))
+//        return index;
+//    else
+//        return 32;
+//#else
+    return __builtin_ctz(v);
+//#endif
+}
+
 template <typename Predicate>
 int FindInterval(int size, const Predicate &pred) {
     int first = 0, len = size;

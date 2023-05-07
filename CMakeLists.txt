@@ -32,14 +32,21 @@ core/Geometry.h
 core/Geometry.cpp
 core/Interaction.h
 core/Interaction.cpp
+core/LowDiscrepancy.h
+core/LowDiscrepancy.cpp
 core/Memory.h
 core/Memory.cpp
 core/Primitive.h
 core/Primitive.cpp
+core/RNG.h
+core/Sampler.h
+core/Sampler.cpp
 core/Sampling.h
 core/Sampling.cpp
 core/Shape.h
 core/Shape.cpp
+core/SobolMatrices.h
+core/SobolMatrices.cpp
 core/Spectrum.h
 core/Spectrum.cpp
 core/Transform.h 
@@ -72,6 +79,12 @@ accelerator/BVHAccel.cpp
 )
 source_group("accelerator" FILES ${ACCELERATOR_FILES})
 
+set(SAMPLERS_FILES 
+samplers/Halton.h 
+samplers/Halton.cpp
+)
+source_group("samplers" FILES ${SAMPLERS_FILES})
+
 set(UI_FILES 
 ui/FrameBuffer.h
 ui/FrameBuffer.cpp
@@ -100,6 +113,7 @@ add_executable(GNXRayTracer
              ${CAMERA_FILES}
              ${SHAPE_FILES}
              ${ACCELERATOR_FILES}
+             ${SAMPLERS_FILES}
              ${UI_FILES}
         )
 
