@@ -32,6 +32,8 @@ core/Geometry.h
 core/Geometry.cpp
 core/Interaction.h
 core/Interaction.cpp
+core/Memory.h
+core/Memory.cpp
 core/Primitive.h
 core/Primitive.cpp
 core/Sampling.h

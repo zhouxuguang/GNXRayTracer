@@ -1349,8 +1349,8 @@ Bounds2<T> Expand(const Bounds2<T> &b, U delta) {
 }
 
 template <typename T>
-inline bool Bounds3<T>::IntersectP(const Ray &ray, Float *hitt0,
-                                   Float *hitt1) const {
+inline bool Bounds3<T>::IntersectP(const Ray &ray, Float *hitt0, Float *hitt1) const
+{
     Float t0 = 0, t1 = ray.tMax;
     for (int i = 0; i < 3; ++i) {
         // Update interval for _i_th bounding box slab
@@ -1373,8 +1373,8 @@ inline bool Bounds3<T>::IntersectP(const Ray &ray, Float *hitt0,
 }
 
 template <typename T>
-inline bool Bounds3<T>::IntersectP(const Ray &ray, const Vector3f &invDir,
-                                   const int dirIsNeg[3]) const {
+inline bool Bounds3<T>::IntersectP(const Ray &ray, const Vector3f &invDir, const int dirIsNeg[3]) const
+{
     const Bounds3f &bounds = *this;
     // Check for ray intersection against $x$ and $y$ slabs
     Float tMin = (bounds[dirIsNeg[0]].x - ray.o.x) * invDir.x;

@@ -111,6 +111,16 @@ class Distribution2D;
 class RNG;
 class ProgressReporter;
 
+#ifndef PBR_L1_CACHE_LINE_SIZE
+  #define PBR_L1_CACHE_LINE_SIZE 64
+#endif
+
+#ifdef _WIN32
+    #define PBR_HAVE__ALIGNED_MALLOC
+#else
+    #define PBR_HAVE_POSIX_MEMALIGN
+#endif
+
 
 // Global Constants
 
@@ -128,31 +138,36 @@ static constexpr Float PiOver4 = 0.78539816339744830961;
 static constexpr Float Sqrt2 = 1.41421356237309504880;
 
 // Global Inline Functions
-inline uint32_t FloatToBits(float f) {
+inline uint32_t FloatToBits(float f)
+{
     uint32_t ui;
     memcpy(&ui, &f, sizeof(float));
     return ui;
 }
 
-inline float BitsToFloat(uint32_t ui) {
+inline float BitsToFloat(uint32_t ui)
+{
     float f;
     memcpy(&f, &ui, sizeof(uint32_t));
     return f;
 }
 
-inline uint64_t FloatToBits(double f) {
+inline uint64_t FloatToBits(double f)
+{
     uint64_t ui;
     memcpy(&ui, &f, sizeof(double));
     return ui;
 }
 
-inline double BitsToFloat(uint64_t ui) {
+inline double BitsToFloat(uint64_t ui)
+{
     double f;
     memcpy(&f, &ui, sizeof(uint64_t));
     return f;
 }
 
-inline float NextFloatUp(float v) {
+inline float NextFloatUp(float v)
+{
     // Handle infinity and negative zero for _NextFloatUp()_
     if (std::isinf(v) && v > 0.) return v;
     if (v == -0.f) v = 0.f;
@@ -166,7 +181,8 @@ inline float NextFloatUp(float v) {
     return BitsToFloat(ui);
 }
 
-inline float NextFloatDown(float v) {
+inline float NextFloatDown(float v)
+{
     // Handle infinity and positive zero for _NextFloatDown()_
     if (std::isinf(v) && v < 0.) return v;
     if (v == 0.f) v = -0.f;
@@ -178,7 +194,8 @@ inline float NextFloatDown(float v) {
     return BitsToFloat(ui);
 }
 
-inline double NextFloatUp(double v, int delta = 1) {
+inline double NextFloatUp(double v, int delta = 1)
+{
     if (std::isinf(v) && v > 0.) return v;
     if (v == -0.f) v = 0.f;
     uint64_t ui = FloatToBits(v);
@@ -189,7 +206,8 @@ inline double NextFloatUp(double v, int delta = 1) {
     return BitsToFloat(ui);
 }
 
-inline double NextFloatDown(double v, int delta = 1) {
+inline double NextFloatDown(double v, int delta = 1)
+{
     if (std::isinf(v) && v < 0.) return v;
     if (v == 0.f) v = -0.f;
     uint64_t ui = FloatToBits(v);
@@ -201,7 +219,8 @@ inline double NextFloatDown(double v, int delta = 1) {
 }
 
 template <typename T, typename U, typename V>
-inline T Clamp(T val, U low, V high) {
+inline T Clamp(T val, U low, V high)
+{
     if (val < low)
         return low;
     else if (val > high)
@@ -211,13 +230,15 @@ inline T Clamp(T val, U low, V high) {
 }
 
 template <typename T>
-inline T Mod(T a, T b) {
+inline T Mod(T a, T b)
+{
     T result = a - (a / b) * b;
     return (T)((result < 0) ? result + b : result);
 }
 
 template <>
-inline Float Mod(Float a, Float b) {
+inline Float Mod(Float a, Float b)
+{
     return std::fmod(a, b);
 }
 
