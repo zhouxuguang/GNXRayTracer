@@ -13,6 +13,7 @@
 #include "core/Spectrum.h"
 #include "accelerator/BVHAccel.h"
 #include "camera/Perspective.h"
+#include "samplers/Halton.h"
 #include <omp.h>
 
 using namespace pbr;
@@ -93,6 +94,9 @@ void RenderThread::run()
     Transform Camera2World = Inverse(lookat);
     cam = CreatePerspectiveCamera(WIDTH, HEIGHT, Camera2World);
     
+    Bounds2i imageBound(Point2i(0, 0), Point2i(WIDTH , HEIGHT));
+    std::shared_ptr<HaltonSampler> hns = std::make_unique<HaltonSampler>(8, imageBound, false);
+    
     
 	int renderCount = 0;
 	while (renderFlag) {
@@ -111,29 +115,38 @@ void RenderThread::run()
 				float u = float(i + getClockRandom()) / float(WIDTH);
 				float v = float(j + getClockRandom()) / float(HEIGHT);
 				int offset = (WIDTH * j + i);
-
-
-                CameraSample cs;
-                cs.pFilm = Point2f(i + getClockRandom(), j + getClockRandom());
-                cs.pLens = Point2f(getClockRandom(), getClockRandom());
-                Ray r;
-                cam->GenerateRay(cs, &r);
                 
-				SurfaceInteraction isect;
-                
-                Float tHit;
-                
-                Vector3f Light(1.0, 1.0, 1.0);
-                Light = Normalize(Light);
+                std::unique_ptr<Sampler> pixel_sampler = hns->Clone(offset);
+                Point2i pixel(i, j);
+                pixel_sampler->StartPixel(pixel); //开始准备随机数
                 
                 Spectrum colObj(0.0f); //colObj[0] = 1.0f; colObj[1] = 1.0f;
                 
-                if (agg->Intersect(r, &isect))
+                do
                 {
-                    //colObj = Vector3f(1.0, 0.0, 0.0);
-                    Float Li = Dot(Light, isect.n);
-                    colObj[1] = std::abs(Li);   //取绝对值，防止出现负值
-                }
+                    CameraSample cs ;
+                    cs= pixel_sampler->GetCameraSample(pixel); //随机数初始化相机采样点
+                    
+                    Ray r;
+                    cam->GenerateRay(cs, &r);
+                    
+                    SurfaceInteraction isect;
+                    
+                    Float tHit;
+                    
+                    Vector3f Light(1.0, 1.0, 1.0);
+                    Light = Normalize(Light);
+                    
+                    if (agg->Intersect(r, &isect))
+                    {
+                        //colObj = Vector3f(1.0, 0.0, 0.0);
+                        Float Li = Dot(Light, isect.n);
+                        colObj[1] += std::abs(Li);   //取绝对值，防止出现负值
+                    }
+                    
+                } while (pixel_sampler->StartNextSample());
+
+                colObj[1] = colObj [1] / (float)pixel_sampler->samplesPerPixel;
 
 //                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 0, renderCount, colObj[0]);
 //                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 1, renderCount, colObj[1]);
