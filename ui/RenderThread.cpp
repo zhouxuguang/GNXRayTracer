@@ -12,6 +12,7 @@
 #include "core/Interaction.h"
 #include "core/Spectrum.h"
 #include "accelerator/BVHAccel.h"
+#include "camera/Perspective.h"
 #include <omp.h>
 
 using namespace pbr;
@@ -84,10 +85,13 @@ void RenderThread::run()
     Aggregate *agg = new BVHAccel(prims, 1);
     
     //相机参数
-    Vector3f lower_left_corner(-2.0, -2.0, -2.0);
-    Vector3f horizontal(4.0, 0.0, 0.0);
-    Vector3f vertical(0.0, 4.0, 0.0);
-    Point3f origin(0.0, 0.0, -4.0);
+    Camera* cam = nullptr;
+    Point3f eye(-3.0f, 1.5f, -3.0f), look(0.0, 0.0, 0.0f);
+    Vector3f up(0.0f, 1.0f, 0.0f);
+    Transform lookat = LookAt(eye, look, up);
+
+    Transform Camera2World = Inverse(lookat);
+    cam = CreatePerspectiveCamera(WIDTH, HEIGHT, Camera2World);
     
     
 	int renderCount = 0;
@@ -108,24 +112,16 @@ void RenderThread::run()
 				float v = float(j + getClockRandom()) / float(HEIGHT);
 				int offset = (WIDTH * j + i);
 
-				Ray r(origin, (lower_left_corner + u*horizontal + v*vertical) - Vector3f(origin));
+
+                CameraSample cs;
+                cs.pFilm = Point2f(i + getClockRandom(), j + getClockRandom());
+                cs.pLens = Point2f(getClockRandom(), getClockRandom());
+                Ray r;
+                cam->GenerateRay(cs, &r);
+                
 				SurfaceInteraction isect;
                 
                 Float tHit;
-                //Vector3f colObj;
-//                if (tris[0]->Intersect(r, &tHit, &isect) || tris[1]->Intersect(r, &tHit, &isect))
-//                {
-//                    colObj = Vector3f(1.0 , 0.0 , 0.0);
-//                }
-                
-//                for (int count = 0; count < plyi->nTriangles; ++count)
-//                {
-//                    if (tris[count]->Intersect(r, &tHit, &isect))
-//                    {
-//                        colObj = Vector3f(1.0, 0.0, 0.0) ;
-//                        break;
-//                    }
-//                }
                 
                 Vector3f Light(1.0, 1.0, 1.0);
                 Light = Normalize(Light);
@@ -139,10 +135,15 @@ void RenderThread::run()
                     colObj[1] = std::abs(Li);   //取绝对值，防止出现负值
                 }
 
-                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 0, renderCount, colObj[0]);
-                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 1, renderCount, colObj[1]);
-                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 2, renderCount, colObj[2]);
-                m_pFramebuffer->set_uc(i, HEIGHT - j - 1, 3, 255);
+//                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 0, renderCount, colObj[0]);
+//                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 1, renderCount, colObj[1]);
+//                m_pFramebuffer->update_f_u_c(i, HEIGHT - j - 1, 2, renderCount, colObj[2]);
+//                m_pFramebuffer->set_uc(i, HEIGHT - j - 1, 3, 255);
+                
+                m_pFramebuffer->update_f_u_c(i, j, 0, renderCount, colObj[0]);
+                m_pFramebuffer->update_f_u_c(i, j, 1, renderCount, colObj[1]);
+                m_pFramebuffer->update_f_u_c(i, j, 2, renderCount, colObj[2]);
+                m_pFramebuffer->set_uc(i, j, 3, 255);
 			}
 		}
 

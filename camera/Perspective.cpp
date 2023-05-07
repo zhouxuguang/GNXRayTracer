@@ -3,7 +3,7 @@
 #include "Perspective.h"
 //#include "paramset.h"
 //#include "sampler.h"
-//#include "sampling.h"
+#include "core/Sampling.h"
 //#include "light.h"
 //#include "stats.h"
 
@@ -16,7 +16,7 @@ namespace pbr
 PerspectiveCamera::PerspectiveCamera(const int rasterWidth, const int rasterHeight, const Transform &CameraToWorld,
     const Bounds2f &screenWindow, float lensRadius, float focalDistance, float fov)
     : ProjectiveCamera(rasterWidth, rasterHeight, CameraToWorld, Perspective(fov, 1e-2f, 1000.f),
-        screenWindow, lensRadius, focalDistance, 0, 0, nullptr, nullptr)
+        screenWindow, 0, 0, lensRadius, focalDistance, nullptr, nullptr)
 {
 
     // Compute image plane bounds at $z=1$ for _PerspectiveCamera_
@@ -37,8 +37,7 @@ float PerspectiveCamera::GenerateRay(const CameraSample &sample, Ray *ray) const
     if (lensRadius > 0)
     {
         // Sample point on lens
-        //Point2f pLens = lensRadius * ConcentricSampleDisk(sample.pLens);
-        Point2f pLens = Point2f(0, 0);
+        Point2f pLens = lensRadius * ConcentricSampleDisk(sample.pLens);
 
         // Compute point on plane of focus
         float ft = focalDistance / ray->d.z;

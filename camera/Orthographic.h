@@ -16,7 +16,7 @@ class OrthographicCamera : public ProjectiveCamera
                        const Bounds2f &screenWindow, float lensRadius,
                        float focalDistance)
         : ProjectiveCamera(RasterWidth, RasterHeight, CameraToWorld, Orthographic(0, 10), screenWindow,
-                           lensRadius, focalDistance, 0, 0, nullptr, nullptr)
+                        0, 0, lensRadius, focalDistance, nullptr, nullptr)
     {
     }
     

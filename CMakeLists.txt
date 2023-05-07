@@ -34,6 +34,8 @@ core/Interaction.h
 core/Interaction.cpp
 core/Primitive.h
 core/Primitive.cpp
+core/Sampling.h
+core/Sampling.cpp
 core/Shape.h
 core/Shape.cpp
 core/Spectrum.h
