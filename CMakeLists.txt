@@ -26,6 +26,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(CORE_FILES 
 core/GNXRayTracer.h
+core/Camera.h 
+core/Camera.cpp
 core/Geometry.h 
 core/Geometry.cpp
 core/Interaction.h
@@ -42,6 +44,14 @@ core/UnitTest.h
 core/UnitTest.cpp
 )
 source_group("core" FILES ${CORE_FILES})
+
+set(CAMERA_FILES 
+camera/Orthographic.h 
+camera/Orthographic.cpp
+camera/Perspective.h 
+camera/Perspective.cpp
+)
+source_group("camera" FILES ${CAMERA_FILES})
 
 set(SHAPE_FILES 
 shape/Sphere.h
@@ -83,6 +93,7 @@ source_group("ui" FILES ${UI_FILES})
 
 add_executable(GNXRayTracer
              ${CORE_FILES}
+             ${CAMERA_FILES}
              ${SHAPE_FILES}
              ${ACCELERATOR_FILES}
              ${UI_FILES}
