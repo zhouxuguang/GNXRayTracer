@@ -43,6 +43,8 @@ core/Sampler.h
 core/Sampler.cpp
 core/Sampling.h
 core/Sampling.cpp
+core/Scene.h
+core/Scene.cpp
 core/Shape.h
 core/Shape.cpp
 core/SobolMatrices.h

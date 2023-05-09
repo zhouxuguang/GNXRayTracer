@@ -11,6 +11,7 @@
 #include "shape/plyRead.h"
 #include "core/Interaction.h"
 #include "core/Spectrum.h"
+#include "core/Scene.h"
 #include "accelerator/BVHAccel.h"
 #include "camera/Perspective.h"
 #include "samplers/Halton.h"
@@ -82,8 +83,8 @@ void RenderThread::run()
     {
         prims.push_back(std::make_shared<GeometricPrimitive>(tris[i]));
     }
-        
-    Aggregate *agg = new BVHAccel(prims, 1);
+    
+    std::unique_ptr<Scene> worldScene = std::make_unique<Scene>(std::make_shared<BVHAccel>(prims, 1));
     
     //相机参数
     Camera* cam = nullptr;
@@ -137,7 +138,7 @@ void RenderThread::run()
                     Vector3f Light(1.0, 1.0, 1.0);
                     Light = Normalize(Light);
                     
-                    if (agg->Intersect(r, &isect))
+                    if (worldScene->Intersect(r, &isect))
                     {
                         //colObj = Vector3f(1.0, 0.0, 0.0);
                         Float Li = Dot(Light, isect.n);
