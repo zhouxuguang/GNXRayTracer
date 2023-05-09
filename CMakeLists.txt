@@ -30,6 +30,8 @@ core/Camera.h
 core/Camera.cpp
 core/Geometry.h 
 core/Geometry.cpp
+core/Integrator.h
+core/Integrator.cpp
 core/Interaction.h
 core/Interaction.cpp
 core/LowDiscrepancy.h
