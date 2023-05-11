@@ -8,6 +8,7 @@
 //#include "light.h"
 //#include "reflection.h"
 #include "Sampler.h"
+#include "ui/FrameBuffer.h"
 
 namespace pbr
 {
@@ -28,14 +29,15 @@ class SamplerIntegrator : public Integrator
     // SamplerIntegrator Public Methods
     SamplerIntegrator(std::shared_ptr<const Camera> camera,
                       std::shared_ptr<Sampler> sampler,
-                      const Bounds2i &pixelBounds) : camera(camera), sampler(sampler), pixelBounds(pixelBounds)
+                      const Bounds2i &pixelBounds, FrameBuffer * pFrameBuffer) :
+    camera(camera), sampler(sampler), pixelBounds(pixelBounds), m_FrameBuffer(pFrameBuffer)
     {}
     
     //进度函数
     virtual void Preprocess(const Scene &scene, Sampler &sampler) {}
     
     //渲染函数
-    void Render(const Scene &scene);
+    void Render(const Scene &scene, double &timeConsume);
     
 protected:
     // SamplerIntegrator Protected Data
@@ -45,6 +47,7 @@ private:
     // SamplerIntegrator Private Data
     std::shared_ptr<Sampler> sampler;
     const Bounds2i pixelBounds;
+    FrameBuffer * m_FrameBuffer;
 };
 
 }  // namespace pbr
