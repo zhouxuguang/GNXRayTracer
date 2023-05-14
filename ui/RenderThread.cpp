@@ -43,7 +43,7 @@ RenderThread::~RenderThread()
 
 void RenderThread::run()
 {
-	emit PrintString("Prepared to Render");
+	emit PrintString((char*)"Prepared to Render");
 
 	ClockRandomInit();
 

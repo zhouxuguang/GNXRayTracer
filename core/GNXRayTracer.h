@@ -14,6 +14,11 @@
 #include <assert.h>
 #include <string.h>
 
+#ifdef WIN32
+#include <intrin.h>
+#endif // WIN32
+
+
 // debug-only checking.  not executed in NDEBUG mode.
 #define DCHECK(condition) 
 #define DCHECK_EQ(val1, val2) 
@@ -251,14 +256,35 @@ inline Float Log2(Float x) {
     return std::log(x) * invLog2;
 }
 
-inline int Log2Int(uint32_t v) {
+inline int Log2Int(uint32_t v) 
+{
+#if defined(_MSC_VER)
+    unsigned long lz = 0;
+    if (_BitScanReverse(&lz, v)) return lz;
+    return 0;
+#else
     return 31 - __builtin_clz(v);
+#endif
 }
 
 inline int Log2Int(int32_t v) { return Log2Int((uint32_t)v); }
 
-inline int Log2Int(uint64_t v) {
+inline int Log2Int(uint64_t v) 
+{
+#if defined(_MSC_VER)
+    unsigned long lz = 0;
+#if defined(_WIN64)
+    _BitScanReverse64(&lz, v);
+#else
+    if (_BitScanReverse(&lz, v >> 32))
+        lz += 32;
+    else
+        _BitScanReverse(&lz, v & 0xffffffff);
+#endif // _WIN64
+    return lz;
+#else  // _MSC_VER
     return 63 - __builtin_clzll(v);
+#endif
 }
 
 inline int Log2Int(int64_t v) { return Log2Int((uint64_t)v); }
@@ -291,15 +317,15 @@ inline int64_t RoundUpPow2(int64_t v) {
 
 inline int CountTrailingZeros(uint32_t v)
 {
-//#if defined(PBRT_IS_MSVC)
-//    unsigned long index;
-//    if (_BitScanForward(&index, v))
-//        return index;
-//    else
-//        return 32;
-//#else
+#if defined(WIN32)
+    unsigned long index;
+    if (_BitScanForward(&index, v))
+        return index;
+    else
+        return 32;
+#else
     return __builtin_ctz(v);
-//#endif
+#endif
 }
 
 template <typename Predicate>
