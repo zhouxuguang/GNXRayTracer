@@ -15,8 +15,9 @@ endmacro (set_xcode_property)
 include_directories(thirdparty/libomp/include)
 link_directories(thirdparty/libomp/lib/mac)
 
-set (CMAKE_C_FLAGS "-Xclang -fopenmp")
-set (CMAKE_CXX_FLAGS "-Xclang -fopenmp")
+if (WIN32)
+    find_package(OpenMP)
+endif (WIN32)
 
 set (CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -g")
 
@@ -123,7 +124,6 @@ add_executable(GNXRayTracer
 
 #target_link_libraries(GNXRayTracer PRIVATE "-framework CoreVideo" "-framework QuartzCore")
 target_link_libraries(GNXRayTracer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-target_link_libraries(GNXRayTracer PRIVATE omp)
 
 set_target_properties(GNXRayTracer PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
@@ -141,6 +141,12 @@ if (APPLE)
     set_xcode_property(GNXRayTracer CLANG_CXX_LIBRARY "libc++")
     set_xcode_property(GNXRayTracer GCC_ENABLE_CPP_EXCEPTIONS NO)
     set_xcode_property(GNXRayTracer GCC_ENABLE_CPP_RTTI NO)
+
+    set (CMAKE_C_FLAGS "-Xclang -fopenmp")
+    set (CMAKE_CXX_FLAGS "-Xclang -fopenmp")
+    target_link_libraries(GNXRayTracer PRIVATE omp)
+elseif(WIN32)
+    target_link_libraries(GNXRayTracer PRIVATE OpenMP::OpenMP_CXX)
 endif (APPLE)
 
 file(GLOB Icons ${CMAKE_CURRENT_SOURCE_DIR}/Icons/*.png)
