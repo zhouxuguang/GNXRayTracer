@@ -12,8 +12,6 @@ macro (set_xcode_property TARGET XCODE_PROPERTY XCODE_VALUE)
         XCODE_ATTRIBUTE_${XCODE_PROPERTY} ${XCODE_VALUE})
 endmacro (set_xcode_property)
 
-include_directories(thirdparty/libomp/include)
-link_directories(thirdparty/libomp/lib/mac)
 
 if (WIN32)
     find_package(OpenMP)
@@ -137,6 +135,9 @@ set_target_properties(GNXRayTracer PROPERTIES AUTOMOC ON)
 set_target_properties(GNXRayTracer PROPERTIES AUTORCC ON)
 
 if (APPLE)
+    include_directories(thirdparty/libomp/include)
+    link_directories(thirdparty/libomp/lib/mac)
+
     set_xcode_property(GNXRayTracer CLANG_CXX_LANGUAGE_STANDARD "c++17")
     set_xcode_property(GNXRayTracer CLANG_CXX_LIBRARY "libc++")
     set_xcode_property(GNXRayTracer GCC_ENABLE_CPP_EXCEPTIONS NO)
