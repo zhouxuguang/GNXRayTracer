@@ -51,7 +51,7 @@ void RenderThread::run()
 	int WIDTH = 500;
 	int HEIGHT = 500;
 
-    emit PrintString("Init FrameBuffer");
+    emit PrintString((char*)"Init FrameBuffer");
     m_pFramebuffer->bufferResize(WIDTH, HEIGHT);
     
     Transform tri_Object2World , tri_World2Object ;
@@ -114,7 +114,7 @@ void RenderThread::run()
         prims.push_back(std::make_shared<GeometricPrimitive>(tris[i]));
     }
     
-    emit PrintString("Init worldScene");
+    emit PrintString((char*)"Init worldScene");
     std::unique_ptr<Scene> worldScene = std::make_unique<Scene>(std::make_shared<BVHAccel>(prims, 1));
     
     //相机参数
@@ -127,7 +127,7 @@ void RenderThread::run()
     
     
     
-    emit PrintString("Init Sampler");
+    emit PrintString((char*)"Init Sampler");
     Bounds2i imageBound(Point2i(0, 0), Point2i(WIDTH , HEIGHT));
     std::shared_ptr<HaltonSampler> sampler = std::make_unique<HaltonSampler>(8, imageBound, false);
     //std::shared_ptr<ClockRandSampler> sampler = std::make_unique<ClockRandSampler>(8, imageBound);
@@ -137,7 +137,7 @@ void RenderThread::run()
     //SamplerIntegrator* integrator = new SamplerIntegrator(camera, nullptr, ScreenBound, m_pFramebuffer);
     
     
-    emit PrintString("Start Rendering");
+    emit PrintString((char*)"Start Rendering");
 	int renderCount = 0;
 	while (renderFlag) {
         QElapsedTimer t;

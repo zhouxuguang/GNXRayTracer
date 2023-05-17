@@ -22,4 +22,6 @@ void testTransform()
     pbr::Vector3f vec1(10, 100, 1000);
     pbr::Transform transform = pbr::Translate(vec1);
     printf("");
+
+    int a = 10;
 }
