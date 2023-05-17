@@ -13,6 +13,8 @@
 #include <vector>
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
+#include <time.h>
 
 #ifdef WIN32
 #include <intrin.h>

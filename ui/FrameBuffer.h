@@ -1,13 +1,13 @@
-#ifndef FRAMEBUFFER_JHDDSJDJ_INCLUDE_H
-#define FRAMEBUFFER_JHDDSJDJ_INCLUDE_H
 
 
+#ifndef __FrameBuffer_H__
+#define __FrameBuffer_H__
 #include "DebugText.h"
 
 #include <QObject>
 
-class FrameBuffer : public QObject
-{
+
+class FrameBuffer : public QObject {
 	Q_OBJECT
 
 public:
@@ -16,7 +16,8 @@ public:
 		height(height),
 		channals(channals),
 		ubuffer(nullptr),
-		fbuffer(nullptr){ }
+		fbuffer(nullptr),
+		curRenderCount(0){ }
 
 	~FrameBuffer(){
 		if (nullptr != ubuffer) delete[] ubuffer;
@@ -28,6 +29,12 @@ public:
 		this->channals = 0;
 	}
 
+	void renderCountIncrease() {
+		curRenderCount++;
+	}
+	void renderCountClear() {
+		curRenderCount = 0;
+	}
 	void InitBuffer(const int width = 800, const int height = 600, const int channals = 4) {
 		this->width = width;
 		this->height = height;
@@ -112,7 +119,7 @@ public:
 		return true;
 	}
 
-	inline bool update_f_u_c(const int w, const int h, const int shifting, const int renderCount, const float & dat) {
+	inline bool update_f_u_c(const int w, const int h, const int shifting, const float & dat) {
 		if (nullptr == fbuffer) {
 			TextDinodonS("Access Error: Buffer is empty and cannot be accessed!");
 			return false;
@@ -122,7 +129,7 @@ public:
 			return false;
 		}
 		int offset = (w + h * width) * channals + shifting;
-		float weight = (1.0f / (float)renderCount);
+		float weight = (1.0f / (float)curRenderCount);
 		fbuffer[offset] = weight * dat + (1.0f - weight) * fbuffer[offset];
 		ubuffer[offset] = fbuffer[offset] * 255;
 		return true;
@@ -136,7 +143,17 @@ private:
 	int width;
 	int height;
 	int channals;
+	int curRenderCount;
 
 };
 
+
+
+
+
 #endif
+
+
+
+
+

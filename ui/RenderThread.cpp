@@ -21,16 +21,6 @@
 using namespace pbr;
 
 
-inline void ClockRandomInit()
-{
-	srand((unsigned)time(NULL));
-}
-
-inline double getClockRandom()
-{
-	return rand() / (RAND_MAX + 1.0);
-}
-
 RenderThread::RenderThread()
 {
 	paintFlag = false;
@@ -136,8 +126,8 @@ void RenderThread::run()
     
     emit PrintString((char*)"Init Sampler");
     Bounds2i imageBound(Point2i(0, 0), Point2i(WIDTH , HEIGHT));
-    std::shared_ptr<HaltonSampler> sampler = std::make_unique<HaltonSampler>(8, imageBound, false);
-    //std::shared_ptr<ClockRandSampler> sampler = std::make_unique<ClockRandSampler>(8, imageBound);
+    //std::shared_ptr<HaltonSampler> sampler = std::make_unique<HaltonSampler>(8, imageBound, false);
+    std::shared_ptr<ClockRandSampler> sampler = std::make_unique<ClockRandSampler>(8, imageBound);
     
     Bounds2i ScreenBound(Point2i(0, 0), Point2i(WIDTH, HEIGHT));
     std::shared_ptr<Integrator> integrator = std::make_shared<SamplerIntegrator>(camera, sampler, ScreenBound, m_pFramebuffer);

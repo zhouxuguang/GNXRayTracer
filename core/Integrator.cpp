@@ -15,16 +15,6 @@ namespace pbr
 
 static int nCameraRays = 0;
 
-static void ClockRandomInit()
-{
-    srand((unsigned)time(NULL));
-}
-
-static double getClockRandom()
-{
-    return rand() / (RAND_MAX + 1.0);
-}
-
 // Integrator Method Definitions
 Integrator::~Integrator() {}
 
@@ -33,10 +23,12 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
 {
     double start = omp_get_wtime(); //渲染开始时间
 
+    m_FrameBuffer->renderCountIncrease();
+
     //光源位置
     Point3f Light(10.0, 10.0, -10.0);
 
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < pixelBounds.pMax.x; i++)
     {
         for (int j = 0; j < pixelBounds.pMax.y; j++)
@@ -71,9 +63,9 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
                 colObj = std::abs(Li) * colObj; //防止为负
             }
 
-            m_FrameBuffer->set_uc(i, j, 0, colObj[0]);
-            m_FrameBuffer->set_uc(i, j, 1, colObj[1]);
-            m_FrameBuffer->set_uc(i, j, 2, colObj[2]);
+            m_FrameBuffer->update_f_u_c(i, j, 0, colObj[0]);
+            m_FrameBuffer->update_f_u_c(i, j, 1, colObj[1]);
+            m_FrameBuffer->update_f_u_c(i, j, 2, colObj[2]);
             m_FrameBuffer->set_uc(i, j, 3, 255);
         }
     }
