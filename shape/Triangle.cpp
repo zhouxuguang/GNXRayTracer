@@ -153,6 +153,7 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
     *tHit = t;
     //++nHits;
     
+    isect->p = b0 * p0 + b1 * p1 + b2 * p2;
     isect->n = Normal3f(Normalize(Cross(p1 - p0, p2 - p0)));
     
     return true;

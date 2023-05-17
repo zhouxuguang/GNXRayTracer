@@ -19,7 +19,7 @@ class Integrator
   public:
     // Integrator Interface
     virtual ~Integrator();
-    virtual void Render(const Scene &scene) = 0;
+    virtual void Render(const Scene &scene, double &timeConsume) = 0;
 };
 
 // SamplerIntegrator Declarations
