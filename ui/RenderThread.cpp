@@ -97,7 +97,14 @@ void RenderThread::run()
     
     tri_Object2World = Translate(Vector3f(0.0, -2.5, 0.0)) * tri_Object2World;
     tri_World2Object = Inverse(tri_Object2World);
-    plyInfo *plyi = new plyInfo("/Users/zhouxuguang/work/opensource/pbrt/pdf/模型文件-1/dragon.3d");
+
+    //E:\code\model
+#ifdef _WIN32
+    plyInfo* plyi = new plyInfo("E:\\code\\model\\dragon.3d");
+#else
+    plyInfo* plyi = new plyInfo("/Users/zhouxuguang/work/opensource/pbrt/pdf/模型文件-1/dragon.3d");
+#endif // _WIN32
+
     std::shared_ptr<TriangleMesh> mesh = std::make_shared<TriangleMesh>(tri_Object2World, plyi->nTriangles, plyi->vertexIndices, plyi->nVertices, plyi->vertexArray, nullptr, nullptr, nullptr, nullptr);
     std::vector<std::shared_ptr<Shape>> tris;
     tris.reserve(plyi->nTriangles);
