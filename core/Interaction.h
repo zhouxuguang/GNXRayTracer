@@ -17,6 +17,7 @@ struct Interaction
 		time(time),
 		wo(Normalize(wo)),
 		n(n) {}
+    
 	// Interaction Public Data
 	Point3f p;
 	float time;
@@ -30,29 +31,36 @@ public:
 	// SurfaceInteraction Public Methods
 	SurfaceInteraction() {}
     
+    SurfaceInteraction(const Point3f &p, const Vector3f &pError,
+                       const Point2f &uv, const Vector3f &wo,
+                       const Vector3f &dpdu, const Vector3f &dpdv,
+                       const Normal3f &dndu, const Normal3f &dndv, Float time,
+                       const Shape *sh,
+                       int faceIndex = 0);
+    
     void SetShadingGeometry(const Vector3f &dpdu, const Vector3f &dpdv,
                             const Normal3f &dndu, const Normal3f &dndv,
                             bool orientationIsAuthoritative);
     
 	void ComputeScatteringFunctions();
 	const Shape *shape = nullptr;
-	const Primitive *primitive = nullptr;
     
-    std::shared_ptr<BSDF> bsdf = nullptr;
     Point2f uv;
     Vector3f dpdu, dpdv;
     Normal3f dndu, dndv;
-    struct
-    {
+    struct {
         Normal3f n;
         Vector3f dpdu, dpdv;
         Normal3f dndu, dndv;
     } shading;
+    const Primitive *primitive = nullptr;
+    BSDF *bsdf = nullptr;
+    BSSRDF *bssrdf = nullptr;
+    mutable Vector3f dpdx, dpdy;
+    mutable Float dudx = 0, dvdx = 0, dudy = 0, dvdy = 0;
 };
 
 }
 
 
 #endif // PBR_INTERACTION_CINDSFMG_H
-
-

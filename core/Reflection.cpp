@@ -157,8 +157,7 @@ Spectrum BSDF::Sample_f(const Vector3f &woWorld, Vector3f *wiWorld,
         if (sampledType) *sampledType = BxDFType(0);
         return Spectrum(0);
     }
-    int comp =
-        std::min((int)std::floor(u[0] * matchingComps), matchingComps - 1);
+    int comp = std::min((int)std::floor(u[0] * matchingComps), matchingComps - 1);
 
     // Get _BxDF_ pointer for chosen component
     BxDF *bxdf = nullptr;

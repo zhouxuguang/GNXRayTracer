@@ -98,6 +98,12 @@ samplers/Halton.cpp
 )
 source_group("samplers" FILES ${SAMPLERS_FILES})
 
+set(MATERIALS_FILES 
+materials/Matte.h 
+materials/Matte.cpp
+)
+source_group("materials" FILES ${MATERIALS_FILES})
+
 set(TEXTURES_FILES 
 textures/Constant.h 
 textures/Constant.cpp
@@ -134,6 +140,7 @@ add_executable(GNXRayTracer
              ${ACCELERATOR_FILES}
              ${SAMPLERS_FILES}
              ${TEXTURES_FILES}
+             ${MATERIALS_FILES}
              ${UI_FILES}
         )
 

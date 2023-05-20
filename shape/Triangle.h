@@ -31,7 +31,7 @@ struct TriangleMesh
 //三角形定义
 class Triangle : public Shape
 {
-  public:
+public:
     // Triangle Public Methods
     Triangle(const Transform *ObjectToWorld, const Transform *WorldToObject,
              bool reverseOrientation, const std::shared_ptr<TriangleMesh> &mesh,
@@ -55,7 +55,7 @@ class Triangle : public Shape
     // reference point p.
     Float SolidAngle(const Point3f &p, int nSamples = 0) const;
 
-  private:
+private:
     // Triangle Private Methods
     void GetUVs(Point2f uv[3]) const
     {

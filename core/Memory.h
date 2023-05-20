@@ -1,5 +1,5 @@
-#ifndef PBRT_CORE_MEMORY_H
-#define PBRT_CORE_MEMORY_H
+#ifndef PBR_CORE_MEMORY_H
+#define PBR_CORE_MEMORY_H
 
 // core/memory.h*
 #include "GNXRayTracer.h"

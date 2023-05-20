@@ -150,11 +150,61 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
     Float b2 = e2 * invDet;
     Float t = tScaled * invDet;
     
+    // Ensure that computed triangle $t$ is conservatively greater than zero
+
+    // Compute $\delta_z$ term for triangle $t$ error bounds
+    float maxZt = MaxComponent(Abs(Vector3f(p0t.z, p1t.z, p2t.z)));
+    float deltaZ = gamma(3) * maxZt;
+    // Compute $\delta_x$ and $\delta_y$ terms for triangle $t$ error bounds
+    float maxXt = MaxComponent(Abs(Vector3f(p0t.x, p1t.x, p2t.x)));
+    float maxYt = MaxComponent(Abs(Vector3f(p0t.y, p1t.y, p2t.y)));
+    float deltaX = gamma(5) * (maxXt + maxZt);
+    float deltaY = gamma(5) * (maxYt + maxZt);
+    // Compute $\delta_e$ term for triangle $t$ error bounds
+    float deltaE = 2 * (gamma(2) * maxXt * maxYt + deltaY * maxXt + deltaX * maxYt);
+    // Compute $\delta_t$ term for triangle $t$ error bounds and check _t_
+    float maxE = MaxComponent(Abs(Vector3f(e0, e1, e2)));
+    float deltaT = 3 * (gamma(3) * maxE * maxZt + deltaE * maxZt + deltaZ * maxE) * std::abs(invDet);
+    if (t <= deltaT) return false;
+
+    // Compute triangle partial derivatives
+    Vector3f dpdu, dpdv;
+    Point2f uv[3];
+    GetUVs(uv);
+
+    // Compute deltas for triangle partial derivatives
+    Vector2f duv02 = uv[0] - uv[2], duv12 = uv[1] - uv[2];
+    Vector3f dp02 = p0 - p2, dp12 = p1 - p2;
+
+    // Compute error bounds for triangle intersection
+    float xAbsSum =
+        (std::abs(b0 * p0.x) + std::abs(b1 * p1.x) + std::abs(b2 * p2.x));
+    float yAbsSum =
+        (std::abs(b0 * p0.y) + std::abs(b1 * p1.y) + std::abs(b2 * p2.y));
+    float zAbsSum =
+        (std::abs(b0 * p0.z) + std::abs(b1 * p1.z) + std::abs(b2 * p2.z));
+    Vector3f pError = gamma(7) * Vector3f(xAbsSum, yAbsSum, zAbsSum);
+
+    Point2f uvHit = b0 * uv[0] + b1 * uv[1] + b2 * uv[2];
+    Point3f pHit = b0 * p0 + b1 * p1 + b2 * p2;
+
+
+    // Fill in _SurfaceInteraction_ from triangle hit
+    *isect = SurfaceInteraction(pHit, pError, uvHit, -ray.d, dpdu, dpdv,
+        Normal3f(0, 0, 0), Normal3f(0, 0, 0), ray.time,
+        this, faceIndex);
+
+    // Override surface normal in _isect_ for triangle
+    isect->n = isect->shading.n = Normal3f(Normalize(Cross(dp02, dp12)));
+    isect->p = b0 * p0 + b1 * p1 + b2 * p2;
+    //if (reverseOrientation ^ transformSwapsHandedness)
+    //    isect->n = isect->shading.n = -isect->n;
+    
     *tHit = t;
     //++nHits;
     
-    isect->p = b0 * p0 + b1 * p1 + b2 * p2;
-    isect->n = Normal3f(Normalize(Cross(p1 - p0, p2 - p0)));
+    
+    //isect->n = Normal3f(Normalize(Cross(p1 - p0, p2 - p0)));
     
     return true;
 }

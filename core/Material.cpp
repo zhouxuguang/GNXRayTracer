@@ -13,7 +13,7 @@ namespace pbr
 // Material Method Definitions
 Material::~Material() {}
 
-#if 0
+#if 1
 
 void Material::Bump(const std::shared_ptr<Texture<Float>> &d, SurfaceInteraction *si)
 {
