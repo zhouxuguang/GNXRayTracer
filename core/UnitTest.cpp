@@ -8,6 +8,7 @@
 #include "UnitTest.h"
 #include "Geometry.h"
 #include "Transform.h"
+#include "Reflection.h"
 
 void testGeometry()
 {
@@ -24,4 +25,10 @@ void testTransform()
     printf("");
 
     int a = 10;
+}
+
+void testLambert()
+{
+    pbr::Spectrum spe;
+    pbr::LambertianReflection a(spe);
 }

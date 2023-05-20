@@ -3,7 +3,7 @@
 
 // core/spectrum.h*
 #include "GNXRayTracer.h"
-//#include "stringprint.h"
+#include "StringPrint.h"
 
 namespace pbr
 {

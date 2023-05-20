@@ -43,6 +43,8 @@ core/Memory.cpp
 core/Primitive.h
 core/Primitive.cpp
 core/RNG.h
+core/Reflection.h
+core/Reflection.cpp
 core/Sampler.h
 core/Sampler.cpp
 core/Sampling.h
@@ -55,6 +57,7 @@ core/SobolMatrices.h
 core/SobolMatrices.cpp
 core/Spectrum.h
 core/Spectrum.cpp
+core/StringPrint.h
 core/Transform.h 
 core/Transform.cpp 
 core/UnitTest.h

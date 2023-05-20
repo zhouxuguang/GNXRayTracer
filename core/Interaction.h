@@ -32,6 +32,17 @@ public:
 	void ComputeScatteringFunctions();
 	const Shape *shape = nullptr;
 	const Primitive *primitive = nullptr;
+    
+    std::shared_ptr<BSDF> bsdf = nullptr;
+    Point2f uv;
+    Vector3f dpdu, dpdv;
+    Normal3f dndu, dndv;
+    struct
+    {
+        Normal3f n;
+        Vector3f dpdu, dpdv;
+        Normal3f dndu, dndv;
+    } shading;
 };
 
 }
