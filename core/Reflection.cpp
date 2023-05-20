@@ -112,8 +112,8 @@ Spectrum BxDF::rho(int nSamples, const Point2f *u1, const Point2f *u2) const {
 }
 
 // BSDF Method Definitions
-Spectrum BSDF::f(const Vector3f &woW, const Vector3f &wiW,
-                 BxDFType flags) const {
+Spectrum BSDF::f(const Vector3f &woW, const Vector3f &wiW, BxDFType flags) const
+{
     //ProfilePhase pp(Prof::BSDFEvaluation);
     Vector3f wi = WorldToLocal(wiW), wo = WorldToLocal(woW);
     if (wo.z == 0) return 0.;

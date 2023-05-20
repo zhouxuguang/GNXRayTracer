@@ -42,7 +42,12 @@ public:
                             const Normal3f &dndu, const Normal3f &dndv,
                             bool orientationIsAuthoritative);
     
-	void ComputeScatteringFunctions();
+    void ComputeScatteringFunctions(
+        const Ray &ray, MemoryArena &arena,
+        bool allowMultipleLobes = false,
+        TransportMode mode = TransportMode::Radiance);
+    
+    
 	const Shape *shape = nullptr;
     
     Point2f uv;

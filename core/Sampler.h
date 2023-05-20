@@ -4,6 +4,7 @@
 // core/sampler.h*
 #include "Geometry.h"
 #include "RNG.h"
+#include "StringPrint.h"
 #include <inttypes.h>
 
 namespace pbr
@@ -28,10 +29,11 @@ class Sampler
     virtual bool StartNextSample();
     virtual std::unique_ptr<Sampler> Clone(int seed) = 0;
     virtual bool SetSampleNumber(int64_t sampleNum);
-//    std::string StateString() const {
-//      return StringPrintf("(%d,%d), sample %" PRId64, currentPixel.x,
-//                          currentPixel.y, currentPixelSampleIndex);
-//    }
+    std::string StateString() const
+    {
+      return StringPrintf("(%d,%d), sample %" PRId64, currentPixel.x,
+                          currentPixel.y, currentPixelSampleIndex);
+    }
     int64_t CurrentSampleNumber() const { return currentPixelSampleIndex; }
 
     // Sampler Public Data
@@ -97,7 +99,7 @@ inline double getClockRandom()
     return rand() / (RAND_MAX + 1.0);
 }
 
-// HaltonSampler Declarations
+// ClockRandSampler Declarations
 class ClockRandSampler : public GlobalSampler {
 public:
     // HaltonSampler Public Methods

@@ -81,7 +81,7 @@ void RenderThread::run()
     //将物体填充到基元
     for (int i = 0; i < nTrianglesFloor ; ++i)
     {
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i]));
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], nullptr));
     }
 
     
@@ -108,7 +108,7 @@ void RenderThread::run()
     prims.reserve(plyi->nTriangles);
     for (int i = 0; i < plyi->nTriangles; ++i)
     {
-        prims.push_back(std::make_shared<GeometricPrimitive>(tris[i]));
+        prims.push_back(std::make_shared<GeometricPrimitive>(tris[i], nullptr));
     }
     
     emit PrintString((char*)"Init worldScene");
