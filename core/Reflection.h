@@ -118,9 +118,13 @@ public:
         bxdfs[nBxDFs++] = b;
     }
     int NumComponents(BxDFType flags = BSDF_ALL) const;
+    
+    //世界空间向量转换到局部空间
     Vector3f WorldToLocal(const Vector3f &v) const {
         return Vector3f(Dot(v, ss), Dot(v, ts), Dot(v, ns));
     }
+    
+    //局部空间向量转换到世界空间
     Vector3f LocalToWorld(const Vector3f &v) const {
         return Vector3f(ss.x * v.x + ts.x * v.y + ns.x * v.z,
                         ss.y * v.x + ts.y * v.y + ns.y * v.z,

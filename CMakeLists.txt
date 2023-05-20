@@ -38,6 +38,8 @@ core/Interaction.h
 core/Interaction.cpp
 core/LowDiscrepancy.h
 core/LowDiscrepancy.cpp
+core/Material.h
+core/Material.cpp
 core/Memory.h
 core/Memory.cpp
 core/Primitive.h
@@ -58,6 +60,8 @@ core/SobolMatrices.cpp
 core/Spectrum.h
 core/Spectrum.cpp
 core/StringPrint.h
+core/Texture.h
+core/Texture.cpp
 core/Transform.h 
 core/Transform.cpp 
 core/UnitTest.h
@@ -94,6 +98,12 @@ samplers/Halton.cpp
 )
 source_group("samplers" FILES ${SAMPLERS_FILES})
 
+set(TEXTURES_FILES 
+textures/Constant.h 
+textures/Constant.cpp
+)
+source_group("textures" FILES ${TEXTURES_FILES})
+
 set(UI_FILES 
 ui/FrameBuffer.h
 ui/FrameBuffer.cpp
@@ -123,6 +133,7 @@ add_executable(GNXRayTracer
              ${SHAPE_FILES}
              ${ACCELERATOR_FILES}
              ${SAMPLERS_FILES}
+             ${TEXTURES_FILES}
              ${UI_FILES}
         )
 

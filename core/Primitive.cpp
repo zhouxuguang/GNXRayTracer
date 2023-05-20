@@ -1,5 +1,6 @@
 #include "Primitive.h"
 #include "Shape.h"
+#include "Interaction.h"
 
 
 namespace pbr 
@@ -23,10 +24,13 @@ namespace pbr
 
 	bool GeometricPrimitive::Intersect(const Ray &r, SurfaceInteraction *isect) const 
     {
-
 		float tHit;
 		if (!shape->Intersect(r, &tHit, isect)) return false;
 		r.tMax = tHit;
+        
+        CHECK_GE(Dot(isect->n, isect->shading.n), 0.);
+        assert(Dot(isect->n, isect->shading.n) >= 0.0);
+        
 		// Initialize _SurfaceInteraction::mediumInterface_ after _Shape_
 		// intersection
 		return true;

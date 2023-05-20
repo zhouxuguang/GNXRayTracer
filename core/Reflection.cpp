@@ -117,7 +117,7 @@ Spectrum BSDF::f(const Vector3f &woW, const Vector3f &wiW,
     //ProfilePhase pp(Prof::BSDFEvaluation);
     Vector3f wi = WorldToLocal(wiW), wo = WorldToLocal(woW);
     if (wo.z == 0) return 0.;
-    bool reflect = Dot(wiW, ng) * Dot(woW, ng) > 0;
+    bool reflect = Dot(wiW, ng) * Dot(woW, ng) > 0; //判断wiW和woW相对于ng是否在同一个半球方向
     Spectrum f(0.f);
     for (int i = 0; i < nBxDFs; ++i)
         if (bxdfs[i]->MatchesFlags(flags) &&
