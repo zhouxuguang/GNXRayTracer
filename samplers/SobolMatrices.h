@@ -3,7 +3,7 @@
 #define PBR_CORE_SOBOLMATRICES_H
 
 // core/sobolmatrices.h*
-#include "GNXRayTracer.h"
+#include "core/GNXRayTracer.h"
 
 namespace pbr
 {

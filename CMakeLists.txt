@@ -36,8 +36,6 @@ core/Integrator.h
 core/Integrator.cpp
 core/Interaction.h
 core/Interaction.cpp
-core/LowDiscrepancy.h
-core/LowDiscrepancy.cpp
 core/Material.h
 core/Material.cpp
 core/Memory.h
@@ -55,8 +53,6 @@ core/Scene.h
 core/Scene.cpp
 core/Shape.h
 core/Shape.cpp
-core/SobolMatrices.h
-core/SobolMatrices.cpp
 core/Spectrum.h
 core/Spectrum.cpp
 core/StringPrint.h
@@ -95,6 +91,10 @@ source_group("accelerator" FILES ${ACCELERATOR_FILES})
 set(SAMPLERS_FILES 
 samplers/Halton.h 
 samplers/Halton.cpp
+samplers/LowDiscrepancy.h
+samplers/LowDiscrepancy.cpp
+samplers/SobolMatrices.h
+samplers/SobolMatrices.cpp
 )
 source_group("samplers" FILES ${SAMPLERS_FILES})
 

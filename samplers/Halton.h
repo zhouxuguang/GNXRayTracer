@@ -4,7 +4,7 @@
 
 // samplers/halton.h*
 #include "core/Sampler.h"
-#include "core/LowDiscrepancy.h"
+#include "LowDiscrepancy.h"
 
 namespace pbr
 {

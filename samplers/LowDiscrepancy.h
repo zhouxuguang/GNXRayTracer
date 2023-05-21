@@ -3,9 +3,9 @@
 #define PBR_CORE_LOWDISCREPANCY_H
 
 // core/lowdiscrepancy.h*
-#include "GNXRayTracer.h"
-#include "RNG.h"
-#include "Sampling.h"
+#include "core/GNXRayTracer.h"
+#include "core/RNG.h"
+#include "core/Sampling.h"
 #include "SobolMatrices.h"
 
 namespace pbr
