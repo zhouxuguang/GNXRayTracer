@@ -15,14 +15,57 @@ struct Interaction
 		const Vector3f &wo, float time)
 		: p(p),
 		time(time),
+        pError(pError),
 		wo(Normalize(wo)),
 		n(n) {}
+    
+    Ray SpawnRay(const Vector3f &d) const
+    {
+        Point3f o = OffsetRayOrigin(p, pError, n, d);
+        return Ray(o, d, Infinity, time, GetMedium(d));
+    }
+    
+    Ray SpawnRayTo(const Point3f &p2) const
+    {
+        Point3f origin = OffsetRayOrigin(p, pError, n, p2 - p);
+        Vector3f d = p2 - p;
+        return Ray(origin, d, 1 - ShadowEpsilon, time, GetMedium(d));
+    }
+    
+    Ray SpawnRayTo(const Interaction &it) const
+    {
+        // 计算交点和光源点之间的射线，用于阴影检测
+        Point3f origin = OffsetRayOrigin(p, pError, n, it.p - p);
+        Point3f target = OffsetRayOrigin(it.p, it.pError, it.n, origin - it.p);
+        Vector3f d = target - origin;
+        return Ray(origin, d, 1 - ShadowEpsilon, time, GetMedium(d));
+    }
+    
+    bool IsMediumInteraction() const
+    {
+        return false;
+        //return !IsSurfaceInteraction();
+    }
+    
+    const Medium *GetMedium(const Vector3f &w) const
+    {
+        return nullptr;
+        //return Dot(w, n) > 0 ? mediumInterface.outside : mediumInterface.inside;
+    }
+    
+    const Medium *GetMedium() const
+    {
+        CHECK_EQ(mediumInterface.inside, mediumInterface.outside);
+        return nullptr;
+        //return mediumInterface.inside;
+    }
     
 	// Interaction Public Data
 	Point3f p;
 	float time;
 	Vector3f wo;
 	Normal3f n;
+    Vector3f pError;
 };
 
 class SurfaceInteraction : public Interaction

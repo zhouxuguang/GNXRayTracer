@@ -38,6 +38,11 @@ bool GeometricPrimitive::Intersect(const Ray &r, SurfaceInteraction *isect) cons
     return true;
 }
 
+const Material *GeometricPrimitive::GetMaterial() const
+{
+    return material.get();
+}
+
 void GeometricPrimitive::ComputeScatteringFunctions(
                                                     SurfaceInteraction *isect,
                                                     MemoryArena &arena,
@@ -50,6 +55,14 @@ void GeometricPrimitive::ComputeScatteringFunctions(
                                              allowMultipleLobes);
     CHECK_GE(Dot(isect->n, isect->shading.n), 0.);
     assert(Dot(isect->n, isect->shading.n) >= 0.0);
+}
+
+const Material *Aggregate::GetMaterial() const
+{
+//    LOG(FATAL) <<
+//        "Aggregate::GetMaterial() method"
+//        "called; should have gone to GeometricPrimitive";
+    return nullptr;
 }
 
 void Aggregate::ComputeScatteringFunctions(SurfaceInteraction *isect,

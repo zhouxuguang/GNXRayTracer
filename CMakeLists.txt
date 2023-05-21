@@ -36,6 +36,8 @@ core/Integrator.h
 core/Integrator.cpp
 core/Interaction.h
 core/Interaction.cpp
+core/Light.h
+core/Light.cpp
 core/Material.h
 core/Material.cpp
 core/Memory.h

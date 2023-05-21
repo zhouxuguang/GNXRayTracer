@@ -8,6 +8,7 @@
 #include "Integrator.h"
 #include "Camera.h"
 #include "Reflection.h"
+#include "Light.h"
 #include "ui/FrameBuffer.h"
 #include <omp.h>
 
@@ -27,9 +28,10 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
     m_FrameBuffer->renderCountIncrease();
 
     //光源位置
-    Point3f Light(10.0, 10.0, -10.0);
+    //Point3f Light(10.0, 10.0, -10.0);
+    Point3f LightPosition(1.0, 4.5, -6.0);
 
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (int i = 0; i < pixelBounds.pMax.x; i++)
     {
         for (int j = 0; j < pixelBounds.pMax.y; j++)
@@ -54,17 +56,24 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
             Spectrum colObj(.0f);
             if (scene.Intersect(r, &isect))
             {
-                //计算散射
-                isect.ComputeScatteringFunctions(r, arena);
-                Vector3f LightNorm = Normalize(Light - isect.p);
-                Vector3f wi = LightNorm;
-                Vector3f wo = isect.wo;
+                //交点类的位置设置为光源
+                Interaction p1;
+                p1.p = LightPosition;
+                VisibilityTester vt(isect, p1);
+                if (vt.Unoccluded(scene))
+                {
+                    //计算散射
+                    isect.ComputeScatteringFunctions(r, arena);
+                    Vector3f LightNorm = Normalize(LightPosition - isect.p);
+                    Vector3f wi = LightNorm;
+                    Vector3f wo = isect.wo;
 
-                Spectrum f = isect.bsdf->f(wo, wi);
-                Float pdf = isect.bsdf->Pdf(wo, wi);
-                
-                //乘以5.0的意义是为了不让图像过暗
-                colObj += f * pdf * 5.0f;
+                    Spectrum f = isect.bsdf->f(wo, wi);
+                    Float pdf = isect.bsdf->Pdf(wo, wi);
+                    
+                    //乘以5.0的意义是为了不让图像过暗
+                    colObj += f * pdf * 5.0f;
+                }
             }
 
             m_FrameBuffer->update_f_u_c(i, j, 0, colObj[0]);
