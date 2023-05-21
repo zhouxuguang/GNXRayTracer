@@ -34,11 +34,11 @@ public:
 
 private:
     // BVHAccel Private Methods
-    BVHBuildNode *recursiveBuild(
+    BVHBuildNode *recursiveBuild(MemoryArena &arena,
         std::vector<BVHPrimitiveInfo> &primitiveInfo,
         int start, int end, int *totalNodes,
         std::vector<std::shared_ptr<Primitive>> &orderedPrims);
-    BVHBuildNode *HLBVHBuild(
+    BVHBuildNode *HLBVHBuild(MemoryArena &arena,
         const std::vector<BVHPrimitiveInfo> &primitiveInfo,
         int *totalNodes,
         std::vector<std::shared_ptr<Primitive>> &orderedPrims) const;
@@ -48,7 +48,7 @@ private:
         MortonPrimitive *mortonPrims, int nPrimitives, int *totalNodes,
         std::vector<std::shared_ptr<Primitive>> &orderedPrims,
         std::atomic<int> *orderedPrimsOffset, int bitIndex) const;
-    BVHBuildNode *buildUpperSAH(std::vector<BVHBuildNode *> &treeletRoots,
+    BVHBuildNode *buildUpperSAH(MemoryArena &arena, std::vector<BVHBuildNode *> &treeletRoots,
                                 int start, int end, int *totalNodes) const;
     int flattenBVHTree(BVHBuildNode *node, int *offset);
 

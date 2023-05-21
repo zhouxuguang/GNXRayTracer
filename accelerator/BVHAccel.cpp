@@ -158,15 +158,15 @@ BVHAccel::BVHAccel(std::vector<std::shared_ptr<Primitive>> p,
         primitiveInfo[i] = {i, primitives[i]->WorldBound()};
 
     // Build BVH tree for primitives using _primitiveInfo_
-    //MemoryArena arena(1024 * 1024);
+    MemoryArena arena(1024 * 1024);
     int totalNodes = 0;
     std::vector<std::shared_ptr<Primitive>> orderedPrims;
     orderedPrims.reserve(primitives.size());
     BVHBuildNode *root;
     if (splitMethod == SplitMethod::HLBVH)
-        root = HLBVHBuild(primitiveInfo, &totalNodes, orderedPrims);
+        root = HLBVHBuild(arena, primitiveInfo, &totalNodes, orderedPrims);
     else
-        root = recursiveBuild(primitiveInfo, 0, primitives.size(),
+        root = recursiveBuild(arena, primitiveInfo, 0, primitives.size(),
                               &totalNodes, orderedPrims);
     primitives.swap(orderedPrims);
     primitiveInfo.resize(0);
@@ -181,8 +181,8 @@ BVHAccel::BVHAccel(std::vector<std::shared_ptr<Primitive>> p,
     // Compute representation of depth-first traversal of BVH tree
 //    treeBytes += totalNodes * sizeof(LinearBVHNode) + sizeof(*this) +
 //                 primitives.size() * sizeof(primitives[0]);
-    //nodes = AllocAligned<LinearBVHNode>(totalNodes);
-    nodes = (LinearBVHNode*)malloc(totalNodes * sizeof(LinearBVHNode));
+    nodes = AllocAligned<LinearBVHNode>(totalNodes);
+    //nodes = (LinearBVHNode*)malloc(totalNodes * sizeof(LinearBVHNode));
     int offset = 0;
     flattenBVHTree(root, &offset);
     CHECK_EQ(totalNodes, offset);
@@ -198,12 +198,12 @@ struct BucketInfo {
     Bounds3f bounds;
 };
 
-BVHBuildNode *BVHAccel::recursiveBuild(std::vector<BVHPrimitiveInfo> &primitiveInfo, int start,
+BVHBuildNode *BVHAccel::recursiveBuild(MemoryArena &arena, std::vector<BVHPrimitiveInfo> &primitiveInfo, int start,
     int end, int *totalNodes,
     std::vector<std::shared_ptr<Primitive>> &orderedPrims) {
     CHECK_NE(start, end);
-    //BVHBuildNode *node = arena.Alloc<BVHBuildNode>();
-    BVHBuildNode *node = new(std::nothrow) BVHBuildNode();
+    BVHBuildNode *node = arena.Alloc<BVHBuildNode>();
+    //BVHBuildNode *node = new(std::nothrow) BVHBuildNode();
     (*totalNodes)++;
     // Compute bounds of all primitives in BVH node
     Bounds3f bounds;
@@ -357,16 +357,16 @@ BVHBuildNode *BVHAccel::recursiveBuild(std::vector<BVHPrimitiveInfo> &primitiveI
             }
             }
             node->InitInterior(dim,
-                               recursiveBuild(primitiveInfo, start, mid,
+                               recursiveBuild(arena, primitiveInfo, start, mid,
                                               totalNodes, orderedPrims),
-                               recursiveBuild(primitiveInfo, mid, end,
+                               recursiveBuild(arena, primitiveInfo, mid, end,
                                               totalNodes, orderedPrims));
         }
     }
     return node;
 }
 
-BVHBuildNode *BVHAccel::HLBVHBuild(const std::vector<BVHPrimitiveInfo> &primitiveInfo,
+BVHBuildNode *BVHAccel::HLBVHBuild(MemoryArena &arena, const std::vector<BVHPrimitiveInfo> &primitiveInfo,
     int *totalNodes,
     std::vector<std::shared_ptr<Primitive>> &orderedPrims) const {
     // Compute bounding box of all primitive centroids
@@ -414,8 +414,8 @@ BVHBuildNode *BVHAccel::HLBVHBuild(const std::vector<BVHPrimitiveInfo> &primitiv
             // Add entry to _treeletsToBuild_ for this treelet
             int nPrimitives = end - start;
             int maxBVHNodes = 2 * nPrimitives;
-            //BVHBuildNode *nodes = arena.Alloc<BVHBuildNode>(maxBVHNodes, false);
-            BVHBuildNode *nodes = new BVHBuildNode();
+            BVHBuildNode *nodes = arena.Alloc<BVHBuildNode>(maxBVHNodes, false);
+            //BVHBuildNode *nodes = new BVHBuildNode();
             treeletsToBuild.push_back({start, nPrimitives, nodes});
             start = end;
         }
@@ -455,7 +455,7 @@ BVHBuildNode *BVHAccel::HLBVHBuild(const std::vector<BVHPrimitiveInfo> &primitiv
     finishedTreelets.reserve(treeletsToBuild.size());
     for (LBVHTreelet &treelet : treeletsToBuild)
         finishedTreelets.push_back(treelet.buildNodes);
-    return buildUpperSAH(finishedTreelets, 0, finishedTreelets.size(),
+    return buildUpperSAH(arena, finishedTreelets, 0, finishedTreelets.size(),
                          totalNodes);
 }
 
@@ -523,15 +523,15 @@ BVHBuildNode *BVHAccel::emitLBVH(
     }
 }
 
-BVHBuildNode *BVHAccel::buildUpperSAH(std::vector<BVHBuildNode *> &treeletRoots,
+BVHBuildNode *BVHAccel::buildUpperSAH(MemoryArena &arena, std::vector<BVHBuildNode *> &treeletRoots,
                                       int start, int end,
                                       int *totalNodes) const {
     CHECK_LT(start, end);
     int nNodes = end - start;
     if (nNodes == 1) return treeletRoots[start];
     (*totalNodes)++;
-    //BVHBuildNode *node = arena.Alloc<BVHBuildNode>();
-    BVHBuildNode *node = new BVHBuildNode();
+    BVHBuildNode *node = arena.Alloc<BVHBuildNode>();
+    //BVHBuildNode *node = new BVHBuildNode();
 
     // Compute bounds of all nodes under this HLBVH node
     Bounds3f bounds;
@@ -620,8 +620,8 @@ BVHBuildNode *BVHAccel::buildUpperSAH(std::vector<BVHBuildNode *> &treeletRoots,
     CHECK_GT(mid, start);
     CHECK_LT(mid, end);
     node->InitInterior(
-        dim, this->buildUpperSAH(treeletRoots, start, mid, totalNodes),
-        this->buildUpperSAH(treeletRoots, mid, end, totalNodes));
+        dim, this->buildUpperSAH(arena, treeletRoots, start, mid, totalNodes),
+        this->buildUpperSAH(arena, treeletRoots, mid, end, totalNodes));
     return node;
 }
 

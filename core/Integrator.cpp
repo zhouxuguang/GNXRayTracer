@@ -29,7 +29,7 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
     //光源位置
     Point3f Light(10.0, 10.0, -10.0);
 
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < pixelBounds.pMax.x; i++)
     {
         for (int j = 0; j < pixelBounds.pMax.y; j++)
