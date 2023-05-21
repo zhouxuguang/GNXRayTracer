@@ -11,6 +11,7 @@ namespace pbr
 
 // Memory Declarations
 #define ARENA_ALLOC(arena, Type) new ((arena).Alloc(sizeof(Type))) Type
+
 void *AllocAligned(size_t size);
 template <typename T>
 T *AllocAligned(size_t count)
@@ -19,6 +20,7 @@ T *AllocAligned(size_t count)
 }
 
 void FreeAligned(void *);
+
 class
 #ifdef PBRT_HAVE_ALIGNAS
 alignas(PBRT_L1_CACHE_LINE_SIZE)
@@ -158,7 +160,7 @@ public:
             for (int u = 0; u < uRes; ++u) *a++ = (*this)(u, v);
     }
 
-  private:
+private:
     // BlockedArray Private Data
     T *data;
     const int uRes, vRes, uBlocks;

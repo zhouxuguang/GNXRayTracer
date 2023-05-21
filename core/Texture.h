@@ -13,7 +13,8 @@ namespace pbr
 {
 
 // Texture Declarations
-class TextureMapping2D {
+class TextureMapping2D 
+{
   public:
     // TextureMapping2D Interface
     virtual ~TextureMapping2D();

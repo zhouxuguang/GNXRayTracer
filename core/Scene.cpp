@@ -38,4 +38,4 @@ bool Scene::IntersectP(const Ray &ray) const
 //    }
 //}
 
-}  // namespace pbrt
+}  // namespace pbr
