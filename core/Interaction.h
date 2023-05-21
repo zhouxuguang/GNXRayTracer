@@ -11,6 +11,13 @@ struct Interaction
 {
 	// Interaction Public Methods
 	Interaction() : time(0) {}
+    
+    Interaction(const Point3f &p, const Vector3f &wo, Float time)
+        : p(p), time(time), wo(wo) {}
+    
+    Interaction(const Point3f &p, Float time)
+        : p(p), time(time) {}
+    
 	Interaction(const Point3f &p, const Normal3f &n, const Vector3f &pError,
 		const Vector3f &wo, float time)
 		: p(p),

@@ -27,11 +27,7 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
 
     m_FrameBuffer->renderCountIncrease();
 
-    //光源位置
-    //Point3f Light(10.0, 10.0, -10.0);
-    Point3f LightPosition(1.0, 4.5, -6.0);
-
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < pixelBounds.pMax.x; i++)
     {
         for (int j = 0; j < pixelBounds.pMax.y; j++)
@@ -46,35 +42,44 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
             std::unique_ptr<Sampler> pixel_sampler = sampler->Clone(offset);
             Point2i pixel(i, j);
             pixel_sampler->StartPixel(pixel);
-
-            CameraSample cs;
-            cs = pixel_sampler->GetCameraSample(pixel);
-            Ray r;
-            camera->GenerateRay(cs, &r);
-
-            SurfaceInteraction isect;
+            
             Spectrum colObj(.0f);
-            if (scene.Intersect(r, &isect))
+            
+            do
             {
-                //交点类的位置设置为光源
-                Interaction p1;
-                p1.p = LightPosition;
-                VisibilityTester vt(isect, p1);
-                if (vt.Unoccluded(scene))
-                {
-                    //计算散射
-                    isect.ComputeScatteringFunctions(r, arena);
-                    Vector3f LightNorm = Normalize(LightPosition - isect.p);
-                    Vector3f wi = LightNorm;
-                    Vector3f wo = isect.wo;
+                CameraSample cs;
+                cs = pixel_sampler->GetCameraSample(pixel);
+                Ray r;
+                camera->GenerateRay(cs, &r);
 
-                    Spectrum f = isect.bsdf->f(wo, wi);
-                    Float pdf = isect.bsdf->Pdf(wo, wi);
+                SurfaceInteraction isect;
+                
+                if (scene.Intersect(r, &isect))
+                {
+                    VisibilityTester vist;
+                    Vector3f wi;
+                    float pdf_light; //采样光的Pdf
+                    Spectrum Li = scene.lights[0]->Sample_Li(isect, pixel_sampler->Get2D(), &wi, &pdf_light, &vist);
                     
-                    //乘以5.0的意义是为了不让图像过暗
-                    colObj += f * pdf * 5.0f;
+                    if (vist.Unoccluded(scene))
+                    {
+                        //计算散射
+                        isect.ComputeScatteringFunctions(r, arena);
+                        Vector3f wo = isect.wo;
+
+                        //采样散射光分布函数
+                        Spectrum f = isect.bsdf->f(wo, wi);
+                        
+                        //散射Pdf
+                        Float pdf_scattering = isect.bsdf->Pdf(wo, wi);
+                        
+                        //乘以3.0的意义是为了不让图像过暗
+                        colObj += Li * pdf_scattering * f * 3.0f / pdf_light;
+                    }
                 }
-            }
+            } while (pixel_sampler->StartNextSample());
+            
+            colObj = colObj / pixel_sampler->samplesPerPixel;
 
             m_FrameBuffer->update_f_u_c(i, j, 0, colObj[0]);
             m_FrameBuffer->update_f_u_c(i, j, 1, colObj[1]);

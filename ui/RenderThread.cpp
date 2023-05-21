@@ -20,6 +20,7 @@
 #include "materials/Matte.h"
 #include "core/Texture.h"
 #include "textures/Constant.h"
+#include "lights/PointLight.h"
 
 #include <omp.h>
 
@@ -129,8 +130,16 @@ void RenderThread::run()
         prims.push_back(std::make_shared<GeometricPrimitive>(tris[i], dragonMaterial));
     }
     
+    //构造点光源
+    Spectrum LightI(80.f);
+    Transform lightToWorld;
+    lightToWorld = Translate(Vector3f(1.0, 4.5, -6.0)) * lightToWorld;
+    std::shared_ptr<Light> pointLight = std::make_shared<PointLight>(lightToWorld, LightI);
+    std::vector<std::shared_ptr<Light>> lights;
+    lights.push_back(pointLight);
+    
     emit PrintString((char*)"Init worldScene");
-    std::unique_ptr<Scene> worldScene = std::make_unique<Scene>(std::make_shared<BVHAccel>(prims, 1));
+    std::unique_ptr<Scene> worldScene = std::make_unique<Scene>(std::make_shared<BVHAccel>(prims, 1), lights);
     
     //相机参数
     Point3f eye(-3.0f, 1.5f, -3.0f), look(0.0, 0.0, 0.0f);

@@ -90,6 +90,12 @@ accelerator/BVHAccel.cpp
 )
 source_group("accelerator" FILES ${ACCELERATOR_FILES})
 
+set(LIGHTS_FILES 
+lights/PointLight.h
+lights/PointLight.cpp
+)
+source_group("lights" FILES ${LIGHTS_FILES})
+
 set(SAMPLERS_FILES 
 samplers/Halton.h 
 samplers/Halton.cpp
@@ -143,6 +149,7 @@ add_executable(GNXRayTracer
              ${SAMPLERS_FILES}
              ${TEXTURES_FILES}
              ${MATERIALS_FILES}
+             ${LIGHTS_FILES}
              ${UI_FILES}
         )
 
