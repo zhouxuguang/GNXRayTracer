@@ -53,7 +53,7 @@ float PerspectiveCamera::GenerateRay(const CameraSample &sample, Ray *ray) const
 
 PerspectiveCamera *CreatePerspectiveCamera(const int RasterWidth, const int RasterHeight, const Transform &cam2world)
 {
-    float lensradius = 0.3f;
+    float lensradius = 0.0f;
     float focaldistance = 3.0f;
     float frame = (float)RasterWidth / (float)RasterHeight;
     Bounds2f screen;
