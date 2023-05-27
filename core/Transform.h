@@ -76,7 +76,7 @@ struct Matrix4x4 {
 // 变换类定义
 class Transform 
 {
-  public:
+public:
     // Transform Public Methods
     Transform() {}
     Transform(const Float mat[4][4]) {
@@ -171,7 +171,7 @@ class Transform
         return os;
     }
 
-  private:
+private:
     // Transform Private Data
     Matrix4x4 m, mInv;
     friend class AnimatedTransform;
@@ -392,4 +392,4 @@ inline Ray Transform::operator()(const Ray &r, const Vector3f &oErrorIn,
 
 }  // namespace pbr
 
-#endif  // PBRT_CORE_TRANSFORM_H
+#endif  // PBR_CORE_TRANSFORM_H

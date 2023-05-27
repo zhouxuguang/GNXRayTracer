@@ -15,7 +15,7 @@ namespace pbr
 // Texture Declarations
 class TextureMapping2D 
 {
-  public:
+public:
     // TextureMapping2D Interface
     virtual ~TextureMapping2D();
     virtual Point2f Map(const SurfaceInteraction &si, Vector2f *dstdx,
@@ -23,38 +23,38 @@ class TextureMapping2D
 };
 
 class UVMapping2D : public TextureMapping2D {
-  public:
+public:
     // UVMapping2D Public Methods
     UVMapping2D(Float su = 1, Float sv = 1, Float du = 0, Float dv = 0);
     Point2f Map(const SurfaceInteraction &si, Vector2f *dstdx,
                 Vector2f *dstdy) const;
 
-  private:
+private:
     const Float su, sv, du, dv;
 };
 
 class SphericalMapping2D : public TextureMapping2D {
-  public:
+public:
     // SphericalMapping2D Public Methods
     SphericalMapping2D(const Transform &WorldToTexture)
         : WorldToTexture(WorldToTexture) {}
     Point2f Map(const SurfaceInteraction &si, Vector2f *dstdx,
                 Vector2f *dstdy) const;
 
-  private:
+private:
     Point2f sphere(const Point3f &P) const;
     const Transform WorldToTexture;
 };
 
 class CylindricalMapping2D : public TextureMapping2D {
-  public:
+public:
     // CylindricalMapping2D Public Methods
     CylindricalMapping2D(const Transform &WorldToTexture)
         : WorldToTexture(WorldToTexture) {}
     Point2f Map(const SurfaceInteraction &si, Vector2f *dstdx,
                 Vector2f *dstdy) const;
 
-  private:
+private:
     // CylindricalMapping2D Private Methods
     Point2f cylinder(const Point3f &p) const {
         Vector3f vec = Normalize(WorldToTexture(p) - Point3f(0, 0, 0));
@@ -64,7 +64,7 @@ class CylindricalMapping2D : public TextureMapping2D {
 };
 
 class PlanarMapping2D : public TextureMapping2D {
-  public:
+public:
     // PlanarMapping2D Public Methods
     Point2f Map(const SurfaceInteraction &si, Vector2f *dstdx,
                 Vector2f *dstdy) const;
@@ -72,13 +72,13 @@ class PlanarMapping2D : public TextureMapping2D {
                     Float dt = 0)
         : vs(vs), vt(vt), ds(ds), dt(dt) {}
 
-  private:
+private:
     const Vector3f vs, vt;
     const Float ds, dt;
 };
 
 class TextureMapping3D {
-  public:
+public:
     // TextureMapping3D Interface
     virtual ~TextureMapping3D();
     virtual Point3f Map(const SurfaceInteraction &si, Vector3f *dpdx,
@@ -86,20 +86,21 @@ class TextureMapping3D {
 };
 
 class IdentityMapping3D : public TextureMapping3D {
-  public:
+public:
     // IdentityMapping3D Public Methods
     IdentityMapping3D(const Transform &WorldToTexture)
         : WorldToTexture(WorldToTexture) {}
     Point3f Map(const SurfaceInteraction &si, Vector3f *dpdx,
                 Vector3f *dpdy) const;
 
-  private:
+private:
     const Transform WorldToTexture;
 };
 
 template <typename T>
-class Texture {
-  public:
+class Texture 
+{
+public:
     // Texture Interface
     virtual T Evaluate(const SurfaceInteraction &) const = 0;
     virtual ~Texture() {}
