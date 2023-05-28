@@ -22,6 +22,7 @@
 #include "textures/Constant.h"
 #include "lights/PointLight.h"
 #include "lights/DiffuseAreaLight.h"
+#include "integrators/WhittedIntegrator.h"
 
 #include <omp.h>
 
@@ -147,7 +148,7 @@ void RenderThread::run()
     std::shared_ptr<ClockRandSampler> sampler = std::make_unique<ClockRandSampler>(8, imageBound);
     
     Bounds2i ScreenBound(Point2i(0, 0), Point2i(WIDTH, HEIGHT));
-    std::shared_ptr<Integrator> integrator = std::make_shared<SamplerIntegrator>(camera, sampler, ScreenBound, m_pFramebuffer);
+    std::shared_ptr<Integrator> integrator = std::make_shared<WhittedIntegrator>(5, camera, sampler, ScreenBound, m_pFramebuffer);
     //SamplerIntegrator* integrator = new SamplerIntegrator(camera, nullptr, ScreenBound, m_pFramebuffer);
     
     //初始化面光源

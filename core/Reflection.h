@@ -104,7 +104,8 @@ enum BxDFType {
 };
 
 
-class BSDF {
+class BSDF
+{
 public:
     // BSDF Public Methods
     BSDF(const SurfaceInteraction &si, Float eta = 1)

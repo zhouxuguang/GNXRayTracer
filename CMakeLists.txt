@@ -120,6 +120,12 @@ textures/Constant.cpp
 )
 source_group("textures" FILES ${TEXTURES_FILES})
 
+set(INTEGRATORS_FILES 
+integrators/WhittedIntegrator.h
+integrators/WhittedIntegrator.cpp
+)
+source_group("integrators" FILES ${INTEGRATORS_FILES})
+
 set(UI_FILES 
 ui/FrameBuffer.h
 ui/FrameBuffer.cpp
@@ -152,6 +158,7 @@ add_executable(GNXRayTracer
              ${TEXTURES_FILES}
              ${MATERIALS_FILES}
              ${LIGHTS_FILES}
+             ${INTEGRATORS_FILES}
              ${UI_FILES}
         )
 

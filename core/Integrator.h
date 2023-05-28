@@ -39,6 +39,15 @@ class SamplerIntegrator : public Integrator
     //渲染函数
     void Render(const Scene &scene, double &timeConsume);
     
+    virtual Spectrum Li(const Ray &ray, const Scene &scene,
+                        Sampler &sampler, MemoryArena &arena,
+                        int depth = 0) const = 0;
+    
+    Spectrum SpecularReflect(const Ray &ray,
+                             const SurfaceInteraction &isect,
+                             const Scene &scene, Sampler &sampler,
+                             MemoryArena &arena, int depth) const;
+    
 protected:
     // SamplerIntegrator Protected Data
     std::shared_ptr<const Camera> camera;

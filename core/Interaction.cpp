@@ -57,8 +57,7 @@ void SurfaceInteraction::ComputeScatteringFunctions(const Ray &ray,
                                                     bool allowMultipleLobes,
                                                     TransportMode mode)
 {
-    primitive->ComputeScatteringFunctions(this, arena, mode,
-                                        allowMultipleLobes);
+    primitive->ComputeScatteringFunctions(this, arena, mode, allowMultipleLobes);
 }
 
 }
