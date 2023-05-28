@@ -175,6 +175,14 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
     // Compute deltas for triangle partial derivatives
     Vector2f duv02 = uv[0] - uv[2], duv12 = uv[1] - uv[2];
     Vector3f dp02 = p0 - p2, dp12 = p1 - p2;
+    
+    float determinant = duv02[0] * duv12[1] - duv02[1] * duv12[0];
+    bool degenerateUV = std::abs(determinant) < 1e-8;
+    if (!degenerateUV) {
+        float invdet = 1 / determinant;
+        dpdu = (duv12[1] * dp02 - duv02[1] * dp12) * invdet;
+        dpdv = (-duv12[0] * dp02 + duv02[0] * dp12) * invdet;
+    }
 
     // Compute error bounds for triangle intersection
     float xAbsSum =

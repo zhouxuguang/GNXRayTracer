@@ -18,6 +18,7 @@
 #include "samplers/Halton.h"
 #include "core/Material.h"
 #include "materials/Matte.h"
+#include "materials/MirrorMaterial.h"
 #include "core/Texture.h"
 #include "textures/Constant.h"
 #include "lights/PointLight.h"
@@ -58,12 +59,16 @@ void RenderThread::run()
     Spectrum dragonColor; dragonColor[0] = 0.8; dragonColor[1] = 0.1; dragonColor[2] = 0.2;
     std::shared_ptr<Texture<Spectrum>> KdDragon = std::make_shared<ConstantTexture<Spectrum>>(dragonColor);
     std::shared_ptr<Texture<Spectrum>> KdFloor = std::make_shared<ConstantTexture<Spectrum>>(floorColor);
+    
+    Spectrum mirrorColor(1.0f);
+    std::shared_ptr<Texture<Spectrum>> KrMirror = std::make_shared<ConstantTexture<Spectrum>>(mirrorColor);
     std::shared_ptr<Texture<Float>> sigma = std::make_shared<ConstantTexture<Float>>(0.0f);
     std::shared_ptr<Texture<Float>> bumpMap = std::make_shared<ConstantTexture<Float>>(0.0f);
     //材质
     std::shared_ptr<Material> dragonMaterial = std::make_shared<MatteMaterial>(KdDragon, sigma, bumpMap);
     std::shared_ptr<Material> floorMaterial = std::make_shared<MatteMaterial>(KdFloor, sigma, bumpMap);
     std::shared_ptr<Material> whiteLightMaterial = std::make_shared<MatteMaterial>(KdFloor, sigma, bumpMap);
+    std::shared_ptr<Material> mirrorMaterial = std::make_shared<MirrorMaterial>(KrMirror, bumpMap);
 
     
     Transform tri_Object2World , tri_World2Object;
@@ -93,7 +98,7 @@ void RenderThread::run()
     //将物体填充到基元
     for (int i = 0; i < nTrianglesFloor; ++i)
     {
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], floorMaterial, nullptr));
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], mirrorMaterial, nullptr));
     }
 
     
@@ -176,7 +181,7 @@ void RenderThread::run()
     for (int i = 0; i < nTrianglesAreaLight; ++i)
     {
         std::shared_ptr<AreaLight> area =
-            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, Spectrum(80.f), 5, trisAreaLight[i], false);
+            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, Spectrum(100.f), 5, trisAreaLight[i], false);
         lights.push_back(area);
         prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i], floorMaterial, area));
     }
