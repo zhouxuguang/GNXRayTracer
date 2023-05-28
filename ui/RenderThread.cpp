@@ -98,7 +98,7 @@ void RenderThread::run()
     //将物体填充到基元
     for (int i = 0; i < nTrianglesFloor; ++i)
     {
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], floorMaterial, nullptr));
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], mirrorMaterial, nullptr));
     }
 
     
@@ -181,7 +181,7 @@ void RenderThread::run()
     for (int i = 0; i < nTrianglesAreaLight; ++i)
     {
         std::shared_ptr<AreaLight> area =
-            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, Spectrum(150.0f), 5, trisAreaLight[i], false);
+            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, Spectrum(25.0f), 5, trisAreaLight[i], false);
         lights.push_back(area);
         prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i], floorMaterial, area));
     }

@@ -27,7 +27,7 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
 
     m_FrameBuffer->renderCountIncrease();
 
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < pixelBounds.pMax.x; i++)
     {
         for (int j = 0; j < pixelBounds.pMax.y; j++)
@@ -52,9 +52,10 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
                 Ray r;
                 camera->GenerateRay(cs, &r);
 
+#if 1
+                colObj += Li(r, scene, *pixel_sampler, arena, 0);
                 
-                //colObj += Li(rar, scene, *pixel_sampler, arena, 0);
-                
+#else
                 SurfaceInteraction isect;
                 if (scene.Intersect(r, &isect))
                 {
@@ -86,6 +87,8 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
 
                     colObj /= lightCount;
                 }
+                
+#endif
             } while (pixel_sampler->StartNextSample());
             
             colObj = colObj / pixel_sampler->samplesPerPixel;
