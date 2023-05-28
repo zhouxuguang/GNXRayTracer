@@ -61,7 +61,7 @@ void RenderThread::run()
     std::shared_ptr<Texture<Spectrum>> KdFloor = std::make_shared<ConstantTexture<Spectrum>>(floorColor);
     
     Spectrum mirrorColor(1.0f);
-    std::shared_ptr<Texture<Spectrum>> KrMirror = std::make_shared<ConstantTexture<Spectrum>>(mirrorColor);
+    std::shared_ptr<Texture<Spectrum>> KrMirror = std::make_shared<ConstantTexture<Spectrum>>(dragonColor);
     std::shared_ptr<Texture<Float>> sigma = std::make_shared<ConstantTexture<Float>>(0.0f);
     std::shared_ptr<Texture<Float>> bumpMap = std::make_shared<ConstantTexture<Float>>(0.0f);
     //材质
@@ -181,7 +181,7 @@ void RenderThread::run()
     for (int i = 0; i < nTrianglesAreaLight; ++i)
     {
         std::shared_ptr<AreaLight> area =
-            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, Spectrum(100.f), 5, trisAreaLight[i], false);
+            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, Spectrum(150.0f), 5, trisAreaLight[i], false);
         lights.push_back(area);
         prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i], floorMaterial, area));
     }
