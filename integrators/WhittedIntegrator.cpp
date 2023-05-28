@@ -21,6 +21,12 @@ Spectrum WhittedIntegrator::Li(const Ray &ray, const Scene &scene,
     if (!scene.Intersect(ray, &isect))
     {
         for (const auto &light : scene.lights) L += light->Le(ray);
+        if (depth <= 2)
+        {
+            Spectrum LL;
+            LL[2] = 0.8;
+            return LL;
+        }
         return L;
     }
 
@@ -44,8 +50,7 @@ Spectrum WhittedIntegrator::Li(const Ray &ray, const Scene &scene,
         Vector3f wi;
         Float pdf;
         VisibilityTester visibility;
-        Spectrum Li =
-            light->Sample_Li(isect, sampler.Get2D(), &wi, &pdf, &visibility);
+        Spectrum Li = light->Sample_Li(isect, sampler.Get2D(), &wi, &pdf, &visibility);
         if (Li.IsBlack() || pdf == 0) continue;
         Spectrum f = isect.bsdf->f(wo, wi);
         if (!f.IsBlack() && visibility.Unoccluded(scene))
@@ -59,4 +64,4 @@ Spectrum WhittedIntegrator::Li(const Ray &ray, const Scene &scene,
     return L;
 }
 
-}  // namespace pbrt
+}  // namespace pbr
