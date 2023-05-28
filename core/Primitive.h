@@ -30,7 +30,8 @@ public:
 	virtual Bounds3f WorldBound() const;
 	virtual bool Intersect(const Ray &r, SurfaceInteraction *isect) const;
 	virtual bool IntersectP(const Ray &r) const;
-	GeometricPrimitive(const std::shared_ptr<Shape> &shape, const std::shared_ptr<Material> &material);
+	GeometricPrimitive(const std::shared_ptr<Shape> &shape, const std::shared_ptr<Material> &material,
+                       const std::shared_ptr<AreaLight> &areaLight);
     virtual const Material *GetMaterial() const;
     virtual void ComputeScatteringFunctions(SurfaceInteraction *isect,
                                             MemoryArena &arena,
@@ -40,6 +41,7 @@ private:
 	// GeometricPrimitive Private Data
 	std::shared_ptr<Shape> shape;
     std::shared_ptr<Material> material;
+    std::shared_ptr<AreaLight> areaLight;
 };
 
 

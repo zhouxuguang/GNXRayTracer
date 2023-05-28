@@ -4,7 +4,7 @@
 //#include "texture.h"
 //#include "textures/constant.h"
 //#include "paramset.h"
-//#include "sampling.h"
+#include "core/Sampling.h"
 //#include "efloat.h"
 //#include "ext/rply.h"
 #include <array>
@@ -370,8 +370,6 @@ Float Triangle::Area() const
     return 0.5 * Cross(p1 - p0, p2 - p0).Length();
 }
 
-#if 0
-
 Interaction Triangle::Sample(const Point2f &u, Float *pdf) const
 {
     Point2f b = UniformSampleTriangle(u);
@@ -385,11 +383,13 @@ Interaction Triangle::Sample(const Point2f &u, Float *pdf) const
     it.n = Normalize(Normal3f(Cross(p1 - p0, p2 - p0)));
     // Ensure correct orientation of the geometric normal; follow the same
     // approach as was used in Triangle::Intersect().
-    if (mesh->n) {
+    if (mesh->n)
+    {
         Normal3f ns(b[0] * mesh->n[v[0]] + b[1] * mesh->n[v[1]] +
                     (1 - b[0] - b[1]) * mesh->n[v[2]]);
         it.n = Faceforward(it.n, ns);
-    } else if (reverseOrientation ^ transformSwapsHandedness)
+    }
+    else if (reverseOrientation ^ transformSwapsHandedness)
         it.n *= -1;
 
     // Compute error bounds for sampled point on triangle
@@ -399,8 +399,6 @@ Interaction Triangle::Sample(const Point2f &u, Float *pdf) const
     *pdf = 1 / Area();
     return it;
 }
-
-#endif
 
 Float Triangle::SolidAngle(const Point3f &p, int nSamples) const 
 {

@@ -53,7 +53,7 @@ Spectrum VisibilityTester::Tr(const Scene &scene, Sampler &sampler) const
 
 Spectrum Light::Le(const Ray &ray) const { return Spectrum(0.f); }
 
-AreaLight::AreaLight(const Transform &LightToWorld, const MediumInterface &medium, int nSamples)
+AreaLight::AreaLight(const Transform &LightToWorld, int nSamples)
     : Light((int)LightFlags::Area, LightToWorld, nSamples)
 {
     ++numAreaLights;

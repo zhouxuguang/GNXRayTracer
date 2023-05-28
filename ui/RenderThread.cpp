@@ -21,6 +21,7 @@
 #include "core/Texture.h"
 #include "textures/Constant.h"
 #include "lights/PointLight.h"
+#include "lights/DiffuseAreaLight.h"
 
 #include <omp.h>
 
@@ -61,19 +62,10 @@ void RenderThread::run()
     //材质
     std::shared_ptr<Material> dragonMaterial = std::make_shared<MatteMaterial>(KdDragon, sigma, bumpMap);
     std::shared_ptr<Material> floorMaterial = std::make_shared<MatteMaterial>(KdFloor, sigma, bumpMap);
+    std::shared_ptr<Material> whiteLightMaterial = std::make_shared<MatteMaterial>(KdFloor, sigma, bumpMap);
 
     
-    Transform tri_Object2World , tri_World2Object ;
-//    int vertexIndices [6] = { 0,1,2,3,4,5 };
-//    int nVertices = 6;
-//    Point3f P[6] = {
-//    Point3f(-1.0 ,1.0 ,0.0) , Point3f(-1.0, -1.0, 0.0), Point3f(0.0 ,1.0 ,0.0) , Point3f(1.0 ,1.0 ,0.0), Point3f(1.0, -1.0, 0.0), Point3f(0.0 , -1.0 ,0.0)
-//    };
-//
-//    //存入mesh里，该行代码可以从triangle .cpp中找到
-//    std::shared_ptr<TriangleMesh> mesh = std::make_shared<TriangleMesh>(
-//    tri_Object2World, nTriangles, vertexIndices, nVertices, P, nullptr, nullptr, nullptr, nullptr);
-//    std::vector<std::shared_ptr<Shape>> tris;
+    Transform tri_Object2World , tri_World2Object;
     
     std::vector<std::shared_ptr<Primitive>> prims;
     
@@ -100,7 +92,7 @@ void RenderThread::run()
     //将物体填充到基元
     for (int i = 0; i < nTrianglesFloor; ++i)
     {
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], floorMaterial));
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], floorMaterial, nullptr));
     }
 
     
@@ -127,19 +119,17 @@ void RenderThread::run()
     prims.reserve(plyi->nTriangles);
     for (int i = 0; i < plyi->nTriangles; ++i)
     {
-        prims.push_back(std::make_shared<GeometricPrimitive>(tris[i], dragonMaterial));
+        prims.push_back(std::make_shared<GeometricPrimitive>(tris[i], dragonMaterial, nullptr));
     }
     
     //构造点光源
-    Spectrum LightI(80.f);
-    Transform lightToWorld;
-    lightToWorld = Translate(Vector3f(1.0, 4.5, -6.0)) * lightToWorld;
-    std::shared_ptr<Light> pointLight = std::make_shared<PointLight>(lightToWorld, LightI);
-    std::vector<std::shared_ptr<Light>> lights;
-    lights.push_back(pointLight);
+//    Spectrum LightI(80.f);
+//    Transform lightToWorld;
+//    lightToWorld = Translate(Vector3f(1.0, 4.5, -6.0)) * lightToWorld;
+//    std::shared_ptr<Light> pointLight = std::make_shared<PointLight>(lightToWorld, LightI);
+//    std::vector<std::shared_ptr<Light>> lights;
+//    lights.push_back(pointLight);
     
-    emit PrintString((char*)"Init worldScene");
-    std::unique_ptr<Scene> worldScene = std::make_unique<Scene>(std::make_shared<BVHAccel>(prims, 1), lights);
     
     //相机参数
     Point3f eye(-3.0f, 1.5f, -3.0f), look(0.0, 0.0, 0.0f);
@@ -159,6 +149,39 @@ void RenderThread::run()
     Bounds2i ScreenBound(Point2i(0, 0), Point2i(WIDTH, HEIGHT));
     std::shared_ptr<Integrator> integrator = std::make_shared<SamplerIntegrator>(camera, sampler, ScreenBound, m_pFramebuffer);
     //SamplerIntegrator* integrator = new SamplerIntegrator(camera, nullptr, ScreenBound, m_pFramebuffer);
+    
+    //初始化面光源
+    emit PrintString((char*)"Init AreaLight");
+    
+    // 面光源
+    std::vector<std::shared_ptr<Light>> lights;
+    int nTrianglesAreaLight = 2;
+    int vertexIndicesAreaLight[6] = {0, 1, 2, 3, 4, 5};
+    int nVerticesAreaLight = 6;
+    const float yPos_AreaLight = 0.0;
+    Point3f P_AreaLight[6] = { Point3f(-1.4,0.0,1.4), Point3f(-1.4,0.0,-1.4), Point3f(1.4,0.0,1.4),
+        Point3f(1.4,0.0,1.4), Point3f(-1.4,0.0,-1.4), Point3f(1.4,0.0,-1.4)};
+
+    Transform tri_Object2World_AreaLight = Translate(Vector3f(0.7f, 5.0f, -2.0f));
+    Transform tri_World2Object_AreaLight = Inverse(tri_Object2World_AreaLight);
+
+    std::shared_ptr<TriangleMesh> meshAreaLight = std::make_shared<TriangleMesh>
+        (tri_Object2World_AreaLight, nTrianglesAreaLight, vertexIndicesAreaLight, nVerticesAreaLight, P_AreaLight, nullptr, nullptr, nullptr, nullptr);
+    std::vector<std::shared_ptr<Shape>> trisAreaLight;
+  
+    for (int i = 0; i < nTrianglesAreaLight; ++i)
+        trisAreaLight.push_back(std::make_shared<Triangle>(&tri_Object2World_AreaLight, &tri_World2Object_AreaLight, false, meshAreaLight, i));
+    //
+    for (int i = 0; i < nTrianglesAreaLight; ++i)
+    {
+        std::shared_ptr<AreaLight> area =
+            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, Spectrum(5.f), 5, trisAreaLight[i], false);
+        lights.push_back(area);
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i], floorMaterial, area));
+    }
+    
+    emit PrintString((char*)"Init worldScene");
+    std::unique_ptr<Scene> worldScene = std::make_unique<Scene>(std::make_shared<BVHAccel>(prims, 1), lights);
     
     
     emit PrintString((char*)"Start Rendering");

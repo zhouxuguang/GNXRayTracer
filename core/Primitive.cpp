@@ -10,8 +10,9 @@ static long long primitiveMemory = 0;
 Primitive::~Primitive() {}
 
 // GeometricPrimitive Method Definitions
-GeometricPrimitive::GeometricPrimitive(const std::shared_ptr<Shape> &shape, const std::shared_ptr<Material> &material) :
-    shape(shape), material(material)
+GeometricPrimitive::GeometricPrimitive(const std::shared_ptr<Shape> &shape, const std::shared_ptr<Material> &material,
+                                       const std::shared_ptr<AreaLight> &areaLight) :
+    shape(shape), material(material), areaLight(areaLight)
 {
     primitiveMemory += sizeof(*this);
 }

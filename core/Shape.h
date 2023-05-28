@@ -29,14 +29,13 @@ class Shape
     virtual Float Area() const = 0;
     // Sample a point on the surface of the shape and return the PDF with
     // respect to area on the surface.
-//    virtual Interaction Sample(const Point2f &u, Float *pdf) const = 0;
-//    virtual Float Pdf(const Interaction &) const { return 1 / Area(); }
-//
-//    // Sample a point on the shape given a reference point |ref| and
-//    // return the PDF with respect to solid angle from |ref|.
-//    virtual Interaction Sample(const Interaction &ref, const Point2f &u,
-//                               Float *pdf) const;
-//    virtual Float Pdf(const Interaction &ref, const Vector3f &wi) const;
+    virtual Interaction Sample(const Point2f &u, Float *pdf) const = 0;
+    virtual Float Pdf(const Interaction &) const { return 1 / Area(); }
+
+    // Sample a point on the shape given a reference point |ref| and
+    // return the PDF with respect to solid angle from |ref|.
+    virtual Interaction Sample(const Interaction &ref, const Point2f &u, Float *pdf) const;
+    virtual Float Pdf(const Interaction &ref, const Vector3f &wi) const;
 //
 //    // Returns the solid angle subtended by the shape w.r.t. the reference
 //    // point p, given in world space. Some shapes compute this value in

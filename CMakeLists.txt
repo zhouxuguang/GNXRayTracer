@@ -93,6 +93,8 @@ source_group("accelerator" FILES ${ACCELERATOR_FILES})
 set(LIGHTS_FILES 
 lights/PointLight.h
 lights/PointLight.cpp
+lights/DiffuseAreaLight.h
+lights/DiffuseAreaLight.cpp
 )
 source_group("lights" FILES ${LIGHTS_FILES})
 

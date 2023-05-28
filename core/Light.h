@@ -78,7 +78,7 @@ class AreaLight : public Light
 {
 public:
     // AreaLight Interface
-    AreaLight(const Transform &LightToWorld, const MediumInterface &medium, int nSamples);
+    AreaLight(const Transform &LightToWorld, int nSamples);
     virtual Spectrum L(const Interaction &intr, const Vector3f &w) const = 0;
 };
 
