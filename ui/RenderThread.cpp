@@ -98,7 +98,7 @@ void RenderThread::run()
     //将物体填充到基元
     for (int i = 0; i < nTrianglesFloor; ++i)
     {
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], mirrorMaterial, nullptr));
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], floorMaterial, nullptr));
     }
 
     
