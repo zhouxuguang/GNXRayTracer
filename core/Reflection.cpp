@@ -13,7 +13,8 @@ namespace pbr
 {
 
 // BxDF Utility Functions
-Float FrDielectric(Float cosThetaI, Float etaI, Float etaT) {
+Float FrDielectric(Float cosThetaI, Float etaI, Float etaT)
+{
     cosThetaI = Clamp(cosThetaI, -1, 1);
     // Potentially swap indices of refraction
     bool entering = cosThetaI > 0.f;
@@ -37,8 +38,8 @@ Float FrDielectric(Float cosThetaI, Float etaI, Float etaT) {
 }
 
 // https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/
-Spectrum FrConductor(Float cosThetaI, const Spectrum &etai,
-                     const Spectrum &etat, const Spectrum &k) {
+Spectrum FrConductor(Float cosThetaI, const Spectrum &etai, const Spectrum &etat, const Spectrum &k)
+{
     cosThetaI = Clamp(cosThetaI, -1, 1);
     Spectrum eta = etat / etai;
     Spectrum etak = k / etai;
@@ -62,11 +63,52 @@ Spectrum FrConductor(Float cosThetaI, const Spectrum &etai,
     return 0.5 * (Rp + Rs);
 }
 
-Spectrum LambertianReflection::f(const Vector3f &wo, const Vector3f &wi) const {
+Fresnel::~Fresnel() {}
+Spectrum FresnelConductor::Evaluate(Float cosThetaI) const
+{
+    return FrConductor(std::abs(cosThetaI), etaI, etaT, k);
+}
+
+std::string FresnelConductor::ToString() const
+{
+    return std::string("[ FresnelConductor etaI: ") + etaI.ToString() +
+           std::string(" etaT: ") + etaT.ToString() + std::string(" k: ") +
+           k.ToString() + std::string(" ]");
+}
+
+Spectrum FresnelDielectric::Evaluate(Float cosThetaI) const
+{
+    return FrDielectric(cosThetaI, etaI, etaT);
+}
+
+std::string FresnelDielectric::ToString() const
+{
+    return StringPrintf("[ FrenselDielectric etaI: %f etaT: %f ]", etaI, etaT);
+}
+
+Spectrum SpecularReflection::Sample_f(const Vector3f &wo, Vector3f *wi,
+                                      const Point2f &sample, Float *pdf,
+                                      BxDFType *sampledType) const
+{
+    // Compute perfect specular reflection direction
+    *wi = Vector3f(-wo.x, -wo.y, wo.z);
+    *pdf = 1;
+    return fresnel->Evaluate(CosTheta(*wi)) * R / AbsCosTheta(*wi);
+}
+
+std::string SpecularReflection::ToString() const
+{
+    return std::string("[ SpecularReflection R: ") + R.ToString() +
+           std::string(" fresnel: ") + fresnel->ToString() + std::string(" ]");
+}
+
+Spectrum LambertianReflection::f(const Vector3f &wo, const Vector3f &wi) const
+{
     return R * InvPi;
 }
 
-std::string LambertianReflection::ToString() const {
+std::string LambertianReflection::ToString() const
+{
     return std::string("[ LambertianReflection R: ") + R.ToString() +
            std::string(" ]");
 }
@@ -81,11 +123,13 @@ Spectrum BxDF::Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u,
     return f(wo, *wi);
 }
 
-Float BxDF::Pdf(const Vector3f &wo, const Vector3f &wi) const {
+Float BxDF::Pdf(const Vector3f &wo, const Vector3f &wi) const
+{
     return SameHemisphere(wo, wi) ? AbsCosTheta(wi) * InvPi : 0;
 }
 
-Spectrum BxDF::rho(const Vector3f &w, int nSamples, const Point2f *u) const {
+Spectrum BxDF::rho(const Vector3f &w, int nSamples, const Point2f *u) const
+{
     Spectrum r(0.);
     for (int i = 0; i < nSamples; ++i) {
         // Estimate one term of $\rho_\roman{hd}$
