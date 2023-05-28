@@ -175,7 +175,7 @@ void RenderThread::run()
     for (int i = 0; i < nTrianglesAreaLight; ++i)
     {
         std::shared_ptr<AreaLight> area =
-            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, Spectrum(5.f), 5, trisAreaLight[i], false);
+            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, Spectrum(80.f), 5, trisAreaLight[i], false);
         lights.push_back(area);
         prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i], floorMaterial, area));
     }

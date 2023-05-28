@@ -27,7 +27,7 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
 
     m_FrameBuffer->renderCountIncrease();
 
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < pixelBounds.pMax.x; i++)
     {
         for (int j = 0; j < pixelBounds.pMax.y; j++)
@@ -87,6 +87,9 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
             } while (pixel_sampler->StartNextSample());
             
             colObj = colObj / pixel_sampler->samplesPerPixel;
+            //printf("colobk = %f, %f, %f\n", colObj[0], colObj[1], colObj[2]);
+            
+            //colObj[0] = 1.0;
 
             m_FrameBuffer->update_f_u_c(i, j, 0, colObj[0]);
             m_FrameBuffer->update_f_u_c(i, j, 1, colObj[1]);
