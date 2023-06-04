@@ -205,8 +205,8 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
     // Override surface normal in _isect_ for triangle
     isect->n = isect->shading.n = Normal3f(Normalize(Cross(dp02, dp12)));
     isect->p = b0 * p0 + b1 * p1 + b2 * p2;
-    //if (reverseOrientation ^ transformSwapsHandedness)
-    //    isect->n = isect->shading.n = -isect->n;
+    if (reverseOrientation ^ transformSwapsHandedness)
+        isect->n = isect->shading.n = -isect->n;
     
     *tHit = t;
     //++nHits;

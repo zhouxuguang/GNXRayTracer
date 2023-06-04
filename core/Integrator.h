@@ -48,6 +48,11 @@ class SamplerIntegrator : public Integrator
                              const Scene &scene, Sampler &sampler,
                              MemoryArena &arena, int depth) const;
     
+    Spectrum SpecularTransmit(const Ray &ray,
+                              const SurfaceInteraction &isect,
+                              const Scene &scene, Sampler &sampler,
+                              MemoryArena &arena, int depth) const;
+    
 protected:
     // SamplerIntegrator Protected Data
     std::shared_ptr<const Camera> camera;

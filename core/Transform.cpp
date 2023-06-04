@@ -4,7 +4,8 @@
 #include "Transform.h"
 //#include "interaction.h"
 
-namespace pbr {
+namespace pbr
+{
 
 // Matrix4x4 Method Definitions
 bool SolveLinearSystem2x2(const Float A[2][2], const Float B[2], Float *x0, Float *x1)
@@ -41,14 +42,16 @@ Matrix4x4::Matrix4x4(Float t00, Float t01, Float t02, Float t03, Float t10,
     m[3][3] = t33;
 }
 
-Matrix4x4 Transpose(const Matrix4x4 &m) {
+Matrix4x4 Transpose(const Matrix4x4 &m)
+{
     return Matrix4x4(m.m[0][0], m.m[1][0], m.m[2][0], m.m[3][0], m.m[0][1],
                      m.m[1][1], m.m[2][1], m.m[3][1], m.m[0][2], m.m[1][2],
                      m.m[2][2], m.m[3][2], m.m[0][3], m.m[1][3], m.m[2][3],
                      m.m[3][3]);
 }
 
-Matrix4x4 Inverse(const Matrix4x4 &m) {
+Matrix4x4 Inverse(const Matrix4x4 &m)
+{
     int indxc[4], indxr[4];
     int ipiv[4] = {0, 0, 0, 0};
     Float minv[4][4];
@@ -107,7 +110,8 @@ Matrix4x4 Inverse(const Matrix4x4 &m) {
 // Transform Method Definitions
 void Transform::Print(FILE *f) const { m.Print(f); }
 
-Transform Translate(const Vector3f &delta) {
+Transform Translate(const Vector3f &delta)
+{
     Matrix4x4 m(1, 0, 0, delta.x, 0, 1, 0, delta.y, 0, 0, 1, delta.z, 0, 0, 0,
                 1);
     Matrix4x4 minv(1, 0, 0, -delta.x, 0, 1, 0, -delta.y, 0, 0, 1, -delta.z, 0,
@@ -115,13 +119,15 @@ Transform Translate(const Vector3f &delta) {
     return Transform(m, minv);
 }
 
-Transform Scale(Float x, Float y, Float z) {
+Transform Scale(Float x, Float y, Float z)
+{
     Matrix4x4 m(x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1);
     Matrix4x4 minv(1 / x, 0, 0, 0, 0, 1 / y, 0, 0, 0, 0, 1 / z, 0, 0, 0, 0, 1);
     return Transform(m, minv);
 }
 
-Transform RotateX(Float theta) {
+Transform RotateX(Float theta)
+{
     Float sinTheta = std::sin(Radians(theta));
     Float cosTheta = std::cos(Radians(theta));
     Matrix4x4 m(1, 0, 0, 0, 0, cosTheta, -sinTheta, 0, 0, sinTheta, cosTheta, 0,
@@ -137,7 +143,8 @@ Transform RotateY(Float theta) {
     return Transform(m, Transpose(m));
 }
 
-Transform RotateZ(Float theta) {
+Transform RotateZ(Float theta)
+{
     Float sinTheta = std::sin(Radians(theta));
     Float cosTheta = std::cos(Radians(theta));
     Matrix4x4 m(cosTheta, -sinTheta, 0, 0, sinTheta, cosTheta, 0, 0, 0, 0, 1, 0,
@@ -145,7 +152,8 @@ Transform RotateZ(Float theta) {
     return Transform(m, Transpose(m));
 }
 
-Transform Rotate(Float theta, const Vector3f &axis) {
+Transform Rotate(Float theta, const Vector3f &axis)
+{
     Vector3f a = Normalize(axis);
     Float sinTheta = std::sin(Radians(theta));
     Float cosTheta = std::cos(Radians(theta));
@@ -169,7 +177,8 @@ Transform Rotate(Float theta, const Vector3f &axis) {
     return Transform(m, Transpose(m));
 }
 
-Transform LookAt(const Point3f &pos, const Point3f &look, const Vector3f &up) {
+Transform LookAt(const Point3f &pos, const Point3f &look, const Vector3f &up)
+{
     Matrix4x4 cameraToWorld;
     // Initialize fourth column of viewing matrix
     cameraToWorld.m[0][3] = pos.x;
@@ -204,7 +213,8 @@ Transform LookAt(const Point3f &pos, const Point3f &look, const Vector3f &up) {
     return Transform(Inverse(cameraToWorld), cameraToWorld);
 }
 
-Bounds3f Transform::operator()(const Bounds3f &b) const {
+Bounds3f Transform::operator()(const Bounds3f &b) const
+{
     const Transform &M = *this;
     Bounds3f ret(M(Point3f(b.pMin.x, b.pMin.y, b.pMin.z)));
     ret = Union(ret, M(Point3f(b.pMax.x, b.pMin.y, b.pMin.z)));
@@ -217,22 +227,26 @@ Bounds3f Transform::operator()(const Bounds3f &b) const {
     return ret;
 }
 
-Transform Transform::operator*(const Transform &t2) const {
+Transform Transform::operator*(const Transform &t2) const
+{
     return Transform(Matrix4x4::Mul(m, t2.m), Matrix4x4::Mul(t2.mInv, mInv));
 }
 
-bool Transform::SwapsHandedness() const {
+bool Transform::SwapsHandedness() const
+{
     Float det = m.m[0][0] * (m.m[1][1] * m.m[2][2] - m.m[1][2] * m.m[2][1]) -
                 m.m[0][1] * (m.m[1][0] * m.m[2][2] - m.m[1][2] * m.m[2][0]) +
                 m.m[0][2] * (m.m[1][0] * m.m[2][1] - m.m[1][1] * m.m[2][0]);
     return det < 0;
 }
 
-Transform Orthographic(Float zNear, Float zFar) {
+Transform Orthographic(Float zNear, Float zFar)
+{
     return Scale(1, 1, 1 / (zFar - zNear)) * Translate(Vector3f(0, 0, -zNear));
 }
 
-Transform Perspective(Float fov, Float n, Float f) {
+Transform Perspective(Float fov, Float n, Float f)
+{
     // Perform projective divide for perspective projection
     Matrix4x4 persp(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, f / (f - n), -f * n / (f - n),
                     0, 0, 1, 0);

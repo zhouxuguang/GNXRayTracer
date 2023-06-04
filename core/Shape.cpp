@@ -12,7 +12,8 @@ Shape::Shape(const Transform *ObjectToWorld, const Transform *WorldToObject,
     : ObjectToWorld(ObjectToWorld),
       WorldToObject(WorldToObject),
       reverseOrientation(reverseOrientation),
-      transformSwapsHandedness(ObjectToWorld->SwapsHandedness()) {
+      transformSwapsHandedness(ObjectToWorld->SwapsHandedness())
+{
 }
 
 Bounds3f Shape::WorldBound() const { return (*ObjectToWorld)(ObjectBound()); }

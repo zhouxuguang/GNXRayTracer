@@ -102,6 +102,36 @@ std::string SpecularReflection::ToString() const
            std::string(" fresnel: ") + fresnel->ToString() + std::string(" ]");
 }
 
+Spectrum SpecularTransmission::Sample_f(const Vector3f &wo, Vector3f *wi,
+                                        const Point2f &sample, Float *pdf,
+                                        BxDFType *sampledType) const
+{
+    // Figure out which $\eta$ is incident and which is transmitted
+    bool entering = CosTheta(wo) > 0;
+    Float etaI = entering ? etaA : etaB;
+    Float etaT = entering ? etaB : etaA;
+
+    // Compute ray direction for specular transmission
+    if (!Refract(wo, Faceforward(Normal3f(0, 0, 1), wo), etaI / etaT, wi))
+        return 0;
+    *pdf = 1;
+    Spectrum ft = T * (Spectrum(1.) - fresnel.Evaluate(CosTheta(*wi)));
+    // Account for non-symmetry with transmission to different medium
+    if (mode == TransportMode::Radiance) ft *= (etaI * etaI) / (etaT * etaT);
+    return ft / AbsCosTheta(*wi);
+}
+
+std::string SpecularTransmission::ToString() const
+{
+    return std::string("[ SpecularTransmission: T: ") + T.ToString() +
+           StringPrintf(" etaA: %f etaB: %f ", etaA, etaB) +
+           std::string(" fresnel: ") + fresnel.ToString() +
+           std::string(" mode : ") +
+           (mode == TransportMode::Radiance ? std::string("RADIANCE")
+                                            : std::string("IMPORTANCE")) +
+           std::string(" ]");
+}
+
 Spectrum LambertianReflection::f(const Vector3f &wo, const Vector3f &wi) const
 {
     return R * InvPi;
@@ -132,7 +162,8 @@ Float BxDF::Pdf(const Vector3f &wo, const Vector3f &wi) const
 Spectrum BxDF::rho(const Vector3f &w, int nSamples, const Point2f *u) const
 {
     Spectrum r(0.);
-    for (int i = 0; i < nSamples; ++i) {
+    for (int i = 0; i < nSamples; ++i)
+    {
         // Estimate one term of $\rho_\roman{hd}$
         Vector3f wi;
         Float pdf = 0;
@@ -145,7 +176,8 @@ Spectrum BxDF::rho(const Vector3f &w, int nSamples, const Point2f *u) const
 Spectrum BxDF::rho(int nSamples, const Point2f *u1, const Point2f *u2) const
 {
     Spectrum r(0.f);
-    for (int i = 0; i < nSamples; ++i) {
+    for (int i = 0; i < nSamples; ++i)
+    {
         // Estimate one term of $\rho_\roman{hh}$
         Vector3f wo, wi;
         wo = UniformSampleHemisphere(u1[i]);

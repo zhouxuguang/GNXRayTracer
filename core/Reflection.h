@@ -268,7 +268,8 @@ public:
         : BxDF(BxDFType(BSDF_REFLECTION | BSDF_SPECULAR)),
           R(R),
           fresnel(fresnel) {}
-    Spectrum f(const Vector3f &wo, const Vector3f &wi) const {
+    Spectrum f(const Vector3f &wo, const Vector3f &wi) const
+    {
         return Spectrum(0.f);
     }
     Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &sample,
@@ -280,6 +281,35 @@ private:
     // SpecularReflection Private Data
     const Spectrum R;
     const Fresnel *fresnel;
+};
+
+class SpecularTransmission : public BxDF
+{
+public:
+    // SpecularTransmission Public Methods
+    SpecularTransmission(const Spectrum &T, Float etaA, Float etaB,
+                         TransportMode mode)
+        : BxDF(BxDFType(BSDF_TRANSMISSION | BSDF_SPECULAR)),
+          T(T),
+          etaA(etaA),
+          etaB(etaB),
+          fresnel(etaA, etaB),
+          mode(mode) {}
+    Spectrum f(const Vector3f &wo, const Vector3f &wi) const
+    {
+        return Spectrum(0.f);
+    }
+    Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &sample,
+                      Float *pdf, BxDFType *sampledType) const;
+    Float Pdf(const Vector3f &wo, const Vector3f &wi) const { return 0; }
+    std::string ToString() const;
+
+private:
+    // SpecularTransmission Private Data
+    const Spectrum T;
+    const Float etaA, etaB;
+    const FresnelDielectric fresnel;
+    const TransportMode mode;
 };
 
 }  // namespace pbr

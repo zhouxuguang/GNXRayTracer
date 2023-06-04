@@ -64,10 +64,11 @@ Spectrum WhittedIntegrator::Li(const Ray &ray, const Scene &scene,
     lightL /= scene.lights.size();
     L += lightL;
     
-    if (depth + 1 < maxDepth) {
+    if (depth + 1 < maxDepth)
+    {
         // Trace rays for specular reflection and refraction
         L += SpecularReflect(ray, isect, scene, sampler, arena, depth);
-        //L += SpecularTransmit(ray, isect, scene, sampler, arena, depth);
+        L += SpecularTransmit(ray, isect, scene, sampler, arena, depth);
     }
     return L;
 }
