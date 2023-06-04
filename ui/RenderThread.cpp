@@ -140,8 +140,6 @@ void RenderThread::run()
     //相机参数
     Point3f eye(-4.0f, 1.f, -4.0f), look(0.0, 0.0, 0.0f);
     Vector3f up(0.0f, 1.0f, 0.0f);
-//    Point3f eye(-3.0f, 1.5f, -3.0f), look(0.0, 0.0, 0.0f);
-//    Vector3f up(0.0f, 1.0f, 0.0f);
     Transform lookat = LookAt(eye, look, up);
 
     Transform Camera2World = Inverse(lookat);
