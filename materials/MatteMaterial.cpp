@@ -2,7 +2,7 @@
 
 
 // materials/matte.cpp*
-#include "Matte.h"
+#include "MatteMaterial.h"
 #include "core/Reflection.h"
 #include "core/Interaction.h"
 #include "core/Texture.h"

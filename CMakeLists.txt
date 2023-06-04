@@ -99,8 +99,8 @@ lights/DiffuseAreaLight.cpp
 source_group("lights" FILES ${LIGHTS_FILES})
 
 set(SAMPLERS_FILES 
-samplers/Halton.h 
-samplers/Halton.cpp
+samplers/HaltonSampler.h 
+samplers/HaltonSampler.cpp
 samplers/LowDiscrepancy.h
 samplers/LowDiscrepancy.cpp
 samplers/SobolMatrices.h
@@ -109,16 +109,16 @@ samplers/SobolMatrices.cpp
 source_group("samplers" FILES ${SAMPLERS_FILES})
 
 set(MATERIALS_FILES 
-materials/Matte.h 
-materials/Matte.cpp
+materials/MatteMaterial.h 
+materials/MatteMaterial.cpp
 materials/MirrorMaterial.h
 materials/MirrorMaterial.cpp
 )
 source_group("materials" FILES ${MATERIALS_FILES})
 
 set(TEXTURES_FILES 
-textures/Constant.h 
-textures/Constant.cpp
+textures/ConstantTexture.h 
+textures/ConstantTexture.cpp
 )
 source_group("textures" FILES ${TEXTURES_FILES})
 

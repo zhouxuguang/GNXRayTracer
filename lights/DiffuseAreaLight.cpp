@@ -44,9 +44,9 @@ Spectrum DiffuseAreaLight::Sample_Li(const Interaction &ref, const Point2f &u,
         *pdf = 0;
         return 0.f;
     }
-    *wi = Normalize(pShape.p - ref.p);
-    *vis = VisibilityTester(ref, pShape);
-    return L(pShape, -*wi);
+    *wi = Normalize(pShape.p - ref.p);  //从相交点指向光源
+    *vis = VisibilityTester(ref, pShape);   //可见性测试对象
+    return L(pShape, -*wi);    //计算光源发射的光亮度
 }
 
 Float DiffuseAreaLight::Pdf_Li(const Interaction &ref, const Vector3f &wi) const {

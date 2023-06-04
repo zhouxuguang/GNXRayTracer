@@ -115,8 +115,9 @@ std::string LambertianReflection::ToString() const
 
 
 Spectrum BxDF::Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u,
-                        Float *pdf, BxDFType *sampledType) const {
-    // Cosine-sample the hemisphere, flipping the direction if necessary
+                        Float *pdf, BxDFType *sampledType) const
+{
+    // 余弦半球采样，如果有必要，将z方向取反
     *wi = CosineSampleHemisphere(u);
     if (wo.z < 0) wi->z *= -1;
     *pdf = Pdf(wo, *wi);
@@ -141,7 +142,8 @@ Spectrum BxDF::rho(const Vector3f &w, int nSamples, const Point2f *u) const
     return r / nSamples;
 }
 
-Spectrum BxDF::rho(int nSamples, const Point2f *u1, const Point2f *u2) const {
+Spectrum BxDF::rho(int nSamples, const Point2f *u1, const Point2f *u2) const
+{
     Spectrum r(0.f);
     for (int i = 0; i < nSamples; ++i) {
         // Estimate one term of $\rho_\roman{hh}$
@@ -256,8 +258,8 @@ Spectrum BSDF::Sample_f(const Vector3f &woWorld, Vector3f *wiWorld,
     return f;
 }
 
-Float BSDF::Pdf(const Vector3f &woWorld, const Vector3f &wiWorld,
-                BxDFType flags) const {
+Float BSDF::Pdf(const Vector3f &woWorld, const Vector3f &wiWorld, BxDFType flags) const
+{
     //ProfilePhase pp(Prof::BSDFPdf);
     if (nBxDFs == 0.f) return 0.f;
     Vector3f wo = WorldToLocal(woWorld), wi = WorldToLocal(wiWorld);

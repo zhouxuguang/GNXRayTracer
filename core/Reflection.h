@@ -1,10 +1,4 @@
 
-
-#if defined(_MSC_VER)
-#define NOMINMAX
-#pragma once
-#endif
-
 #ifndef PBR_CORE_REFLECTION_H
 #define PBR_CORE_REFLECTION_H
 

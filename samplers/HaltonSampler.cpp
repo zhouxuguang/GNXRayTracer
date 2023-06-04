@@ -1,6 +1,6 @@
 
 // samplers/halton.cpp*
-#include "Halton.h"
+#include "HaltonSampler.h"
 #include "core/RNG.h"
 
 namespace pbr

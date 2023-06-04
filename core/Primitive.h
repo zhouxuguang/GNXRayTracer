@@ -10,7 +10,7 @@ namespace pbr
 
 class Primitive 
 {
-  public:
+public:
     // Primitive Interface
     virtual ~Primitive();
     virtual Bounds3f WorldBound() const = 0;

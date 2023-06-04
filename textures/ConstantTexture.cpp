@@ -1,7 +1,7 @@
 
 
 // textures/constant.cpp*
-#include "Constant.h"
+#include "ConstantTexture.h"
 
 namespace pbr
 {
