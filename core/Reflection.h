@@ -155,13 +155,15 @@ private:
     friend class MixMaterial;
 };
 
-inline std::ostream &operator<<(std::ostream &os, const BSDF &bsdf) {
+inline std::ostream &operator<<(std::ostream &os, const BSDF &bsdf)
+{
     os << bsdf.ToString();
     return os;
 }
 
 // BxDF Declarations
-class BxDF {
+class BxDF
+{
 public:
     // BxDF Interface
     virtual ~BxDF() {}
@@ -188,7 +190,8 @@ inline std::ostream &operator<<(std::ostream &os, const BxDF &bxdf) {
 }
 
 
-class LambertianReflection : public BxDF {
+class LambertianReflection : public BxDF
+{
 public:
     // LambertianReflection Public Methods
     LambertianReflection(const Spectrum &R)

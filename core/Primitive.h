@@ -16,6 +16,7 @@ public:
     virtual Bounds3f WorldBound() const = 0;
     virtual bool Intersect(const Ray &r, SurfaceInteraction *) const = 0;
     virtual bool IntersectP(const Ray &r) const = 0;
+    virtual const AreaLight *GetAreaLight() const = 0;
     virtual const Material *GetMaterial() const = 0;
     virtual void ComputeScatteringFunctions(SurfaceInteraction *isect,
                                             MemoryArena &arena,
@@ -32,8 +33,9 @@ public:
 	virtual bool IntersectP(const Ray &r) const;
 	GeometricPrimitive(const std::shared_ptr<Shape> &shape, const std::shared_ptr<Material> &material,
                        const std::shared_ptr<AreaLight> &areaLight);
-    virtual const Material *GetMaterial() const;
-    virtual void ComputeScatteringFunctions(SurfaceInteraction *isect,
+    const AreaLight *GetAreaLight() const;
+    const Material *GetMaterial() const;
+    void ComputeScatteringFunctions(SurfaceInteraction *isect,
                                             MemoryArena &arena,
                                             TransportMode mode,
                                             bool allowMultipleLobes) const;
@@ -49,6 +51,7 @@ class Aggregate : public Primitive
 {
 public:
 	// Aggregate Public Methods
+    const AreaLight *GetAreaLight() const;
     const Material *GetMaterial() const;
     virtual void ComputeScatteringFunctions(SurfaceInteraction *isect,
                                             MemoryArena &arena,

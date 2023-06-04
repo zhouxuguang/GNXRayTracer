@@ -1,4 +1,5 @@
 #include "Interaction.h"
+#include "Light.h"
 
 namespace pbr 
 {
@@ -58,6 +59,16 @@ void SurfaceInteraction::ComputeScatteringFunctions(const Ray &ray,
                                                     TransportMode mode)
 {
     primitive->ComputeScatteringFunctions(this, arena, mode, allowMultipleLobes);
+}
+
+Spectrum SurfaceInteraction::Le(const Vector3f &w) const
+{
+    const AreaLight *area = primitive->GetAreaLight();
+//    if (area)
+//    {
+//        return area->L(*this, w);
+//    }
+    return area ? area->L(*this, w) : Spectrum(0.f);
 }
 
 }

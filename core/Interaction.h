@@ -3,6 +3,7 @@
 
 #include "Shape.h"
 #include "Primitive.h"
+#include "Spectrum.h"
 
 namespace pbr 
 {
@@ -96,6 +97,8 @@ public:
         const Ray &ray, MemoryArena &arena,
         bool allowMultipleLobes = false,
         TransportMode mode = TransportMode::Radiance);
+    
+    Spectrum Le(const Vector3f &w) const;
     
     
 	const Shape *shape = nullptr;

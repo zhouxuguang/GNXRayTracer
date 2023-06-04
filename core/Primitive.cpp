@@ -39,6 +39,11 @@ bool GeometricPrimitive::Intersect(const Ray &r, SurfaceInteraction *isect) cons
     return true;
 }
 
+const AreaLight *GeometricPrimitive::GetAreaLight() const
+{
+    return areaLight.get();
+}
+
 const Material *GeometricPrimitive::GetMaterial() const
 {
     return material.get();
@@ -56,6 +61,11 @@ void GeometricPrimitive::ComputeScatteringFunctions(
                                              allowMultipleLobes);
     CHECK_GE(Dot(isect->n, isect->shading.n), 0.);
     assert(Dot(isect->n, isect->shading.n) >= 0.0);
+}
+
+const AreaLight *Aggregate::GetAreaLight() const
+{
+    return nullptr;
 }
 
 const Material *Aggregate::GetMaterial() const

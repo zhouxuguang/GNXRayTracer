@@ -226,7 +226,16 @@ Spectrum BSDF::rho(const Vector3f &woWorld, int nSamples, const Point2f *samples
 
 Spectrum BSDF::Sample_f(const Vector3f &woWorld, Vector3f *wiWorld,
                         const Point2f &u, Float *pdf, BxDFType type,
-                        BxDFType *sampledType) const {
+                        BxDFType *sampledType) const
+{
+    // 总体思路如下：
+    /**
+         1、选择采样哪个BxDF
+         2、uRemapped()函数把随机数重映射到[0 ,1)范围(之前使用随机数来选择采样哪个BxDF，所以不能重用它来继续采样，映射方法很简单，参考 PBRT 的第14章)
+         3、使用所选择的BxDF来采样入射光方向
+         4、计算匹配的sampledType类型的全部的Pdf(非镜面材质)
+         5、计算采样方向的BSDF值(非镜面材质)
+     */
     //ProfilePhase pp(Prof::BSDFSampling);
     // Choose which _BxDF_ to sample
     int matchingComps = NumComponents(type);
@@ -250,8 +259,7 @@ Spectrum BSDF::Sample_f(const Vector3f &woWorld, Vector3f *wiWorld,
 //        matchingComps << ", bxdf: " << bxdf->ToString();
 
     // Remap _BxDF_ sample _u_ to $[0,1)^2$
-    Point2f uRemapped(std::min(u[0] * matchingComps - comp, OneMinusEpsilon),
-                      u[1]);
+    Point2f uRemapped(std::min(u[0] * matchingComps - comp, OneMinusEpsilon), u[1]);
 
     // Sample chosen _BxDF_
     Vector3f wi, wo = WorldToLocal(woWorld);

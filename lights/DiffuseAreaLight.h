@@ -44,6 +44,6 @@ private:
     const Float area;
 };
 
-}  // namespace pbrt
+}  // namespace pbr
 
-#endif  // PBRT_LIGHTS_DIFFUSE_H
+#endif  // PBR_LIGHTS_DIFFUSE_H

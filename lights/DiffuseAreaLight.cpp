@@ -36,11 +36,13 @@ Spectrum DiffuseAreaLight::Power() const
 
 Spectrum DiffuseAreaLight::Sample_Li(const Interaction &ref, const Point2f &u,
                                      Vector3f *wi, Float *pdf,
-                                     VisibilityTester *vis) const {
+                                     VisibilityTester *vis) const
+{
     //ProfilePhase _(Prof::LightSample);
     Interaction pShape = shape->Sample(ref, u, pdf);
     //pShape.mediumInterface = mediumInterface;
-    if (*pdf == 0 || (pShape.p - ref.p).LengthSquared() == 0) {
+    if (*pdf == 0 || (pShape.p - ref.p).LengthSquared() == 0)   //如果pdf为0或者相交点和光源距离非常近
+    {
         *pdf = 0;
         return 0.f;
     }
@@ -49,14 +51,16 @@ Spectrum DiffuseAreaLight::Sample_Li(const Interaction &ref, const Point2f &u,
     return L(pShape, -*wi);    //计算光源发射的光亮度
 }
 
-Float DiffuseAreaLight::Pdf_Li(const Interaction &ref, const Vector3f &wi) const {
+Float DiffuseAreaLight::Pdf_Li(const Interaction &ref, const Vector3f &wi) const
+{
     //ProfilePhase _(Prof::LightPdf);
     return shape->Pdf(ref, wi);
 }
 
 Spectrum DiffuseAreaLight::Sample_Le(const Point2f &u1, const Point2f &u2,
                                      Float time, Ray *ray, Normal3f *nLight,
-                                     Float *pdfPos, Float *pdfDir) const {
+                                     Float *pdfPos, Float *pdfDir) const
+{
     //ProfilePhase _(Prof::LightSample);
     // Sample a point on the area light's _Shape_, _pShape_
     Interaction pShape = shape->Sample(u1, pdfPos);
