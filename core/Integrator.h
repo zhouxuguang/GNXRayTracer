@@ -22,6 +22,8 @@ class Integrator
     virtual void Render(const Scene &scene, double &timeConsume) = 0;
 };
 
+std::unique_ptr<Distribution1D> ComputeLightPowerDistribution(const Scene &scene);
+
 // SamplerIntegrator Declarations
 class SamplerIntegrator : public Integrator
 {

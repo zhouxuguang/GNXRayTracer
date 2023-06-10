@@ -97,6 +97,8 @@ lights/DiffuseAreaLight.h
 lights/DiffuseAreaLight.cpp
 lights/SkyBoxLight.h
 lights/SkyBoxLight.cpp
+lights/LightDistribution.h
+lights/LightDistribution.cpp
 )
 source_group("lights" FILES ${LIGHTS_FILES})
 

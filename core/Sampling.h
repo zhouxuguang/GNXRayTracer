@@ -15,9 +15,11 @@ void StratifiedSample2D(Point2f *samples, int nx, int ny, RNG &rng,
                         bool jitter = true);
 void LatinHypercube(Float *samples, int nSamples, int nDim, RNG &rng);
 
-struct Distribution1D {
+struct Distribution1D
+{
     // Distribution1D Public Methods
-    Distribution1D(const Float *f, int n) : func(f, f + n), cdf(n + 1) {
+    Distribution1D(const Float *f, int n) : func(f, f + n), cdf(n + 1)
+    {
         // Compute integral of step function at $x_i$
         cdf[0] = 0;
         for (int i = 1; i < n + 1; ++i) cdf[i] = cdf[i - 1] + func[i - 1] / n;
@@ -30,8 +32,11 @@ struct Distribution1D {
             for (int i = 1; i < n + 1; ++i) cdf[i] /= funcInt;
         }
     }
+    
     int Count() const { return (int)func.size(); }
-    Float SampleContinuous(Float u, Float *pdf, int *off = nullptr) const {
+    
+    Float SampleContinuous(Float u, Float *pdf, int *off = nullptr) const
+    {
         // Find surrounding CDF segments and _offset_
         int offset = FindInterval((int)cdf.size(),
                                   [&](int index) { return cdf[index] <= u; });
@@ -50,8 +55,9 @@ struct Distribution1D {
         // Return $x\in{}[0,1)$ corresponding to sample
         return (offset + du) / Count();
     }
-    int SampleDiscrete(Float u, Float *pdf = nullptr,
-                       Float *uRemapped = nullptr) const {
+    
+    int SampleDiscrete(Float u, Float *pdf = nullptr, Float *uRemapped = nullptr) const
+    {
         // Find surrounding CDF segments and _offset_
         int offset = FindInterval((int)cdf.size(),
                                   [&](int index) { return cdf[index] <= u; });
@@ -61,7 +67,9 @@ struct Distribution1D {
         if (uRemapped) CHECK(*uRemapped >= 0.f && *uRemapped <= 1.f);
         return offset;
     }
-    Float DiscretePDF(int index) const {
+    
+    Float DiscretePDF(int index) const
+    {
         CHECK(index >= 0 && index < Count());
         return func[index] / (funcInt * Count());
     }
@@ -83,11 +91,16 @@ Float UniformConePdf(Float thetamax);
 Point2f UniformSampleDisk(const Point2f &u);
 Point2f ConcentricSampleDisk(const Point2f &u);
 Point2f UniformSampleTriangle(const Point2f &u);
-class Distribution2D {
-  public:
+
+
+class Distribution2D
+{
+public:
     // Distribution2D Public Methods
     Distribution2D(const Float *data, int nu, int nv);
-    Point2f SampleContinuous(const Point2f &u, Float *pdf) const {
+    
+    Point2f SampleContinuous(const Point2f &u, Float *pdf) const
+    {
         Float pdfs[2];
         int v;
         Float d1 = pMarginal->SampleContinuous(u[1], &pdfs[1], &v);
@@ -95,7 +108,9 @@ class Distribution2D {
         *pdf = pdfs[0] * pdfs[1];
         return Point2f(d0, d1);
     }
-    Float Pdf(const Point2f &p) const {
+    
+    Float Pdf(const Point2f &p) const
+    {
         int iu = Clamp(int(p[0] * pConditionalV[0]->Count()), 0,
                        pConditionalV[0]->Count() - 1);
         int iv =
@@ -103,7 +118,7 @@ class Distribution2D {
         return pConditionalV[iv]->func[iu] / pMarginal->funcInt;
     }
 
-  private:
+private:
     // Distribution2D Private Data
     std::vector<std::unique_ptr<Distribution1D>> pConditionalV;
     std::unique_ptr<Distribution1D> pMarginal;

@@ -20,6 +20,16 @@ static int nCameraRays = 0;
 // Integrator Method Definitions
 Integrator::~Integrator() {}
 
+std::unique_ptr<Distribution1D> ComputeLightPowerDistribution(const Scene &scene)
+{
+    if (scene.lights.empty()) return nullptr;
+    std::vector<Float> lightPower;
+    for (const auto &light : scene.lights)
+        lightPower.push_back(light->Power().y());
+    return std::unique_ptr<Distribution1D>(
+        new Distribution1D(&lightPower[0], lightPower.size()));
+}
+
 // SamplerIntegrator Method Definitions
 void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
 {
