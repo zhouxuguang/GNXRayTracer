@@ -38,6 +38,8 @@ core/Interaction.h
 core/Interaction.cpp
 core/Light.h
 core/Light.cpp
+core/LightDistribution.h
+core/LightDistribution.cpp
 core/Material.h
 core/Material.cpp
 core/Memory.h
@@ -97,8 +99,6 @@ lights/DiffuseAreaLight.h
 lights/DiffuseAreaLight.cpp
 lights/SkyBoxLight.h
 lights/SkyBoxLight.cpp
-lights/LightDistribution.h
-lights/LightDistribution.cpp
 )
 source_group("lights" FILES ${LIGHTS_FILES})
 

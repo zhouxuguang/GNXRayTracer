@@ -2,8 +2,8 @@
 #ifndef PBR_CORE_LIGHTDISTRIBUTION_H
 #define PBR_CORE_LIGHTDISTRIBUTION_H
 
-#include "core/Geometry.h"
-#include "core/Sampling.h"
+#include "Geometry.h"
+#include "Sampling.h"
 #include <atomic>
 #include <functional>
 #include <mutex>

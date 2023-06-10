@@ -3,8 +3,8 @@
 #include "LightDistribution.h"
 #include "samplers/LowDiscrepancy.h"
 //#include "parallel.h"
-#include "core/Scene.h"
-#include "core/Integrator.h"
+#include "Scene.h"
+#include "Integrator.h"
 #include <numeric>
 
 namespace pbr

@@ -4,7 +4,7 @@
 
 // integrators/path.h*
 #include "core/Integrator.h"
-#include "lights/LightDistribution.h"
+#include "core/LightDistribution.h"
 
 namespace pbr
 {
