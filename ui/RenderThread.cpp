@@ -23,6 +23,7 @@
 #include "textures/ConstantTexture.h"
 #include "lights/PointLight.h"
 #include "lights/DiffuseAreaLight.h"
+#include "lights/SkyBoxLight.h"
 #include "integrators/WhittedIntegrator.h"
 
 #include <omp.h>
@@ -56,7 +57,7 @@ void RenderThread::run()
     //初始化材质
     emit PrintString((char*)"Init Material");
     Spectrum floorColor; floorColor[0] = 0.2; floorColor[1] = 0.3; floorColor[2] = 0.9;
-    Spectrum dragonColor; dragonColor[0] = 0.8; dragonColor[1] = 0.1; dragonColor[2] = 0.2;
+    Spectrum dragonColor; dragonColor[0] = 0.2; dragonColor[1] = 0.7; dragonColor[2] = 0.2;
     std::shared_ptr<Texture<Spectrum>> KdDragon = std::make_shared<ConstantTexture<Spectrum>>(dragonColor);
     std::shared_ptr<Texture<Spectrum>> KdFloor = std::make_shared<ConstantTexture<Spectrum>>(floorColor);
     
@@ -128,15 +129,6 @@ void RenderThread::run()
         prims.push_back(std::make_shared<GeometricPrimitive>(tris[i], dragonMaterial, nullptr));
     }
     
-    //构造点光源
-//    Spectrum LightI(80.f);
-//    Transform lightToWorld;
-//    lightToWorld = Translate(Vector3f(1.0, 4.5, -6.0)) * lightToWorld;
-//    std::shared_ptr<Light> pointLight = std::make_shared<PointLight>(lightToWorld, LightI);
-//    std::vector<std::shared_ptr<Light>> lights;
-//    lights.push_back(pointLight);
-    
-    
     //相机参数
     Point3f eye(-4.0f, 1.f, -4.0f), look(0.0, 0.0, 0.0f);
     Vector3f up(0.0f, 1.0f, 0.0f);
@@ -185,6 +177,13 @@ void RenderThread::run()
         lights.push_back(area);
         prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i], floorMaterial, area));
     }
+    
+    //构造环境光源
+    Transform SkyBoxToWorld;
+    Point3f SkyBoxCenter(0.f, 0.f, 0.f);
+    Float SkyBoxRadius = 10.0f;
+    std::shared_ptr<Light> skyBoxLight = std::make_shared<SkyBoxLight>(SkyBoxToWorld, SkyBoxCenter, SkyBoxRadius, "1", 1);
+    lights.push_back(skyBoxLight);
     
     emit PrintString((char*)"Init worldScene");
     std::unique_ptr<Scene> worldScene = std::make_unique<Scene>(std::make_shared<BVHAccel>(prims, 1), lights);

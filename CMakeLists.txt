@@ -95,6 +95,8 @@ lights/PointLight.h
 lights/PointLight.cpp
 lights/DiffuseAreaLight.h
 lights/DiffuseAreaLight.cpp
+lights/SkyBoxLight.h
+lights/SkyBoxLight.cpp
 )
 source_group("lights" FILES ${LIGHTS_FILES})
 
@@ -151,6 +153,11 @@ ui/main.cpp
 )
 source_group("ui" FILES ${UI_FILES})
 
+set(3RD_FILES 
+3rd/stb_image.h
+)
+source_group("3rd" FILES ${3RD_FILES})
+
 add_executable(GNXRayTracer
              ${CORE_FILES}
              ${CAMERA_FILES}
@@ -162,6 +169,7 @@ add_executable(GNXRayTracer
              ${LIGHTS_FILES}
              ${INTEGRATORS_FILES}
              ${UI_FILES}
+             ${3RD_FILES}
         )
 
 #target_link_libraries(GNXRayTracer PRIVATE "-framework CoreVideo" "-framework QuartzCore")
