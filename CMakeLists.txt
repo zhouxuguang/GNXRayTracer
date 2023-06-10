@@ -127,6 +127,8 @@ textures/ConstantTexture.cpp
 source_group("textures" FILES ${TEXTURES_FILES})
 
 set(INTEGRATORS_FILES 
+integrators/DirectLightingIntegrator.h
+integrators/DirectLightingIntegrator.cpp
 integrators/WhittedIntegrator.h
 integrators/WhittedIntegrator.cpp
 )
