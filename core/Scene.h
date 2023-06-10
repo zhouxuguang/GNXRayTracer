@@ -36,9 +36,9 @@ public:
 
     // Scene Public Data
     std::vector<std::shared_ptr<Light>> lights;
-//    // Store infinite light sources separately for cases where we only want
-//    // to loop over them.
-//    std::vector<std::shared_ptr<Light>> infiniteLights;
+    // Store infinite light sources separately for cases where we only want
+    // to loop over them.
+    std::vector<std::shared_ptr<Light>> infiniteLights;
 
 private:
     // Scene Private Data

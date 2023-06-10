@@ -129,6 +129,8 @@ source_group("textures" FILES ${TEXTURES_FILES})
 set(INTEGRATORS_FILES 
 integrators/DirectLightingIntegrator.h
 integrators/DirectLightingIntegrator.cpp
+integrators/PathIntegrator.h
+integrators/PathIntegrator.cpp
 integrators/WhittedIntegrator.h
 integrators/WhittedIntegrator.cpp
 )

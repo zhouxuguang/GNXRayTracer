@@ -99,6 +99,7 @@ std::unique_ptr<Distribution1D> ComputeLightPowerDistribution(const Scene &scene
 // SamplerIntegrator Method Definitions
 void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
 {
+    Preprocess(scene, *sampler);
     double start = omp_get_wtime(); //渲染开始时间
 
     m_FrameBuffer->renderCountIncrease();
