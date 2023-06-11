@@ -64,7 +64,7 @@ Spectrum WhittedIntegrator::Li(const Ray &ray, const Scene &scene,
     
     //这里除以灯光的数量，因为实际一个光源当成了多个光源
     //lightL /= scene.lights.size();
-    lightL /= 2;   //先写死了
+    //lightL /= 2;   //先写死了
     L += lightL;
     
     if (depth + 1 < maxDepth)

@@ -25,6 +25,7 @@
 #include "lights/DiffuseAreaLight.h"
 #include "lights/SkyBoxLight.h"
 #include "integrators/WhittedIntegrator.h"
+#include "integrators/PathIntegrator.h"
 
 #include <omp.h>
 
@@ -48,28 +49,52 @@ void RenderThread::run()
 
 	ClockRandomInit();
 
-	int WIDTH = 500;
-	int HEIGHT = 500;
+	int WIDTH = 200;
+	int HEIGHT = 200;
 
     emit PrintString((char*)"Init FrameBuffer");
     m_pFramebuffer->bufferResize(WIDTH, HEIGHT);
     
+    //相机参数
+    //Point3f eye(-4.0f, 1.f, -4.0f), look(0.0, 0.0, 0.0f);
+    Vector3f up(0.0f, 1.0f, 0.0f);
+    
+    Point3f eye(0.f, 0.f, 5.2f), look(0.f, 0.f, 0.0f);
+    Transform lookat = LookAt(eye, look, up);
+
+    Transform Camera2World = Inverse(lookat);
+    std::shared_ptr<const Camera> camera = std::shared_ptr<Camera>(CreatePerspectiveCamera(WIDTH, HEIGHT, Camera2World));
+    
     //初始化材质
     emit PrintString((char*)"Init Material");
-    Spectrum floorColor; floorColor[0] = 0.2; floorColor[1] = 0.3; floorColor[2] = 0.9;
-    Spectrum dragonColor; dragonColor[0] = 0.2; dragonColor[1] = 0.7; dragonColor[2] = 0.2;
-    std::shared_ptr<Texture<Spectrum>> KdDragon = std::make_shared<ConstantTexture<Spectrum>>(dragonColor);
-    std::shared_ptr<Texture<Spectrum>> KdFloor = std::make_shared<ConstantTexture<Spectrum>>(floorColor);
-    
-    Spectrum mirrorColor(1.0f);
-    std::shared_ptr<Texture<Spectrum>> KrMirror = std::make_shared<ConstantTexture<Spectrum>>(dragonColor);
-    std::shared_ptr<Texture<Float>> sigma = std::make_shared<ConstantTexture<Float>>(0.0f);
-    std::shared_ptr<Texture<Float>> bumpMap = std::make_shared<ConstantTexture<Float>>(0.0f);
-    //材质
-    std::shared_ptr<Material> dragonMaterial = std::make_shared<MatteMaterial>(KdDragon, sigma, bumpMap);
-    std::shared_ptr<Material> floorMaterial = std::make_shared<MatteMaterial>(KdFloor, sigma, bumpMap);
-    std::shared_ptr<Material> whiteLightMaterial = std::make_shared<MatteMaterial>(KdFloor, sigma, bumpMap);
-    std::shared_ptr<Material> mirrorMaterial = std::make_shared<MirrorMaterial>(KrMirror, bumpMap);
+    std::shared_ptr<Material> dragonMaterial;
+    std::shared_ptr<Material> whiteWallMaterial;
+    std::shared_ptr<Material> redWallMaterial;
+    std::shared_ptr<Material> blueWallMaterial;
+    std::shared_ptr<Material> whiteLightMaterial;
+    std::shared_ptr<Material> mirrorMaterial;
+    {
+        Spectrum whiteColor; whiteColor[0] = 0.91; whiteColor[1] = 0.91; whiteColor[2] = 0.91;
+        Spectrum dragonColor; dragonColor[0] = 0.2; dragonColor[1] = 0.8; dragonColor[2] = 0.2;
+        Spectrum redWallColor; redWallColor[0] = 0.9; redWallColor[1] = 0.1; redWallColor[2] = 0.17;
+        Spectrum blueWallColor; blueWallColor[0] = 0.14; blueWallColor[1] = 0.21; blueWallColor[2] = 0.87;
+        std::shared_ptr<Texture<Spectrum>> KdDragon = std::make_shared<ConstantTexture<Spectrum>>(dragonColor);
+        std::shared_ptr<Texture<Spectrum>> KrDragon = std::make_shared<ConstantTexture<Spectrum>>(dragonColor);
+        std::shared_ptr<Texture<Spectrum>> KdWhite = std::make_shared<ConstantTexture<Spectrum>>(whiteColor);
+        std::shared_ptr<Texture<Spectrum>> KdRed = std::make_shared<ConstantTexture<Spectrum>>(redWallColor);
+        std::shared_ptr<Texture<Spectrum>> KdBlue = std::make_shared<ConstantTexture<Spectrum>>(blueWallColor);
+        std::shared_ptr<Texture<float>> sigma = std::make_shared<ConstantTexture<float>>(0.0f);
+        std::shared_ptr<Texture<float>> bumpMap = std::make_shared<ConstantTexture<float>>(0.0f);
+
+        dragonMaterial = std::make_shared<MatteMaterial>(KdDragon, sigma, bumpMap);
+
+        whiteWallMaterial = std::make_shared<MatteMaterial>(KdWhite, sigma, bumpMap);
+        redWallMaterial = std::make_shared<MatteMaterial>(KdRed, sigma, bumpMap);
+        blueWallMaterial = std::make_shared<MatteMaterial>(KdBlue, sigma, bumpMap);
+
+        whiteLightMaterial = std::make_shared<MatteMaterial>(KdWhite, sigma, bumpMap);
+        mirrorMaterial = std::make_shared<MirrorMaterial>(KrDragon, bumpMap);
+    }
 
     
     Transform tri_Object2World , tri_World2Object;
@@ -97,56 +122,85 @@ void RenderThread::run()
     }
     
     //将物体填充到基元
-    for (int i = 0; i < nTrianglesFloor; ++i)
+//    for (int i = 0; i < nTrianglesFloor; ++i)
+//    {
+//        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], whiteWallMaterial, nullptr));
+//    }
+
+    
+    emit PrintString((char*)"Init Mesh...");
     {
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], floorMaterial, nullptr));
+        std::shared_ptr<TriangleMesh> mesh;
+        std::vector<std::shared_ptr<Shape>> tris;
+    
+        Transform tri_Object2World, tri_World2Object;
+
+        tri_Object2World = Translate(Vector3f(0.f, -2.9f, 0.f)) * tri_Object2World;
+        tri_World2Object = Inverse(tri_Object2World);
+
+        //E:\code\model
+    #ifdef _WIN32
+        plyInfo plyi("E:\\code\\model\\dragon.3d");
+    #else
+        plyInfo plyi("/Users/zhouxuguang/work/opensource/pbrt/pdf/模型文件-1/dragon.3d");
+    #endif // _WIN32
+        mesh = std::make_shared<TriangleMesh>(tri_Object2World, plyi.nTriangles, plyi.vertexIndices, plyi.nVertices, plyi.vertexArray, nullptr, nullptr, nullptr, nullptr);
+        tris.reserve(plyi.nTriangles);
+ 
+        for (int i = 0; i < plyi.nTriangles; ++i)
+            tris.push_back(std::make_shared<Triangle>(&tri_Object2World, &tri_World2Object, false, mesh, i));
+
+        for (int i = 0; i < plyi.nTriangles; ++i)
+            prims.push_back(std::make_shared<GeometricPrimitive>(tris[i], dragonMaterial, nullptr));
+        //plyi.Release();
     }
-
     
-    tri_Object2World = Translate(Vector3f(0.0, -2.5, 0.0)) * tri_Object2World;
-    tri_World2Object = Inverse(tri_Object2World);
-
-    //E:\code\model
-#ifdef _WIN32
-    plyInfo* plyi = new plyInfo("E:\\code\\model\\dragon.3d");
-#else
-    plyInfo* plyi = new plyInfo("/Users/zhouxuguang/work/opensource/pbrt/pdf/模型文件-1/dragon.3d");
-#endif // _WIN32
-
-    std::shared_ptr<TriangleMesh> mesh = std::make_shared<TriangleMesh>(tri_Object2World, plyi->nTriangles, plyi->vertexIndices, plyi->nVertices, plyi->vertexArray, nullptr, nullptr, nullptr, nullptr);
-    std::vector<std::shared_ptr<Shape>> tris;
-    tris.reserve(plyi->nTriangles);
-    
-    //从mesh转为Shape类型，该代码可以从triangle .cpp文件里找到 tris.reserve(nTriangles);
-    for (int i = 0; i < plyi->nTriangles; ++i)
+    emit PrintString((char*)"Init Cornell Box...");
     {
-        tris.push_back(std::make_shared<Triangle>(&tri_Object2World, &tri_World2Object, false , mesh, i));
-    }
-    
-    prims.reserve(plyi->nTriangles);
-    for (int i = 0; i < plyi->nTriangles; ++i)
-    {
-        prims.push_back(std::make_shared<GeometricPrimitive>(tris[i], dragonMaterial, nullptr));
-    }
-    
-    //相机参数
-    Point3f eye(-4.0f, 1.f, -4.0f), look(0.0, 0.0, 0.0f);
-    Vector3f up(0.0f, 1.0f, 0.0f);
-    Transform lookat = LookAt(eye, look, up);
+        //三角形个数
+        const int nTrianglesWall = 2 * 5;
+        int vertexIndicesWall[nTrianglesWall * 3];
+        for (int i = 0; i < nTrianglesWall * 3; i++)
+            vertexIndicesWall[i] = i;
+        const int nVerticesWall = nTrianglesWall * 3;
+        const float length_Wall = 5.0f;
+        Point3f P_Wall[nVerticesWall] =
+        {
+            //底座
+            Point3f(0.f,0.f,length_Wall),Point3f(length_Wall,0.f,length_Wall), Point3f(0.f,0.f,0.f),
+            Point3f(length_Wall,0.f,length_Wall),Point3f(length_Wall,0.f,0.f),Point3f(0.f,0.f,0.f),
+            //天花板
+            Point3f(0.f,length_Wall,length_Wall),Point3f(0.f,length_Wall,0.f),Point3f(length_Wall,length_Wall,length_Wall),
+            Point3f(length_Wall,length_Wall,length_Wall),Point3f(0.f,length_Wall,0.f),Point3f(length_Wall,length_Wall,0.f),
+            //后墙
+            Point3f(0.f,0.f,0.f),Point3f(length_Wall,0.f,0.f), Point3f(length_Wall,length_Wall,0.f),
+            Point3f(0.f,0.f,0.f), Point3f(length_Wall,length_Wall,0.f),Point3f(0.f,length_Wall,0.f),
+            //右墙
+            Point3f(0.f,0.f,0.f),Point3f(0.f,length_Wall,length_Wall), Point3f(0.f,0.f,length_Wall),
+            Point3f(0.f,0.f,0.f), Point3f(0.f,length_Wall,0.f),Point3f(0.f,length_Wall,length_Wall),
+            //左墙
+            Point3f(length_Wall,0.f,0.f),Point3f(length_Wall,length_Wall,length_Wall), Point3f(length_Wall,0.f,length_Wall),
+            Point3f(length_Wall,0.f,0.f), Point3f(length_Wall,length_Wall,0.f),Point3f(length_Wall,length_Wall,length_Wall)
+        };
+        Transform tri_ConBox2World = Translate(Vector3f(-0.5*length_Wall,-0.5*length_Wall,-0.5*length_Wall));
+        Transform tri_World2ConBox = Inverse(tri_ConBox2World);
+        std::shared_ptr<TriangleMesh> meshConBox = std::make_shared<TriangleMesh>
+            (tri_ConBox2World, nTrianglesWall, vertexIndicesWall, nVerticesWall, P_Wall, nullptr, nullptr, nullptr, nullptr);
+        std::vector<std::shared_ptr<Shape>> trisConBox;
+        for (int i = 0; i < nTrianglesWall; ++i)
+            trisConBox.push_back(std::make_shared<Triangle>(&tri_ConBox2World, &tri_World2ConBox, false, meshConBox, i));
 
-    Transform Camera2World = Inverse(lookat);
-    std::shared_ptr<const Camera> camera = std::shared_ptr<Camera>(CreatePerspectiveCamera(WIDTH, HEIGHT, Camera2World));
+        //增加三角形到图元
+        for (int i = 0; i < nTrianglesWall; ++i) {
+            if (i == 6 || i == 7)
+                prims.push_back(std::make_shared<GeometricPrimitive>(trisConBox[i], redWallMaterial, nullptr));
+            else if (i == 8 || i == 9)
+                prims.push_back(std::make_shared<GeometricPrimitive>(trisConBox[i], blueWallMaterial, nullptr));
+            else
+                prims.push_back(std::make_shared<GeometricPrimitive>(trisConBox[i], whiteWallMaterial, nullptr));
+        }
+    }
     
-    
-    
-    emit PrintString((char*)"Init Sampler");
-    Bounds2i imageBound(Point2i(0, 0), Point2i(WIDTH , HEIGHT));
-    //std::shared_ptr<HaltonSampler> sampler = std::make_unique<HaltonSampler>(8, imageBound, false);
-    std::shared_ptr<ClockRandSampler> sampler = std::make_unique<ClockRandSampler>(8, imageBound);
-    
-    Bounds2i ScreenBound(Point2i(0, 0), Point2i(WIDTH, HEIGHT));
-    std::shared_ptr<Integrator> integrator = std::make_shared<WhittedIntegrator>(5, camera, sampler, ScreenBound, m_pFramebuffer);
-    //SamplerIntegrator* integrator = new SamplerIntegrator(camera, nullptr, ScreenBound, m_pFramebuffer);
     
     //初始化面光源
     emit PrintString((char*)"Init AreaLight");
@@ -159,8 +213,7 @@ void RenderThread::run()
     const float yPos_AreaLight = 0.0;
     Point3f P_AreaLight[6] = { Point3f(-1.4,0.0,1.4), Point3f(-1.4,0.0,-1.4), Point3f(1.4,0.0,1.4),
         Point3f(1.4,0.0,1.4), Point3f(-1.4,0.0,-1.4), Point3f(1.4,0.0,-1.4)};
-
-    Transform tri_Object2World_AreaLight = Translate(Vector3f(0.7f, 5.0f, -2.0f));
+    Transform tri_Object2World_AreaLight = Translate(Vector3f(0.0f, 2.45f, 0.0f));
     Transform tri_World2Object_AreaLight = Inverse(tri_Object2World_AreaLight);
 
     std::shared_ptr<TriangleMesh> meshAreaLight = std::make_shared<TriangleMesh>
@@ -173,20 +226,29 @@ void RenderThread::run()
     for (int i = 0; i < nTrianglesAreaLight; ++i)
     {
         std::shared_ptr<AreaLight> area =
-            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, Spectrum(25.0f), 5, trisAreaLight[i], false);
+            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, Spectrum(5.0f), 5, trisAreaLight[i], false);
         lights.push_back(area);
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i], floorMaterial, area));
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i], dragonMaterial, area));
     }
     
     //构造环境光源
     Transform SkyBoxToWorld;
     Point3f SkyBoxCenter(0.f, 0.f, 0.f);
     Float SkyBoxRadius = 10.0f;
-    std::shared_ptr<Light> skyBoxLight = std::make_shared<SkyBoxLight>(SkyBoxToWorld, SkyBoxCenter, SkyBoxRadius, "1", 1);
-    lights.push_back(skyBoxLight);
+//    std::shared_ptr<Light> skyBoxLight = std::make_shared<SkyBoxLight>(SkyBoxToWorld, SkyBoxCenter, SkyBoxRadius, "1", 1);
+//    lights.push_back(skyBoxLight);
     
     emit PrintString((char*)"Init worldScene");
     std::unique_ptr<Scene> worldScene = std::make_unique<Scene>(std::make_shared<BVHAccel>(prims, 1), lights);
+    
+    emit PrintString((char*)"Init Sampler");
+    Bounds2i imageBound(Point2i(0, 0), Point2i(WIDTH , HEIGHT));
+    //std::shared_ptr<HaltonSampler> sampler = std::make_unique<HaltonSampler>(8, imageBound, false);
+    std::shared_ptr<ClockRandSampler> sampler = std::make_unique<ClockRandSampler>(8, imageBound);
+    
+    Bounds2i ScreenBound(Point2i(0, 0), Point2i(WIDTH, HEIGHT));
+    //std::shared_ptr<Integrator> integrator = std::make_shared<WhittedIntegrator>(5, camera, sampler, ScreenBound, m_pFramebuffer);
+    std::shared_ptr<Integrator> integrator = std::make_shared<PathIntegrator>(1, camera, sampler, ScreenBound, m_pFramebuffer, 1.f, "spatial");
     
     
     emit PrintString((char*)"Start Rendering");

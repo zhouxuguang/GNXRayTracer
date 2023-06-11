@@ -74,7 +74,10 @@ Spectrum PathIntegrator::Li(const Ray &r, const Scene &scene,
         }
 
         // Terminate path if ray escaped or _maxDepth_ was reached
-        if (!foundIntersection || bounces >= maxDepth) break;
+        if (!foundIntersection || bounces >= maxDepth)
+        {
+            break;
+        }
 
         // Compute scattering functions and skip over medium boundaries
         isect.ComputeScatteringFunctions(ray, arena, true);
