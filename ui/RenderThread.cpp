@@ -49,8 +49,8 @@ void RenderThread::run()
 
 	ClockRandomInit();
 
-	int WIDTH = 200;
-	int HEIGHT = 200;
+	int WIDTH = 500;
+	int HEIGHT = 500;
 
     emit PrintString((char*)"Init FrameBuffer");
     m_pFramebuffer->bufferResize(WIDTH, HEIGHT);
@@ -59,7 +59,7 @@ void RenderThread::run()
     //Point3f eye(-4.0f, 1.f, -4.0f), look(0.0, 0.0, 0.0f);
     Vector3f up(0.0f, 1.0f, 0.0f);
     
-    Point3f eye(0.f, 0.f, 5.2f), look(0.f, 0.f, 0.0f);
+    Point3f eye(0.f, 0.f, 5.0f), look(0.f, 0.f, 0.0f);
     Transform lookat = LookAt(eye, look, up);
 
     Transform Camera2World = Inverse(lookat);
@@ -226,7 +226,7 @@ void RenderThread::run()
     for (int i = 0; i < nTrianglesAreaLight; ++i)
     {
         std::shared_ptr<AreaLight> area =
-            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, Spectrum(5.0f), 5, trisAreaLight[i], false);
+            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, Spectrum(15.0f), 5, trisAreaLight[i], false);
         lights.push_back(area);
         prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i], dragonMaterial, area));
     }
@@ -247,8 +247,8 @@ void RenderThread::run()
     std::shared_ptr<ClockRandSampler> sampler = std::make_unique<ClockRandSampler>(8, imageBound);
     
     Bounds2i ScreenBound(Point2i(0, 0), Point2i(WIDTH, HEIGHT));
-    //std::shared_ptr<Integrator> integrator = std::make_shared<WhittedIntegrator>(5, camera, sampler, ScreenBound, m_pFramebuffer);
-    std::shared_ptr<Integrator> integrator = std::make_shared<PathIntegrator>(1, camera, sampler, ScreenBound, m_pFramebuffer, 1.f, "spatial");
+    std::shared_ptr<Integrator> integrator = std::make_shared<WhittedIntegrator>(5, camera, sampler, ScreenBound, m_pFramebuffer);
+    //std::shared_ptr<Integrator> integrator = std::make_shared<PathIntegrator>(15, camera, sampler, ScreenBound, m_pFramebuffer, 1.f, "spatial");
     
     
     emit PrintString((char*)"Start Rendering");
