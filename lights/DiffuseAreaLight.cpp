@@ -103,4 +103,4 @@ void DiffuseAreaLight::Pdf_Le(const Ray &ray, const Normal3f &n, Float *pdfPos, 
                        : CosineHemispherePdf(Dot(n, ray.d));
 }
 
-}  // namespace pbrt
+}  // namespace pbr

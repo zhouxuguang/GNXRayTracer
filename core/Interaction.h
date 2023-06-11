@@ -49,6 +49,8 @@ struct Interaction
         return Ray(origin, d, 1 - ShadowEpsilon, time, GetMedium(d));
     }
     
+    bool IsSurfaceInteraction() const { return n != Normal3f(); }
+    
     bool IsMediumInteraction() const
     {
         return false;
@@ -75,6 +77,20 @@ struct Interaction
 	Normal3f n;
     Vector3f pError;
 };
+
+//class MediumInteraction : public Interaction
+//{
+//public:
+//    // MediumInteraction Public Methods
+//    MediumInteraction() : phase(nullptr) {}
+//    MediumInteraction(const Point3f &p, const Vector3f &wo, Float time,
+//                      const Medium *medium, const PhaseFunction *phase)
+//        : Interaction(p, wo, time, medium), phase(phase) {}
+//    bool IsValid() const { return phase != nullptr; }
+//
+//    // MediumInteraction Public Data
+//    const PhaseFunction *phase;
+//};
 
 class SurfaceInteraction : public Interaction
 {
