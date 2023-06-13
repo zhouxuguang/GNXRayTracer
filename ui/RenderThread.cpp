@@ -140,7 +140,7 @@ void RenderThread::run()
 
         //E:\code\model
     #ifdef _WIN32
-        plyInfo plyi("E:\\code\\model\\dragon.3d");
+        plyInfo plyi("E:\\zxg\\code\\model\\dragon.3d");
     #else
         plyInfo plyi("/Users/zhouxuguang/work/opensource/pbrt/pdf/模型文件-1/dragon.3d");
     #endif // _WIN32
