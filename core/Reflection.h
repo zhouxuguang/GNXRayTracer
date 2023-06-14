@@ -7,6 +7,7 @@
 #include "Shape.h"
 #include "Spectrum.h"
 #include "Interaction.h"
+#include "MicroFacet.h"
 
 namespace pbr
 {
@@ -334,6 +335,80 @@ private:
     const Float etaA, etaB;
     const FresnelDielectric fresnel;
     const TransportMode mode;
+};
+
+class MicrofacetReflection : public BxDF
+{
+public:
+    // MicrofacetReflection Public Methods
+    MicrofacetReflection(const Spectrum& R,
+        MicrofacetDistribution* distribution, Fresnel* fresnel)
+        : BxDF(BxDFType(BSDF_REFLECTION | BSDF_GLOSSY)),
+        R(R),
+        distribution(distribution),
+        fresnel(fresnel) {}
+    Spectrum f(const Vector3f& wo, const Vector3f& wi) const;
+    Spectrum Sample_f(const Vector3f& wo, Vector3f* wi, const Point2f& u,
+        Float* pdf, BxDFType* sampledType) const;
+    Float Pdf(const Vector3f& wo, const Vector3f& wi) const;
+    std::string ToString() const;
+
+private:
+    // MicrofacetReflection Private Data
+    const Spectrum R;
+    const MicrofacetDistribution* distribution;
+    const Fresnel* fresnel;
+};
+
+class MicrofacetTransmission : public BxDF
+{
+public:
+    // MicrofacetTransmission Public Methods
+    MicrofacetTransmission(const Spectrum& T,
+        MicrofacetDistribution* distribution, Float etaA,
+        Float etaB, TransportMode mode)
+        : BxDF(BxDFType(BSDF_TRANSMISSION | BSDF_GLOSSY)),
+        T(T),
+        distribution(distribution),
+        etaA(etaA),
+        etaB(etaB),
+        fresnel(etaA, etaB),
+        mode(mode) {}
+    Spectrum f(const Vector3f& wo, const Vector3f& wi) const;
+    Spectrum Sample_f(const Vector3f& wo, Vector3f* wi, const Point2f& u,
+        Float* pdf, BxDFType* sampledType) const;
+    Float Pdf(const Vector3f& wo, const Vector3f& wi) const;
+    std::string ToString() const;
+
+private:
+    // MicrofacetTransmission Private Data
+    const Spectrum T;
+    const MicrofacetDistribution* distribution;
+    const Float etaA, etaB;
+    const FresnelDielectric fresnel;
+    const TransportMode mode;
+};
+
+class FresnelBlend : public BxDF
+{
+public:
+    // FresnelBlend Public Methods
+    FresnelBlend(const Spectrum& Rd, const Spectrum& Rs,
+        MicrofacetDistribution* distrib);
+    Spectrum f(const Vector3f& wo, const Vector3f& wi) const;
+    Spectrum SchlickFresnel(Float cosTheta) const {
+        auto pow5 = [](Float v) { return (v * v) * (v * v) * v; };
+        return Rs + pow5(1 - cosTheta) * (Spectrum(1.) - Rs);
+    }
+    Spectrum Sample_f(const Vector3f& wi, Vector3f* sampled_f, const Point2f& u,
+        Float* pdf, BxDFType* sampledType) const;
+    Float Pdf(const Vector3f& wo, const Vector3f& wi) const;
+    std::string ToString() const;
+
+private:
+    // FresnelBlend Private Data
+    const Spectrum Rd, Rs;
+    MicrofacetDistribution* distribution;
 };
 
 }  // namespace pbr

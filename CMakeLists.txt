@@ -44,6 +44,8 @@ core/Material.h
 core/Material.cpp
 core/Memory.h
 core/Memory.cpp
+core/MicroFacet.h
+core/MicroFacet.cpp
 core/Primitive.h
 core/Primitive.cpp
 core/RNG.h

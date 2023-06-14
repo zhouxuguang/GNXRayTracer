@@ -176,6 +176,85 @@ std::string OrenNayar::ToString() const
         StringPrintf(" A: %f B: %f ]", A, B);
 }
 
+Spectrum MicrofacetReflection::Sample_f(const Vector3f& wo, Vector3f* wi, const Point2f& u, Float* pdf, BxDFType* sampledType) const 
+{
+    // Sample microfacet orientation $\wh$ and reflected direction $\wi$
+    if (wo.z == 0) return 0.;
+    Vector3f wh = distribution->Sample_wh(wo, u);
+    if (Dot(wo, wh) < 0) return 0.;   // Should be rare
+    *wi = Reflect(wo, wh);
+    if (!SameHemisphere(wo, *wi)) return Spectrum(0.f);
+
+    // Compute PDF of _wi_ for microfacet reflection
+    *pdf = distribution->Pdf(wo, wh) / (4 * Dot(wo, wh));
+    return f(wo, *wi);
+}
+
+Float MicrofacetReflection::Pdf(const Vector3f& wo, const Vector3f& wi) const 
+{
+    if (!SameHemisphere(wo, wi)) return 0;
+    Vector3f wh = Normalize(wo + wi);
+    return distribution->Pdf(wo, wh) / (4 * Dot(wo, wh));
+}
+
+Spectrum MicrofacetTransmission::Sample_f(const Vector3f& wo, Vector3f* wi, const Point2f& u, Float* pdf, BxDFType* sampledType) const 
+{
+    if (wo.z == 0) return 0.;
+    Vector3f wh = distribution->Sample_wh(wo, u);
+    if (Dot(wo, wh) < 0) return 0.;  // Should be rare
+
+    Float eta = CosTheta(wo) > 0 ? (etaA / etaB) : (etaB / etaA);
+    if (!Refract(wo, (Normal3f)wh, eta, wi)) return 0;
+    *pdf = Pdf(wo, *wi);
+    return f(wo, *wi);
+}
+
+Float MicrofacetTransmission::Pdf(const Vector3f& wo, const Vector3f& wi) const 
+{
+    if (SameHemisphere(wo, wi)) return 0;
+    // Compute $\wh$ from $\wo$ and $\wi$ for microfacet transmission
+    Float eta = CosTheta(wo) > 0 ? (etaB / etaA) : (etaA / etaB);
+    Vector3f wh = Normalize(wo + wi * eta);
+
+    if (Dot(wo, wh) * Dot(wi, wh) > 0) return 0;
+
+    // Compute change of variables _dwh\_dwi_ for microfacet transmission
+    Float sqrtDenom = Dot(wo, wh) + eta * Dot(wi, wh);
+    Float dwh_dwi =
+        std::abs((eta * eta * Dot(wi, wh)) / (sqrtDenom * sqrtDenom));
+    return distribution->Pdf(wo, wh) * dwh_dwi;
+}
+
+Spectrum FresnelBlend::Sample_f(const Vector3f& wo, Vector3f* wi,
+    const Point2f& uOrig, Float* pdf,
+    BxDFType* sampledType) const 
+{
+    Point2f u = uOrig;
+    if (u[0] < .5) {
+        u[0] = std::min(2 * u[0], OneMinusEpsilon);
+        // Cosine-sample the hemisphere, flipping the direction if necessary
+        *wi = CosineSampleHemisphere(u);
+        if (wo.z < 0) wi->z *= -1;
+    }
+    else {
+        u[0] = std::min(2 * (u[0] - .5f), OneMinusEpsilon);
+        // Sample microfacet orientation $\wh$ and reflected direction $\wi$
+        Vector3f wh = distribution->Sample_wh(wo, u);
+        *wi = Reflect(wo, wh);
+        if (!SameHemisphere(wo, *wi)) return Spectrum(0.f);
+    }
+    *pdf = Pdf(wo, *wi);
+    return f(wo, *wi);
+}
+
+Float FresnelBlend::Pdf(const Vector3f& wo, const Vector3f& wi) const 
+{
+    if (!SameHemisphere(wo, wi)) return 0;
+    Vector3f wh = Normalize(wo + wi);
+    Float pdf_wh = distribution->Pdf(wo, wh);
+    return .5f * (AbsCosTheta(wi) * InvPi + pdf_wh / (4 * Dot(wo, wh)));
+}
+
 
 Spectrum BxDF::Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u,
                         Float *pdf, BxDFType *sampledType) const
