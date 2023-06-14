@@ -83,7 +83,8 @@ void RenderThread::run()
         std::shared_ptr<Texture<Spectrum>> KdWhite = std::make_shared<ConstantTexture<Spectrum>>(whiteColor);
         std::shared_ptr<Texture<Spectrum>> KdRed = std::make_shared<ConstantTexture<Spectrum>>(redWallColor);
         std::shared_ptr<Texture<Spectrum>> KdBlue = std::make_shared<ConstantTexture<Spectrum>>(blueWallColor);
-        std::shared_ptr<Texture<float>> sigma = std::make_shared<ConstantTexture<float>>(0.0f);
+        //std::shared_ptr<Texture<float>> sigma = std::make_shared<ConstantTexture<float>>(0.0f);
+        std::shared_ptr<Texture<float>> sigma = std::make_shared<ConstantTexture<float>>(60.0f);
         std::shared_ptr<Texture<float>> bumpMap = std::make_shared<ConstantTexture<float>>(0.0f);
 
         dragonMaterial = std::make_shared<MatteMaterial>(KdDragon, sigma, bumpMap);
