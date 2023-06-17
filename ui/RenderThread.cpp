@@ -19,6 +19,7 @@
 #include "core/Material.h"
 #include "materials/MatteMaterial.h"
 #include "materials/MirrorMaterial.h"
+#include "materials/PlasticMaterial.h"
 #include "core/Texture.h"
 #include "textures/ConstantTexture.h"
 #include "lights/PointLight.h"
@@ -30,6 +31,16 @@
 #include <omp.h>
 
 using namespace pbr;
+
+inline std::shared_ptr<Material> getPurplePlasticMaterial() 
+{
+    Spectrum purple; purple[0] = 0.35; purple[1] = 0.12; purple[2] = 0.48;
+    std::shared_ptr<Texture<Spectrum>> plasticKd = std::make_shared<ConstantTexture<Spectrum>>(purple);
+    std::shared_ptr<Texture<Spectrum>> plasticKr = std::make_shared<ConstantTexture<Spectrum>>(Spectrum(1.f) - purple);
+    std::shared_ptr<Texture<float >> plasticRoughness = std::make_shared<ConstantTexture<float >>(0.1f);
+    std::shared_ptr<Texture<float >> bumpMap = std::make_shared<ConstantTexture<float >>(0.0f);
+    return std::make_shared<PlasticMaterial >(plasticKd, plasticKr, plasticRoughness, bumpMap, true);
+}
 
 
 RenderThread::RenderThread()
@@ -87,7 +98,8 @@ void RenderThread::run()
         std::shared_ptr<Texture<float>> sigma = std::make_shared<ConstantTexture<float>>(60.0f);
         std::shared_ptr<Texture<float>> bumpMap = std::make_shared<ConstantTexture<float>>(0.0f);
 
-        dragonMaterial = std::make_shared<MatteMaterial>(KdDragon, sigma, bumpMap);
+        //dragonMaterial = std::make_shared<MatteMaterial>(KdDragon, sigma, bumpMap);
+        dragonMaterial = getPurplePlasticMaterial();
 
         whiteWallMaterial = std::make_shared<MatteMaterial>(KdWhite, sigma, bumpMap);
         redWallMaterial = std::make_shared<MatteMaterial>(KdRed, sigma, bumpMap);

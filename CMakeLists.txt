@@ -119,6 +119,8 @@ materials/MatteMaterial.h
 materials/MatteMaterial.cpp
 materials/MirrorMaterial.h
 materials/MirrorMaterial.cpp
+materials/PlasticMaterial.h
+materials/PlasticMaterial.cpp
 )
 source_group("materials" FILES ${MATERIALS_FILES})
 

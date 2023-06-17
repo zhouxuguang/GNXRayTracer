@@ -197,6 +197,28 @@ Float MicrofacetReflection::Pdf(const Vector3f& wo, const Vector3f& wi) const
     return distribution->Pdf(wo, wh) / (4 * Dot(wo, wh));
 }
 
+Spectrum MicrofacetReflection::f(const Vector3f& wo, const Vector3f& wi) const 
+{
+    Float cosThetaO = AbsCosTheta(wo), cosThetaI = AbsCosTheta(wi);
+    Vector3f wh = wi + wo;
+    // Handle degenerate cases for microfacet reflection
+    if (cosThetaI == 0 || cosThetaO == 0) return Spectrum(0.);
+    if (wh.x == 0 && wh.y == 0 && wh.z == 0) return Spectrum(0.);
+    wh = Normalize(wh);
+    // For the Fresnel call, make sure that wh is in the same hemisphere
+    // as the surface normal, so that TIR is handled correctly.
+    Spectrum F = fresnel->Evaluate(Dot(wi, Faceforward(wh, Vector3f(0, 0, 1))));
+    return R * distribution->D(wh) * distribution->G(wo, wi) * F /
+        (4 * cosThetaI * cosThetaO);
+}
+
+std::string MicrofacetReflection::ToString() const 
+{
+    return std::string("[ MicrofacetReflection R: ") + R.ToString() +
+        std::string(" distribution: ") + distribution->ToString() +
+        std::string(" fresnel: ") + fresnel->ToString() + std::string(" ]");
+}
+
 Spectrum MicrofacetTransmission::Sample_f(const Vector3f& wo, Vector3f* wi, const Point2f& u, Float* pdf, BxDFType* sampledType) const 
 {
     if (wo.z == 0) return 0.;
