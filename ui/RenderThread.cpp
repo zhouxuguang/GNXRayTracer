@@ -34,6 +34,8 @@
 
 using namespace pbr;
 
+void showMemoryInfo(void);
+
 inline std::shared_ptr<Material> getPurplePlasticMaterial() 
 {
     Spectrum purple; purple[0] = 0.35; purple[1] = 0.12; purple[2] = 0.48;
@@ -311,6 +313,36 @@ void RenderThread::run()
 		emit PaintBuffer(m_pFramebuffer->getUCbuffer(), WIDTH, HEIGHT, 4);
 			
 		while (t.elapsed() < 1);
+
+        showMemoryInfo();
 	}
 	
 }
+
+#ifdef _WIN32
+
+
+#include <windows.h>
+#include <psapi.h>
+#pragma comment(lib, "psapi.lib") 
+void showMemoryInfo(void) {
+
+    //  SIZE_T PeakWorkingSetSize; //峰值内存使用
+    //  SIZE_T WorkingSetSize; //内存使用
+    //  SIZE_T PagefileUsage; //虚拟内存使用
+    //  SIZE_T PeakPagefileUsage; //峰值虚拟内存使用
+
+    EmptyWorkingSet(GetCurrentProcess());
+
+    HANDLE handle = GetCurrentProcess();
+    PROCESS_MEMORY_COUNTERS pmc;
+    GetProcessMemoryInfo(handle, &pmc, sizeof(pmc));
+
+    g_RenderStatus.setDataChanged("Memory Use", "WorkingSetSize", QString::number(pmc.WorkingSetSize / 1000.f / 1000.f), "M");
+    g_RenderStatus.setDataChanged("Memory Use", "PeakWorkingSetSize", QString::number(pmc.PeakWorkingSetSize / 1000.f / 1000.f), "M");
+    g_RenderStatus.setDataChanged("Memory Use", "PagefileUsage", QString::number(pmc.PagefileUsage / 1000.f / 1000.f), "M");
+    g_RenderStatus.setDataChanged("Memory Use", "PeakPagefileUsage", QString::number(pmc.PeakPagefileUsage / 1000.f / 1000.f), "M");
+
+}
+
+#endif // _WIN32
