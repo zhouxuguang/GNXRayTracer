@@ -118,6 +118,9 @@ class Distribution2D;
 class RNG;
 class ProgressReporter;
 
+template <typename T, int logBlockSize = 2>
+class BlockedArray;
+
 #ifndef PBR_L1_CACHE_LINE_SIZE
   #define PBR_L1_CACHE_LINE_SIZE 64
 #endif

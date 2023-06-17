@@ -30,4 +30,4 @@ void FreeAligned(void *ptr)
 #endif
 }
 
-}  // namespace pbrt
+}  // namespace pbr

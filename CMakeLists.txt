@@ -46,6 +46,8 @@ core/Memory.h
 core/Memory.cpp
 core/MicroFacet.h
 core/MicroFacet.cpp
+core/MIPMap.h
+core/MIPMap.cpp
 core/Primitive.h
 core/Primitive.cpp
 core/RNG.h
