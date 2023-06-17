@@ -132,7 +132,8 @@ public:
 		float weight = (1.0f / (float)curRenderCount);
 		fbuffer[offset] = weight * dat + (1.0f - weight) * fbuffer[offset];
         
-        float exposure = 0.45;
+		//É«µ÷Ó³Éä
+        float exposure = 0.75;
         float temp_c = 1.0f -expf(-fbuffer[offset] * 1.0f / (1 - exposure));
 
         ubuffer[offset] = temp_c * 255;
@@ -150,9 +151,6 @@ private:
 	int curRenderCount;
 
 };
-
-
-
 
 
 #endif
