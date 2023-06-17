@@ -243,45 +243,11 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
                 colObj += Li(r, scene, *pixel_sampler, arena, 0);
                 
 #else
-                SurfaceInteraction isect;
-                if (scene.Intersect(r, &isect))
-                {
-                    VisibilityTester vist;
-                    Vector3f wi;
-                    float pdf_light; //采样光的Pdf
-
-                    size_t lightCount = scene.lights.size();
-                    for (int count = 0; count < lightCount; count++)
-                    {
-                        Spectrum Li = scene.lights[count]->Sample_Li(isect, pixel_sampler->Get2D(), &wi, &pdf_light, &vist);
-
-                        if (vist.Unoccluded(scene))
-                        {
-                            //计算散射
-                            isect.ComputeScatteringFunctions(r, arena);
-                            Vector3f wo = isect.wo;
-
-                            //采样散射光分布函数
-                            Spectrum f = isect.bsdf->f(wo, wi);
-
-                            //散射Pdf
-                            Float pdf_scattering = isect.bsdf->Pdf(wo, wi);
-
-                            //乘以3.0的意义是为了不让图像过暗
-                            colObj += Li * pdf_scattering * f * 3.0f / pdf_light;
-                        }
-                    }
-
-                    colObj /= lightCount;
-                }
-                
+                // 这里可以测试一些东西
 #endif
             } while (pixel_sampler->StartNextSample());
             
             colObj = colObj / pixel_sampler->samplesPerPixel;
-            //printf("colobk = %f, %f, %f\n", colObj[0], colObj[1], colObj[2]);
-            
-            //colObj[0] = 1.0;
 
             m_FrameBuffer->update_f_u_c(i, j, 0, colObj[0]);
             m_FrameBuffer->update_f_u_c(i, j, 1, colObj[1]);
