@@ -13,8 +13,8 @@ class plyInfo
 {
 public:
 	int nVertices, nTriangles;
-	Point3f *vertexArray;
-	int *vertexIndices;
+	Point3f *vertexArray = nullptr;
+	int *vertexIndices = nullptr;
     
 	plyInfo(std::string filePath)
     {
@@ -45,6 +45,12 @@ public:
 			f >> vertexIndices[i * 3 + 1];
 			f >> vertexIndices[i * 3 + 2];
 		}
+	}
+
+	void Release() 
+	{
+		delete[] vertexIndices;
+		delete[] vertexArray;
 	}
 };
 

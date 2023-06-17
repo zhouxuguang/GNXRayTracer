@@ -198,7 +198,7 @@ void RenderThread::run()
 
         for (int i = 0; i < plyi.nTriangles; ++i)
             prims.push_back(std::make_shared<GeometricPrimitive>(tris[i], dragonMaterial, nullptr));
-        //plyi.Release();
+        plyi.Release();
     }
     
     emit PrintString((char*)"Init Cornell Box...");
