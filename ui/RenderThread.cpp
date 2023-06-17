@@ -20,6 +20,7 @@
 #include "materials/MatteMaterial.h"
 #include "materials/MirrorMaterial.h"
 #include "materials/PlasticMaterial.h"
+#include "materials/MetalMaterial.h"
 #include "core/Texture.h"
 #include "textures/ConstantTexture.h"
 #include "lights/PointLight.h"
@@ -40,6 +41,19 @@ inline std::shared_ptr<Material> getPurplePlasticMaterial()
     std::shared_ptr<Texture<float >> plasticRoughness = std::make_shared<ConstantTexture<float >>(0.1f);
     std::shared_ptr<Texture<float >> bumpMap = std::make_shared<ConstantTexture<float >>(0.0f);
     return std::make_shared<PlasticMaterial >(plasticKd, plasticKr, plasticRoughness, bumpMap, true);
+}
+
+inline std::shared_ptr<Material> getYelloMetalMaterial() 
+{
+    Spectrum eta; eta[0] = 0.2f; eta[1] = 0.2f; eta[2] = 0.8f;
+    std::shared_ptr<Texture<Spectrum>> etaM = std::make_shared<ConstantTexture<Spectrum>>(eta);
+    Spectrum k; k[0] = 0.11f; k[1] = 0.11f; k[2] = 0.11f;
+    std::shared_ptr<Texture<Spectrum>> kM = std::make_shared<ConstantTexture<Spectrum>>(k);
+    std::shared_ptr<Texture<float>> Roughness = std::make_shared<ConstantTexture<float>>(0.15f);
+    std::shared_ptr<Texture<float>> RoughnessU = std::make_shared<ConstantTexture<float>>(0.15f);
+    std::shared_ptr<Texture<float>> RoughnessV = std::make_shared<ConstantTexture<float>>(0.15f);
+    std::shared_ptr<Texture<float>> bumpMap = std::make_shared<ConstantTexture<float>>(0.0f);
+    return 	std::make_shared<MetalMaterial>(etaM, kM, Roughness, RoughnessU, RoughnessV, bumpMap, false);
 }
 
 
@@ -99,7 +113,8 @@ void RenderThread::run()
         std::shared_ptr<Texture<float>> bumpMap = std::make_shared<ConstantTexture<float>>(0.0f);
 
         //dragonMaterial = std::make_shared<MatteMaterial>(KdDragon, sigma, bumpMap);
-        dragonMaterial = getPurplePlasticMaterial();
+        //dragonMaterial = getPurplePlasticMaterial();
+        dragonMaterial = getYelloMetalMaterial();
 
         whiteWallMaterial = std::make_shared<MatteMaterial>(KdWhite, sigma, bumpMap);
         redWallMaterial = std::make_shared<MatteMaterial>(KdRed, sigma, bumpMap);

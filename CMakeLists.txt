@@ -117,6 +117,8 @@ source_group("samplers" FILES ${SAMPLERS_FILES})
 set(MATERIALS_FILES 
 materials/MatteMaterial.h 
 materials/MatteMaterial.cpp
+materials/MetalMaterial.h
+materials/MetalMaterial.cpp
 materials/MirrorMaterial.h
 materials/MirrorMaterial.cpp
 materials/PlasticMaterial.h
