@@ -247,6 +247,45 @@ Float MicrofacetTransmission::Pdf(const Vector3f& wo, const Vector3f& wi) const
     return distribution->Pdf(wo, wh) * dwh_dwi;
 }
 
+Spectrum MicrofacetTransmission::f(const Vector3f& wo, const Vector3f& wi) const 
+{
+    if (SameHemisphere(wo, wi)) return 0;  // transmission only
+
+    Float cosThetaO = CosTheta(wo);
+    Float cosThetaI = CosTheta(wi);
+    if (cosThetaI == 0 || cosThetaO == 0) return Spectrum(0);
+
+    // Compute $\wh$ from $\wo$ and $\wi$ for microfacet transmission
+    Float eta = CosTheta(wo) > 0 ? (etaB / etaA) : (etaA / etaB);
+    Vector3f wh = Normalize(wo + wi * eta);
+    if (wh.z < 0) wh = -wh;
+
+    // Same side?
+    if (Dot(wo, wh) * Dot(wi, wh) > 0) return Spectrum(0);
+
+    Spectrum F = fresnel.Evaluate(Dot(wo, wh));
+
+    Float sqrtDenom = Dot(wo, wh) + eta * Dot(wi, wh);
+    Float factor = (mode == TransportMode::Radiance) ? (1 / eta) : 1;
+
+    return (Spectrum(1.f) - F) * T *
+        std::abs(distribution->D(wh) * distribution->G(wo, wi) * eta * eta *
+            AbsDot(wi, wh) * AbsDot(wo, wh) * factor * factor /
+            (cosThetaI * cosThetaO * sqrtDenom * sqrtDenom));
+}
+
+std::string MicrofacetTransmission::ToString() const 
+{
+    return std::string("[ MicrofacetTransmission T: ") + T.ToString() +
+        std::string(" distribution: ") + distribution->ToString() +
+        StringPrintf(" etaA: %f etaB: %f", etaA, etaB) +
+        std::string(" fresnel: ") + fresnel.ToString() +
+        std::string(" mode : ") +
+        (mode == TransportMode::Radiance ? std::string("RADIANCE")
+            : std::string("IMPORTANCE")) +
+        std::string(" ]");
+}
+
 Spectrum FresnelBlend::Sample_f(const Vector3f& wo, Vector3f* wi,
     const Point2f& uOrig, Float* pdf,
     BxDFType* sampledType) const 
@@ -275,6 +314,53 @@ Float FresnelBlend::Pdf(const Vector3f& wo, const Vector3f& wi) const
     Vector3f wh = Normalize(wo + wi);
     Float pdf_wh = distribution->Pdf(wo, wh);
     return .5f * (AbsCosTheta(wi) * InvPi + pdf_wh / (4 * Dot(wo, wh)));
+}
+
+Spectrum FresnelSpecular::Sample_f(const Vector3f& wo, Vector3f* wi, const Point2f& u, Float* pdf, BxDFType* sampledType) const 
+{
+    Float F = FrDielectric(CosTheta(wo), etaA, etaB);
+    if (u[0] < F) {
+        // Compute specular reflection for _FresnelSpecular_
+
+        // Compute perfect specular reflection direction
+        *wi = Vector3f(-wo.x, -wo.y, wo.z);
+        if (sampledType)
+            *sampledType = BxDFType(BSDF_SPECULAR | BSDF_REFLECTION);
+        *pdf = F;
+        return F * R / AbsCosTheta(*wi);
+    }
+    else {
+        // Compute specular transmission for _FresnelSpecular_
+
+        // Figure out which $\eta$ is incident and which is transmitted
+        bool entering = CosTheta(wo) > 0;
+        Float etaI = entering ? etaA : etaB;
+        Float etaT = entering ? etaB : etaA;
+
+        // Compute ray direction for specular transmission
+        if (!Refract(wo, Faceforward(Normal3f(0, 0, 1), wo), etaI / etaT, wi))
+            return 0;
+        Spectrum ft = T * (1 - F);
+
+        // Account for non-symmetry with transmission to different medium
+        if (mode == TransportMode::Radiance)
+            ft *= (etaI * etaI) / (etaT * etaT);
+        if (sampledType)
+            *sampledType = BxDFType(BSDF_SPECULAR | BSDF_TRANSMISSION);
+        *pdf = 1 - F;
+        return ft / AbsCosTheta(*wi);
+    }
+}
+
+std::string FresnelSpecular::ToString() const 
+{
+    return std::string("[ FresnelSpecular R: ") + R.ToString() +
+        std::string(" T: ") + T.ToString() +
+        StringPrintf(" etaA: %f etaB: %f ", etaA, etaB) +
+        std::string(" mode : ") +
+        (mode == TransportMode::Radiance ? std::string("RADIANCE")
+            : std::string("IMPORTANCE")) +
+        std::string(" ]");
 }
 
 

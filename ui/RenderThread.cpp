@@ -21,6 +21,7 @@
 #include "materials/MirrorMaterial.h"
 #include "materials/PlasticMaterial.h"
 #include "materials/MetalMaterial.h"
+#include "materials/GlassMaterial.h"
 #include "core/Texture.h"
 #include "textures/ConstantTexture.h"
 #include "lights/PointLight.h"
@@ -54,6 +55,20 @@ inline std::shared_ptr<Material> getYelloMetalMaterial()
     std::shared_ptr<Texture<float>> RoughnessV = std::make_shared<ConstantTexture<float>>(0.15f);
     std::shared_ptr<Texture<float>> bumpMap = std::make_shared<ConstantTexture<float>>(0.0f);
     return 	std::make_shared<MetalMaterial>(etaM, kM, Roughness, RoughnessU, RoughnessV, bumpMap, false);
+}
+
+inline std::shared_ptr<Material> getWhiteGlassMaterial() 
+{
+    Spectrum c1; c1[0] = 0.98f; c1[1] = 0.98f; c1[2] = 0.98f;
+    std::shared_ptr<Texture<Spectrum>> Kr = std::make_shared<ConstantTexture<Spectrum>>(c1);
+    Spectrum c2; c2[0] = 0.98f; c2[1] = 0.98f; c2[2] = 0.98f;
+    std::shared_ptr<Texture<Spectrum>> Kt = std::make_shared<ConstantTexture<Spectrum>>(c2);
+    std::shared_ptr<Texture<float>> index = std::make_shared<ConstantTexture<float>>(1.5f);
+    std::shared_ptr<Texture<float>> RoughnessU = std::make_shared<ConstantTexture<float>>(0.1f);
+    std::shared_ptr<Texture<float>> RoughnessV = std::make_shared<ConstantTexture<float>>(0.1f);
+    std::shared_ptr<Texture<float>> bumpMap = std::make_shared<ConstantTexture<float>>(0.0f);
+    return 	std::make_shared<GlassMaterial>(Kr, Kt,
+        RoughnessU, RoughnessV, index, bumpMap, false);
 }
 
 
@@ -114,7 +129,8 @@ void RenderThread::run()
 
         //dragonMaterial = std::make_shared<MatteMaterial>(KdDragon, sigma, bumpMap);
         //dragonMaterial = getPurplePlasticMaterial();
-        dragonMaterial = getYelloMetalMaterial();
+        //dragonMaterial = getYelloMetalMaterial();
+        dragonMaterial = getWhiteGlassMaterial();
 
         whiteWallMaterial = std::make_shared<MatteMaterial>(KdWhite, sigma, bumpMap);
         redWallMaterial = std::make_shared<MatteMaterial>(KdRed, sigma, bumpMap);

@@ -115,6 +115,8 @@ samplers/SobolMatrices.cpp
 source_group("samplers" FILES ${SAMPLERS_FILES})
 
 set(MATERIALS_FILES 
+materials/GlassMaterial.h
+materials/GlassMaterial.cpp
 materials/MatteMaterial.h 
 materials/MatteMaterial.cpp
 materials/MetalMaterial.h
