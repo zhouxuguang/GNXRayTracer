@@ -50,7 +50,7 @@ Spectrum PathIntegrator::Li(const Ray &r, const Scene &scene,
     // out of a medium and thus have their beta value increased.
     Float etaScale = 1;
 
-    for (bounces = 0;; ++bounces)
+    for (bounces = 0; ; ++bounces)
     {
         // Find next path vertex and accumulate contribution
 //        VLOG(2) << "Path tracer bounce " << bounces << ", current L = " << L

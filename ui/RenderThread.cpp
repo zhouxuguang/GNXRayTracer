@@ -27,12 +27,24 @@
 #include "lights/PointLight.h"
 #include "lights/DiffuseAreaLight.h"
 #include "lights/SkyBoxLight.h"
+#include "lights/InfiniteAreaLight.h"
 #include "integrators/WhittedIntegrator.h"
 #include "integrators/PathIntegrator.h"
 
 #include <omp.h>
 
 using namespace pbr;
+
+std::string getResourcesDir()
+{
+    std::string path= __FILE__;
+    std::string::size_type posNX = path.find("GNXRayTracer");
+    
+    path = path.substr(0, posNX);
+    
+    path = path + ("GNXRayTracer/Resources/");
+    return path;
+}
 
 void showMemoryInfo(void);
 
@@ -98,10 +110,10 @@ void RenderThread::run()
     m_pFramebuffer->bufferResize(WIDTH, HEIGHT);
     
     //相机参数
-    //Point3f eye(-4.0f, 1.f, -4.0f), look(0.0, 0.0, 0.0f);
+    Point3f eye(0.f, 2.f, 6.f), look(0.f, 0.f, 0.0f);
     Vector3f up(0.0f, 1.0f, 0.0f);
     
-    Point3f eye(0.f, 0.f, 5.0f), look(0.f, 0.f, 0.0f);
+    //Point3f eye(0.f, 0.f, 5.0f), look(0.f, 0.f, 0.0f);
     Transform lookat = LookAt(eye, look, up);
 
     Transform Camera2World = Inverse(lookat);
@@ -129,10 +141,10 @@ void RenderThread::run()
         std::shared_ptr<Texture<float>> sigma = std::make_shared<ConstantTexture<float>>(60.0f);
         std::shared_ptr<Texture<float>> bumpMap = std::make_shared<ConstantTexture<float>>(0.0f);
 
-        //dragonMaterial = std::make_shared<MatteMaterial>(KdDragon, sigma, bumpMap);
+        dragonMaterial = std::make_shared<MatteMaterial>(KdDragon, sigma, bumpMap);
         //dragonMaterial = getPurplePlasticMaterial();
         //dragonMaterial = getYelloMetalMaterial();
-        dragonMaterial = getWhiteGlassMaterial();
+        //dragonMaterial = getWhiteGlassMaterial();
 
         whiteWallMaterial = std::make_shared<MatteMaterial>(KdWhite, sigma, bumpMap);
         redWallMaterial = std::make_shared<MatteMaterial>(KdRed, sigma, bumpMap);
@@ -168,10 +180,10 @@ void RenderThread::run()
     }
     
     //将物体填充到基元
-//    for (int i = 0; i < nTrianglesFloor; ++i)
-//    {
-//        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], whiteWallMaterial, nullptr));
-//    }
+    for (int i = 0; i < nTrianglesFloor; ++i)
+    {
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], whiteWallMaterial, nullptr));
+    }
 
     
     emit PrintString((char*)"Init Mesh...");
@@ -237,14 +249,15 @@ void RenderThread::run()
             trisConBox.push_back(std::make_shared<Triangle>(&tri_ConBox2World, &tri_World2ConBox, false, meshConBox, i));
 
         //增加三角形到图元
-        for (int i = 0; i < nTrianglesWall; ++i) {
-            if (i == 6 || i == 7)
-                prims.push_back(std::make_shared<GeometricPrimitive>(trisConBox[i], redWallMaterial, nullptr));
-            else if (i == 8 || i == 9)
-                prims.push_back(std::make_shared<GeometricPrimitive>(trisConBox[i], blueWallMaterial, nullptr));
-            else
-                prims.push_back(std::make_shared<GeometricPrimitive>(trisConBox[i], whiteWallMaterial, nullptr));
-        }
+//        for (int i = 0; i < nTrianglesWall; ++i)
+//        {
+//            if (i == 6 || i == 7)
+//                prims.push_back(std::make_shared<GeometricPrimitive>(trisConBox[i], redWallMaterial, nullptr));
+//            else if (i == 8 || i == 9)
+//                prims.push_back(std::make_shared<GeometricPrimitive>(trisConBox[i], blueWallMaterial, nullptr));
+//            else
+//                prims.push_back(std::make_shared<GeometricPrimitive>(trisConBox[i], whiteWallMaterial, nullptr));
+//        }
     }
     
     
@@ -271,10 +284,10 @@ void RenderThread::run()
     //
     for (int i = 0; i < nTrianglesAreaLight; ++i)
     {
-        std::shared_ptr<AreaLight> area =
-            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, Spectrum(5.0f), 5, trisAreaLight[i], false);
-        lights.push_back(area);
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i], dragonMaterial, area));
+//        std::shared_ptr<AreaLight> area =
+//            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, Spectrum(5.0f), 5, trisAreaLight[i], false);
+//        lights.push_back(area);
+//        prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i], dragonMaterial, area));
     }
     
     //构造环境光源
@@ -283,6 +296,16 @@ void RenderThread::run()
     Float SkyBoxRadius = 10.0f;
 //    std::shared_ptr<Light> skyBoxLight = std::make_shared<SkyBoxLight>(SkyBoxToWorld, SkyBoxCenter, SkyBoxRadius, "1", 1);
 //    lights.push_back(skyBoxLight);
+    
+    //构造无限远面光源
+    emit PrintString((char*)"Init InfiniteLight...");
+    {
+        Transform InfinityLightToWorld = RotateX(20) * RotateY(-90) * RotateX(-90);
+        Spectrum power(1.0f);
+        std::shared_ptr<Light> infinityLight =
+            std::make_shared<InfiniteAreaLight>(InfinityLightToWorld, power, 10, getResourcesDir() + "MonValley1000.hdr");
+        lights.push_back(infinityLight);
+    }
     
     emit PrintString((char*)"Init worldScene");
     std::unique_ptr<Scene> worldScene = std::make_unique<Scene>(std::make_shared<BVHAccel>(prims, 1), lights);

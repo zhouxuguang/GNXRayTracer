@@ -12,8 +12,8 @@ namespace pbr
 InfiniteAreaLight::InfiniteAreaLight(const Transform &LightToWorld,
                                      const Spectrum &L, int nSamples,
                                      const std::string &texmap)
-    : Light((int)LightFlags::Infinite, LightToWorld,
-            nSamples) {
+    : Light((int)LightFlags::Infinite, LightToWorld, nSamples)
+{
     // Read texel data from _texmap_ and initialize _Lmap_
     Point2i resolution;
 
@@ -88,7 +88,7 @@ Spectrum InfiniteAreaLight::Power() const
                     SpectrumType::Illuminant);
 }
 
-Spectrum InfiniteAreaLight::Le(const RayDifferential &ray) const 
+Spectrum InfiniteAreaLight::Le(const Ray &ray) const 
 {
     Vector3f w = Normalize(WorldToLight(ray.d));
     Point2f st(SphericalPhi(w) * Inv2Pi, SphericalTheta(w) * InvPi);
