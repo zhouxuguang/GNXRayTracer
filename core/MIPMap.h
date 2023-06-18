@@ -34,14 +34,15 @@ public:
            Float maxAniso = 8.f, ImageWrap wrapMode = ImageWrap::Repeat);
     int Width() const { return resolution[0]; }
     int Height() const { return resolution[1]; }
-    int Levels() const { return pyramid.size(); }
+    int Levels() const { return (int)pyramid.size(); }
     const T &Texel(int level, int s, int t) const;
     T Lookup(const Point2f &st, Float width = 0.f) const;
     T Lookup(const Point2f &st, Vector2f dstdx, Vector2f dstdy) const;
 
 private:
     // MIPMap Private Methods
-    std::unique_ptr<ResampleWeight[]> resampleWeights(int oldRes, int newRes) {
+    std::unique_ptr<ResampleWeight[]> resampleWeights(int oldRes, int newRes)
+    {
         CHECK_GE(newRes, oldRes);
         std::unique_ptr<ResampleWeight[]> wt(new ResampleWeight[newRes]);
         Float filterwidth = 2.f;
@@ -61,11 +62,14 @@ private:
         }
         return wt;
     }
+    
     Float clamp(Float v) { return Clamp(v, 0.f, Infinity); }
     RGBSpectrum clamp(const RGBSpectrum &v) { return v.Clamp(0.f, Infinity); }
-    SampledSpectrum clamp(const SampledSpectrum &v) {
+    SampledSpectrum clamp(const SampledSpectrum &v)
+    {
         return v.Clamp(0.f, Infinity);
     }
+    
     T triangle(int level, const Point2f &st) const;
     T EWA(int level, Point2f st, Vector2f dst0, Vector2f dst1) const;
 

@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "Reflection.h"
 #include "Light.h"
+#include "MIPMap.h"
 #include "ui/FrameBuffer.h"
 #include <omp.h>
 
@@ -206,6 +207,8 @@ std::unique_ptr<Distribution1D> ComputeLightPowerDistribution(const Scene &scene
         new Distribution1D(&lightPower[0], lightPower.size()));
 }
 
+//#define TEST_MIPMAP
+
 // SamplerIntegrator Method Definitions
 void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
 {
@@ -213,6 +216,30 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
     double start = omp_get_wtime(); //渲染开始时间
 
     m_FrameBuffer->renderCountIncrease();
+    
+    std::shared_ptr<MIPMap<Spectrum>> mp = nullptr;
+    
+#ifdef TEST_MIPMAP
+    
+    int mW = 400, mH = 235;
+    Spectrum *mpdata = new Spectrum[mW * mH];
+    for (int j = 0; j < mH; j ++)
+    {
+        for (int i = 0; i <mW; i++)
+        {
+            int offset = i + j * mW;
+            Spectrum s;
+            s[0] = i / (Float)pixelBounds.pMax.x;
+            s[1] = j / (Float)pixelBounds.pMax.y;
+            s[2] = 0.4f;
+            mpdata[offset] = s;
+        }
+    }
+    
+    mp = std::make_shared<MIPMap<Spectrum>>(Point2i(mW, mH), mpdata, true);
+    delete [] mpdata;
+    
+#endif
 
     #pragma omp parallel for
     for (int i = 0; i < pixelBounds.pMax.x; i++)
@@ -239,7 +266,7 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
                 Ray r;
                 camera->GenerateRay(cs, &r);
 
-#if 1
+#ifndef TEST_MIPMAP
                 colObj += Li(r, scene, *pixel_sampler, arena, 0);
                 
 #else
@@ -248,6 +275,18 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
             } while (pixel_sampler->StartNextSample());
             
             colObj = colObj / pixel_sampler->samplesPerPixel;
+            
+            if (mp)
+            {
+                if (i < mp->Width() - 1 && j < mp->Height() - 1)
+                {
+                    colObj = mp->Lookup(Point2f((i + 1) / (Float)pixelBounds.pMax.x, (j + 1) / (Float)pixelBounds.pMax.y), 0.0f);
+                }
+                else
+                {
+                    colObj = Spectrum(0.0f);
+                }
+            }
 
             m_FrameBuffer->update_f_u_c(i, j, 0, colObj[0]);
             m_FrameBuffer->update_f_u_c(i, j, 1, colObj[1]);
