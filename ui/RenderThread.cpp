@@ -35,6 +35,12 @@
 
 using namespace pbr;
 
+#ifdef _WIN32
+    #define PATHSPLIT "\\"
+#else
+    #define PATHSPLIT "/"
+#endif
+
 std::string getResourcesDir()
 {
     std::string path = __FILE__;
@@ -43,7 +49,10 @@ std::string getResourcesDir()
     
     path = path.substr(0, posNX);
     
-    path = path + ("GNXRayTracer/Resources/");
+    path = path + "GNXRayTracer";
+    path += PATHSPLIT;
+    path += "Resources";
+    path += PATHSPLIT;
     return path;
 }
 
