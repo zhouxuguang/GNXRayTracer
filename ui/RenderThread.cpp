@@ -37,7 +37,8 @@ using namespace pbr;
 
 std::string getResourcesDir()
 {
-    std::string path= __FILE__;
+    std::string path = __FILE__;
+    printf("file path = %s\n", path.c_str());
     std::string::size_type posNX = path.find("GNXRayTracer");
     
     path = path.substr(0, posNX);

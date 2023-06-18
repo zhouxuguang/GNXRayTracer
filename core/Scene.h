@@ -23,8 +23,8 @@ public:
         for (const auto &light : lights)
         {
             light->Preprocess(*this);
-//            if (light->flags & (int)LightFlags::Infinite)
-//                infiniteLights.push_back(light);
+            if (light->flags & (int)LightFlags::Infinite)
+                infiniteLights.push_back(light);
         }
     }
     
