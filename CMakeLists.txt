@@ -135,6 +135,8 @@ source_group("materials" FILES ${MATERIALS_FILES})
 set(TEXTURES_FILES 
 textures/ConstantTexture.h 
 textures/ConstantTexture.cpp
+textures/ImageTexture.h
+textures/ImageTexture.cpp
 )
 source_group("textures" FILES ${TEXTURES_FILES})
 
