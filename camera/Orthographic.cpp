@@ -3,12 +3,12 @@
 #include "Orthographic.h"
 //#include "paramset.h"
 //#include "sampler.h"
-//#include "sampling.h"
+#include "core/Sampling.h"
 
 namespace pbr
 {
 
-float OrthographicCamera::GenerateRay(const CameraSample &sample, Ray *ray) const
+Float OrthographicCamera::GenerateRay(const CameraSample &sample, Ray *ray) const
 {
     // Compute raster and camera sample positions
     Point3f pFilm = Point3f(sample.pFilm.x, sample.pFilm.y, 0);
@@ -30,6 +30,58 @@ float OrthographicCamera::GenerateRay(const CameraSample &sample, Ray *ray) cons
         ray->o = Point3f(pLens.x, pLens.y, 0);
         ray->d = Normalize(pFocus - ray->o);
     }
+    *ray = CameraToWorld(*ray);
+    return 1;
+}
+
+Float OrthographicCamera::GenerateRayDifferential(const CameraSample &sample, RayDifferential *ray) const
+{
+    //ProfilePhase prof(Prof::GenerateCameraRay);
+    // Compute main orthographic viewing ray
+
+    // Compute raster and camera sample positions
+    Point3f pFilm = Point3f(sample.pFilm.x, sample.pFilm.y, 0);
+    Point3f pCamera = RasterToCamera(pFilm);
+    *ray = RayDifferential(pCamera, Vector3f(0, 0, 1));
+
+    // Modify ray for depth of field
+    if (lensRadius > 0)
+    {
+        // Sample point on lens
+        Point2f pLens = lensRadius * ConcentricSampleDisk(sample.pLens);
+
+        // Compute point on plane of focus
+        Float ft = focalDistance / ray->d.z;
+        Point3f pFocus = (*ray)(ft);
+
+        // Update ray for effect of lens
+        ray->o = Point3f(pLens.x, pLens.y, 0);
+        ray->d = Normalize(pFocus - ray->o);
+    }
+
+    // Compute ray differentials for _OrthographicCamera_
+    if (lensRadius > 0) {
+        // Compute _OrthographicCamera_ ray differentials accounting for lens
+
+        // Sample point on lens
+        Point2f pLens = lensRadius * ConcentricSampleDisk(sample.pLens);
+        Float ft = focalDistance / ray->d.z;
+
+        Point3f pFocus = pCamera + dxCamera + (ft * Vector3f(0, 0, 1));
+        ray->rxOrigin = Point3f(pLens.x, pLens.y, 0);
+        ray->rxDirection = Normalize(pFocus - ray->rxOrigin);
+
+        pFocus = pCamera + dyCamera + (ft * Vector3f(0, 0, 1));
+        ray->ryOrigin = Point3f(pLens.x, pLens.y, 0);
+        ray->ryDirection = Normalize(pFocus - ray->ryOrigin);
+    } else {
+        ray->rxOrigin = ray->o + dxCamera;
+        ray->ryOrigin = ray->o + dyCamera;
+        ray->rxDirection = ray->ryDirection = ray->d;
+    }
+    ray->time = Lerp(sample.time, shutterOpen, shutterClose);
+    ray->hasDifferentials = true;
+    //ray->medium = medium;
     *ray = CameraToWorld(*ray);
     return 1;
 }

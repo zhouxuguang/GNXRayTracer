@@ -15,11 +15,11 @@ Camera::~Camera()
 
 Camera::Camera(const Transform &CameraToWorld, Float shutterOpen,
                Float shutterClose, Film *film, const Medium *medium)
-    : CameraToWorld(CameraToWorld)
-//      shutterOpen(shutterOpen),
-//      shutterClose(shutterClose),
+    : CameraToWorld(CameraToWorld),
+      shutterOpen(shutterOpen),
+      shutterClose(shutterClose),
 //      film(film),
-//      medium(medium)
+      medium(medium)
 {
 //    if (CameraToWorld.HasScale())
 //        Warning(
@@ -28,6 +28,45 @@ Camera::Camera(const Transform &CameraToWorld, Float shutterOpen,
 //            "that this transform will have no scale factors in it.\n"
 //            "Proceed at your own risk; your image may have errors or\n"
 //            "the system may crash as a result of this.");
+}
+
+Float Camera::GenerateRayDifferential(const CameraSample &sample, RayDifferential *rd) const
+{
+    Float wt = GenerateRay(sample, rd);
+    if (wt == 0) return 0;
+
+    // Find camera ray after shifting a fraction of a pixel in the $x$ direction
+    Float wtx;
+    for (Float eps : { .05, -.05 }) {
+        CameraSample sshift = sample;
+        sshift.pFilm.x += eps;
+        Ray rx;
+        wtx = GenerateRay(sshift, &rx);
+        rd->rxOrigin = rd->o + (rx.o - rd->o) / eps;
+        rd->rxDirection = rd->d + (rx.d - rd->d) / eps;
+        if (wtx != 0)
+            break;
+    }
+    if (wtx == 0)
+        return 0;
+
+    // Find camera ray after shifting a fraction of a pixel in the $y$ direction
+    Float wty;
+    for (Float eps : { .05, -.05 }) {
+        CameraSample sshift = sample;
+        sshift.pFilm.y += eps;
+        Ray ry;
+        wty = GenerateRay(sshift, &ry);
+        rd->ryOrigin = rd->o + (ry.o - rd->o) / eps;
+        rd->ryDirection = rd->d + (ry.d - rd->d) / eps;
+        if (wty != 0)
+            break;
+    }
+    if (wty == 0)
+        return 0;
+
+    rd->hasDifferentials = true;
+    return wt;
 }
 
 Spectrum Camera::We(const Ray &ray, Point2f *raster) const

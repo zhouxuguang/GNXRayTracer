@@ -55,16 +55,16 @@ class SamplerIntegrator : public Integrator
     //渲染函数
     void Render(const Scene &scene, double &timeConsume);
     
-    virtual Spectrum Li(const Ray &ray, const Scene &scene,
+    virtual Spectrum Li(const RayDifferential &ray, const Scene &scene,
                         Sampler &sampler, MemoryArena &arena,
                         int depth = 0) const = 0;
     
-    Spectrum SpecularReflect(const Ray &ray,
+    Spectrum SpecularReflect(const RayDifferential &ray,
                              const SurfaceInteraction &isect,
                              const Scene &scene, Sampler &sampler,
                              MemoryArena &arena, int depth) const;
     
-    Spectrum SpecularTransmit(const Ray &ray,
+    Spectrum SpecularTransmit(const RayDifferential &ray,
                               const SurfaceInteraction &isect,
                               const Scene &scene, Sampler &sampler,
                               MemoryArena &arena, int depth) const;

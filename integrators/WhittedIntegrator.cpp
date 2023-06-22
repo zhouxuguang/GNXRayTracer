@@ -11,7 +11,7 @@ namespace pbr
 {
 
 // WhittedIntegrator Method Definitions
-Spectrum WhittedIntegrator::Li(const Ray &ray, const Scene &scene,
+Spectrum WhittedIntegrator::Li(const RayDifferential &ray, const Scene &scene,
                                Sampler &sampler, MemoryArena &arena,
                                int depth) const
 {

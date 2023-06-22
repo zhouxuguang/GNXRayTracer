@@ -52,7 +52,7 @@ Spectrum SkyBoxLight::Sample_Li(const Interaction &ref, const Point2f &u, Vector
 	return 16 * getLightValue(u.x, u.y);
 }
 
-Spectrum SkyBoxLight::Le(const Ray &ray) const
+Spectrum SkyBoxLight::Le(const RayDifferential &ray) const
 {
 	Vector3f oc = ray.o - worldCenter;
 	float a = Dot(ray.d, ray.d);

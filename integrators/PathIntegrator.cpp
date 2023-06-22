@@ -33,7 +33,7 @@ void PathIntegrator::Preprocess(const Scene &scene, Sampler &sampler)
     lightDistribution = CreateLightSampleDistribution(lightSampleStrategy, scene);
 }
 
-Spectrum PathIntegrator::Li(const Ray &r, const Scene &scene,
+Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
                             Sampler &sampler, MemoryArena &arena,
                             int depth) const {
     //ProfilePhase p(Prof::SamplerIntegratorLi);

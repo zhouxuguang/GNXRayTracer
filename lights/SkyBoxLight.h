@@ -31,7 +31,7 @@ public:
 	bool loadImage(const char* imageFile);
 	Spectrum getLightValue(float u, float v) const;
     Spectrum Power() const { return Spectrum(0.f); }
-	Spectrum Le(const Ray &ray) const;
+	Spectrum Le(const RayDifferential &ray) const;
 	Spectrum Sample_Li(const Interaction &ref, const Point2f &u, Vector3f *wi,
 		float *pdf, VisibilityTester *vis) const;
 	float Pdf_Li(const Interaction &, const Vector3f &) const { return 0.f; }

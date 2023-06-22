@@ -263,11 +263,15 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
             {
                 CameraSample cs;
                 cs = pixel_sampler->GetCameraSample(pixel);
-                Ray r;
-                camera->GenerateRay(cs, &r);
+//                Ray ray;
+//                camera->GenerateRay(cs, &r);
+                
+                RayDifferential ray;
+                float rayWeight = camera->GenerateRayDifferential(cs, &ray);
+                ray.ScaleDifferentials(1 / std::sqrt((Float)pixel_sampler->samplesPerPixel));
 
 #ifndef TEST_MIPMAP
-                colObj += Li(r, scene, *pixel_sampler, arena, 0);
+                colObj += Li(ray, scene, *pixel_sampler, arena, 0);
                 
 #else
                 // 这里可以测试一些东西
@@ -301,7 +305,7 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
 }
 
 Spectrum SamplerIntegrator::SpecularReflect(
-    const Ray &ray, const SurfaceInteraction &isect,
+    const RayDifferential &ray, const SurfaceInteraction &isect,
     const Scene &scene, Sampler &sampler, MemoryArena &arena, int depth) const
 {
     // Compute specular reflection direction _wi_ and BSDF value
@@ -315,32 +319,32 @@ Spectrum SamplerIntegrator::SpecularReflect(
     if (pdf > 0.f && !f.IsBlack() && AbsDot(wi, ns) != 0.f)
     {
         // Compute ray differential _rd_ for specular reflection
-        Ray rd = isect.SpawnRay(wi);
-//        if (ray.hasDifferentials) {
-//            rd.hasDifferentials = true;
-//            rd.rxOrigin = isect.p + isect.dpdx;
-//            rd.ryOrigin = isect.p + isect.dpdy;
-//            // Compute differential reflected directions
-//            Normal3f dndx = isect.shading.dndu * isect.dudx +
-//                            isect.shading.dndv * isect.dvdx;
-//            Normal3f dndy = isect.shading.dndu * isect.dudy +
-//                            isect.shading.dndv * isect.dvdy;
-//            Vector3f dwodx = -ray.rxDirection - wo,
-//                     dwody = -ray.ryDirection - wo;
-//            Float dDNdx = Dot(dwodx, ns) + Dot(wo, dndx);
-//            Float dDNdy = Dot(dwody, ns) + Dot(wo, dndy);
-//            rd.rxDirection =
-//                wi - dwodx + 2.f * Vector3f(Dot(wo, ns) * dndx + dDNdx * ns);
-//            rd.ryDirection =
-//                wi - dwody + 2.f * Vector3f(Dot(wo, ns) * dndy + dDNdy * ns);
-//        }
+        RayDifferential rd = isect.SpawnRay(wi);
+        if (ray.hasDifferentials) {
+            rd.hasDifferentials = true;
+            rd.rxOrigin = isect.p + isect.dpdx;
+            rd.ryOrigin = isect.p + isect.dpdy;
+            // Compute differential reflected directions
+            Normal3f dndx = isect.shading.dndu * isect.dudx +
+                            isect.shading.dndv * isect.dvdx;
+            Normal3f dndy = isect.shading.dndu * isect.dudy +
+                            isect.shading.dndv * isect.dvdy;
+            Vector3f dwodx = -ray.rxDirection - wo,
+                     dwody = -ray.ryDirection - wo;
+            Float dDNdx = Dot(dwodx, ns) + Dot(wo, dndx);
+            Float dDNdy = Dot(dwody, ns) + Dot(wo, dndy);
+            rd.rxDirection =
+                wi - dwodx + 2.f * Vector3f(Dot(wo, ns) * dndx + dDNdx * ns);
+            rd.ryDirection =
+                wi - dwody + 2.f * Vector3f(Dot(wo, ns) * dndy + dDNdy * ns);
+        }
         return f * Li(rd, scene, sampler, arena, depth + 1) * AbsDot(wi, ns) / pdf;
     }
     else
         return Spectrum(0.f);
 }
 
-Spectrum SamplerIntegrator::SpecularTransmit(const Ray &ray,
+Spectrum SamplerIntegrator::SpecularTransmit(const RayDifferential &ray,
                           const SurfaceInteraction &isect,
                           const Scene &scene, Sampler &sampler,
                           MemoryArena &arena, int depth) const
@@ -355,9 +359,8 @@ Spectrum SamplerIntegrator::SpecularTransmit(const Ray &ray,
     Normal3f ns = isect.shading.n;
     if (pdf > 0.f && !f.IsBlack() && AbsDot(wi, ns) != 0.f) {
         // Compute ray differential _rd_ for specular transmission
-        Ray rd = isect.SpawnRay(wi);
-        //if (ray.hasDifferentials)
-#if 0
+        RayDifferential rd = isect.SpawnRay(wi);
+        if (ray.hasDifferentials)
         {
             rd.hasDifferentials = true;
             rd.rxOrigin = p + isect.dpdx;
@@ -419,7 +422,6 @@ Spectrum SamplerIntegrator::SpecularTransmit(const Ray &ray,
             rd.ryDirection =
                 wi - eta * dwody + Vector3f(mu * dndy + dmudy * ns);
         }
-#endif
         L = f * Li(rd, scene, sampler, arena, depth + 1) * AbsDot(wi, ns) / pdf;
     }
     return L;

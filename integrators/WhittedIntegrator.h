@@ -18,7 +18,7 @@ public:
                       const Bounds2i &pixelBounds, FrameBuffer * pFrameBuffer)
         : SamplerIntegrator(camera, sampler, pixelBounds, pFrameBuffer), maxDepth(maxDepth) {}
     
-    Spectrum Li(const Ray &ray, const Scene &scene,
+    Spectrum Li(const RayDifferential &ray, const Scene &scene,
                 Sampler &sampler, MemoryArena &arena, int depth) const;
 
 private:

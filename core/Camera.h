@@ -18,6 +18,7 @@ public:
            Float shutterClose, Film *film, const Medium *medium);
     virtual ~Camera();
     virtual Float GenerateRay(const CameraSample &sample, Ray *ray) const = 0;
+    virtual Float GenerateRayDifferential(const CameraSample &sample, RayDifferential *rd) const;
     
     virtual Spectrum We(const Ray &ray, Point2f *pRaster2 = nullptr) const;
     virtual void Pdf_We(const Ray &ray, Float *pdfPos, Float *pdfDir) const;
@@ -27,9 +28,9 @@ public:
 
     // Camera Public Data
     Transform CameraToWorld;
-    // const Float shutterOpen, shutterClose;
+    const Float shutterOpen, shutterClose;
     // Film *film;
-    // const Medium *medium;
+    const Medium *medium;
 };
 
 struct CameraSample

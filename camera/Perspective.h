@@ -16,7 +16,12 @@ class PerspectiveCamera : public ProjectiveCamera
     PerspectiveCamera(const int rasterWidth, const int rasterHeight, const Transform &CameraToWorld,
                       const Bounds2f &screenWindow, float lensRadius, float focalDistance, float fov);
     
-    float GenerateRay(const CameraSample &sample, Ray *) const;
+    Float GenerateRay(const CameraSample &sample, Ray *) const;
+    
+    Float GenerateRayDifferential(const CameraSample &sample, RayDifferential *ray) const;
+    
+private:
+    Vector3f dxCamera, dyCamera;
 };
 
 //PerspectiveCamera *CreatePerspectiveCamera(const ParamSet &params,
