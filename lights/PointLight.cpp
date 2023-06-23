@@ -18,7 +18,6 @@ Spectrum PointLight::Sample_Li(const Interaction &ref, const Point2f &u,
     *wi = Normalize(pLight - ref.p);
     *pdf = 1.f;
     *vis = VisibilityTester(ref, Interaction(pLight, ref.time, mediumInterface));
-    //return I;
     return I / DistanceSquared(pLight, ref.p);
 }
 
@@ -48,4 +47,4 @@ void PointLight::Pdf_Le(const Ray &, const Normal3f &, Float *pdfPos, Float *pdf
     *pdfDir = UniformSpherePdf();
 }
 
-}  // namespace pbrt
+}  // namespace pbr

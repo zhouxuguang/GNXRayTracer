@@ -648,7 +648,6 @@ int BVHAccel::flattenBVHTree(BVHBuildNode *node, int *offset) {
 BVHAccel::~BVHAccel()
 {
     FreeAligned(nodes);
-    //free(nodes);
 }
 
 bool BVHAccel::Intersect(const Ray &ray, SurfaceInteraction *isect) const

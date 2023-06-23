@@ -119,4 +119,4 @@ OrthographicCamera *CreateOrthographicCamera(const int RasterWidth, const int Ra
     return new OrthographicCamera(RasterWidth, RasterHeight, cam2world, screen, lensradius, focaldistance);
 }
 
-}  // namespace pbrt
+}  // namespace pbr

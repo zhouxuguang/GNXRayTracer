@@ -3,16 +3,19 @@
 
 // core/transform.h*
 #include "GNXRayTracer.h"
-//#include "stringprint.h"
+#include "StringPrint.h"
 #include "Geometry.h"
 //#include "quaternion.h"
 
-namespace pbr {
+namespace pbr
+{
 
-// Matrix4x4 Declarations
-struct Matrix4x4 {
+// 4*4矩阵定义
+struct Matrix4x4
+{
     // Matrix4x4 Public Methods
-    Matrix4x4() {
+    Matrix4x4()
+    {
         m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.f;
         m[0][1] = m[0][2] = m[0][3] = m[1][0] = m[1][2] = m[1][3] = m[2][0] =
             m[2][1] = m[2][3] = m[3][0] = m[3][1] = m[3][2] = 0.f;
@@ -58,14 +61,14 @@ struct Matrix4x4 {
 
     friend std::ostream &operator<<(std::ostream &os, const Matrix4x4 &m) {
         // clang-format off
-        // os << StringPrintf("[ [ %f, %f, %f, %f ] "
-        //                    "[ %f, %f, %f, %f ] "
-        //                    "[ %f, %f, %f, %f ] "
-        //                    "[ %f, %f, %f, %f ] ]",
-        //                    m.m[0][0], m.m[0][1], m.m[0][2], m.m[0][3],
-        //                    m.m[1][0], m.m[1][1], m.m[1][2], m.m[1][3],
-        //                    m.m[2][0], m.m[2][1], m.m[2][2], m.m[2][3],
-        //                    m.m[3][0], m.m[3][1], m.m[3][2], m.m[3][3]);
+         os << StringPrintf("[ [ %f, %f, %f, %f ] "
+                            "[ %f, %f, %f, %f ] "
+                            "[ %f, %f, %f, %f ] "
+                            "[ %f, %f, %f, %f ] ]",
+                            m.m[0][0], m.m[0][1], m.m[0][2], m.m[0][3],
+                            m.m[1][0], m.m[1][1], m.m[1][2], m.m[1][3],
+                            m.m[2][0], m.m[2][1], m.m[2][2], m.m[2][3],
+                            m.m[3][0], m.m[3][1], m.m[3][2], m.m[3][3]);
         // clang-format on
         return os;
     }

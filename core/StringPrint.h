@@ -20,7 +20,8 @@
 namespace pbr
 {
 
-inline void stringPrintfRecursive(std::string *s, const char *fmt) {
+inline void stringPrintfRecursive(std::string *s, const char *fmt)
+{
     const char *c = fmt;
     // No args left; make sure there aren't any extra formatting
     // specifiers.
@@ -36,7 +37,8 @@ inline void stringPrintfRecursive(std::string *s, const char *fmt) {
 // 1. Copy from fmt to *s, up to the next formatting directive.
 // 2. Advance fmt past the next formatting directive and return the
 //    formatting directive as a string.
-inline std::string copyToFormatString(const char **fmt_ptr, std::string *s) {
+inline std::string copyToFormatString(const char **fmt_ptr, std::string *s)
+{
     const char *&fmt = *fmt_ptr;
     while (*fmt) {
         if (*fmt != '%') {
@@ -68,7 +70,8 @@ inline std::string copyToFormatString(const char **fmt_ptr, std::string *s) {
 }
 
 template <typename T>
-inline std::string formatOne(const char *fmt, T v) {
+inline std::string formatOne(const char *fmt, T v)
+{
     // Figure out how much space we need to allocate; add an extra
     // character for the '\0'.
     size_t size = snprintf(nullptr, 0, fmt, v) + 1;
@@ -83,8 +86,8 @@ inline std::string formatOne(const char *fmt, T v) {
 // output for a single StringPrintf() argument to the final result string
 // in *s.
 template <typename T, typename... Args>
-inline void stringPrintfRecursive(std::string *s, const char *fmt, T v,
-                                  Args... args) {
+inline void stringPrintfRecursive(std::string *s, const char *fmt, T v, Args... args)
+{
     std::string nextFmt = copyToFormatString(&fmt, s);
     *s += formatOne(nextFmt.c_str(), v);
     stringPrintfRecursive(s, fmt, args...);
@@ -92,8 +95,8 @@ inline void stringPrintfRecursive(std::string *s, const char *fmt, T v,
 
 // Special case of StringPrintRecursive for float-valued arguments.
 template <typename... Args>
-inline void stringPrintfRecursive(std::string *s, const char *fmt, float v,
-                                  Args... args) {
+inline void stringPrintfRecursive(std::string *s, const char *fmt, float v, Args... args)
+{
     std::string nextFmt = copyToFormatString(&fmt, s);
     if (nextFmt == "%f")
         // Always use enough precision so that the printed value gives
@@ -114,8 +117,8 @@ inline void stringPrintfRecursive(std::string *s, const char *fmt, float v,
 // that this is the version that is actually called for floats.  I thought
 // that float->double promotion wasn't supposed to happen in this case?)
 template <typename... Args>
-inline void stringPrintfRecursive(std::string *s, const char *fmt, double v,
-                                  Args... args) {
+inline void stringPrintfRecursive(std::string *s, const char *fmt, double v, Args... args)
+{
     std::string nextFmt = copyToFormatString(&fmt, s);
     if (nextFmt == "%f")
         *s += formatOne("%.17g", v);
@@ -132,7 +135,8 @@ inline void stringPrintfRecursive(std::string *s, const char *fmt, double v,
 // specially so that enough digits are always printed so that the original
 // float/double can be reconstituted exactly from the printed digits.
 template <typename... Args>
-inline std::string StringPrintf(const char *fmt, Args... args) {
+inline std::string StringPrintf(const char *fmt, Args... args)
+{
     std::string ret;
     stringPrintfRecursive(&ret, fmt, args...);
     return ret;

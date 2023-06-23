@@ -126,7 +126,8 @@ private:
 
 // Sampling Inline Functions
 template <typename T>
-void Shuffle(T *samp, int count, int nDimensions, RNG &rng) {
+void Shuffle(T *samp, int count, int nDimensions, RNG &rng)
+{
     for (int i = 0; i < count; ++i) {
         int other = i + rng.UniformUInt32(count - i);
         for (int j = 0; j < nDimensions; ++j)
@@ -134,7 +135,8 @@ void Shuffle(T *samp, int count, int nDimensions, RNG &rng) {
     }
 }
 
-inline Vector3f CosineSampleHemisphere(const Point2f &u) {
+inline Vector3f CosineSampleHemisphere(const Point2f &u)
+{
     Point2f d = ConcentricSampleDisk(u);
     Float z = std::sqrt(std::max((Float)0, 1 - d.x * d.x - d.y * d.y));
     return Vector3f(d.x, d.y, z);
@@ -142,11 +144,13 @@ inline Vector3f CosineSampleHemisphere(const Point2f &u) {
 
 inline Float CosineHemispherePdf(Float cosTheta) { return cosTheta * InvPi; }
 
-inline Float BalanceHeuristic(int nf, Float fPdf, int ng, Float gPdf) {
+inline Float BalanceHeuristic(int nf, Float fPdf, int ng, Float gPdf)
+{
     return (nf * fPdf) / (nf * fPdf + ng * gPdf);
 }
 
-inline Float PowerHeuristic(int nf, Float fPdf, int ng, Float gPdf) {
+inline Float PowerHeuristic(int nf, Float fPdf, int ng, Float gPdf)
+{
     Float f = nf * fPdf, g = ng * gPdf;
     return (f * f) / (f * f + g * g);
 }

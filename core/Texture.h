@@ -22,7 +22,8 @@ public:
                         Vector2f *dstdy) const = 0;
 };
 
-class UVMapping2D : public TextureMapping2D {
+class UVMapping2D : public TextureMapping2D
+{
 public:
     // UVMapping2D Public Methods
     UVMapping2D(Float su = 1, Float sv = 1, Float du = 0, Float dv = 0);
@@ -33,7 +34,8 @@ private:
     const Float su, sv, du, dv;
 };
 
-class SphericalMapping2D : public TextureMapping2D {
+class SphericalMapping2D : public TextureMapping2D
+{
 public:
     // SphericalMapping2D Public Methods
     SphericalMapping2D(const Transform &WorldToTexture)
@@ -46,7 +48,8 @@ private:
     const Transform WorldToTexture;
 };
 
-class CylindricalMapping2D : public TextureMapping2D {
+class CylindricalMapping2D : public TextureMapping2D
+{
 public:
     // CylindricalMapping2D Public Methods
     CylindricalMapping2D(const Transform &WorldToTexture)
@@ -63,7 +66,8 @@ private:
     const Transform WorldToTexture;
 };
 
-class PlanarMapping2D : public TextureMapping2D {
+class PlanarMapping2D : public TextureMapping2D
+{
 public:
     // PlanarMapping2D Public Methods
     Point2f Map(const SurfaceInteraction &si, Vector2f *dstdx,
@@ -77,7 +81,8 @@ private:
     const Float ds, dt;
 };
 
-class TextureMapping3D {
+class TextureMapping3D
+{
 public:
     // TextureMapping3D Interface
     virtual ~TextureMapping3D();
@@ -114,6 +119,6 @@ Float FBm(const Point3f &p, const Vector3f &dpdx, const Vector3f &dpdy,
 Float Turbulence(const Point3f &p, const Vector3f &dpdx, const Vector3f &dpdy,
                  Float omega, int octaves);
 
-}  // namespace pbrt
+}  // namespace pbr
 
-#endif  // PBRT_CORE_TEXTURE_H
+#endif  // PBR_CORE_TEXTURE_H

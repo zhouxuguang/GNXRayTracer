@@ -21,12 +21,6 @@ Spectrum WhittedIntegrator::Li(const RayDifferential &ray, const Scene &scene,
     if (!scene.Intersect(ray, &isect))
     {
         for (const auto &light : scene.lights) L += light->Le(ray);
-//        if (depth <= 2)
-//        {
-//            Spectrum LL;
-//            LL[2] = 0.8;
-//            return LL;
-//        }
         return L;
     }
 

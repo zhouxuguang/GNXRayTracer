@@ -10,7 +10,8 @@ namespace pbr
 {
 
 // HaltonSampler Declarations
-class HaltonSampler : public GlobalSampler {
+class HaltonSampler : public GlobalSampler
+{
 public:
     // HaltonSampler Public Methods
     HaltonSampler(int nsamp, const Bounds2i &sampleBounds,

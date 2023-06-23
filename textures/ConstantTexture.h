@@ -22,6 +22,6 @@ private:
     T value;
 };
 
-}  // namespace pbrt
+}  // namespace pbr
 
 #endif  // PBRT_TEXTURES_CONSTANT_H

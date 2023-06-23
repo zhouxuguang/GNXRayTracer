@@ -103,4 +103,4 @@ MIPMap<Tmemory> *ImageTexture<Tmemory, Treturn>::GetTexture(
 template class ImageTexture<Float, Float>;
 template class ImageTexture<RGBSpectrum, Spectrum>;
 
-}  // namespace pbrt
+}  // namespace pbr

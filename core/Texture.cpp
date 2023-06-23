@@ -8,7 +8,8 @@ namespace pbr
 {
 
 // Texture Inline Functions
-inline Float SmoothStep(Float min, Float max, Float value) {
+inline Float SmoothStep(Float min, Float max, Float value)
+{
     Float v = Clamp((value - min) / (max - min), 0, 1);
     return v * v * (-2 * v + 3);
 }
@@ -19,7 +20,8 @@ inline Float NoiseWeight(Float t);
 
 // Perlin Noise Data
 static constexpr int NoisePermSize = 256;
-static int NoisePerm[2 * NoisePermSize] = {
+static int NoisePerm[2 * NoisePermSize] =
+{
     151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140,
     36, 103, 30, 69, 142,
     // Remainder of the noise permutation table
@@ -54,7 +56,8 @@ static int NoisePerm[2 * NoisePermSize] = {
     121, 50, 45, 127, 4, 150, 254, 138, 236, 205, 93, 222, 114, 67, 29, 24, 72,
     243, 141, 128, 195, 78, 66, 215, 61, 156, 180};
 
-Float Noise(Float x, Float y, Float z) {
+Float Noise(Float x, Float y, Float z)
+{
     // Compute noise cell coordinates and offsets
     int ix = std::floor(x), iy = std::floor(y), iz = std::floor(z);
     Float dx = x - ix, dy = y - iy, dz = z - iz;
@@ -84,7 +87,8 @@ Float Noise(Float x, Float y, Float z) {
 }
 
 Float Noise(const Point3f &p) { return Noise(p.x, p.y, p.z); }
-inline Float Grad(int x, int y, int z, Float dx, Float dy, Float dz) {
+inline Float Grad(int x, int y, int z, Float dx, Float dy, Float dz)
+{
     int h = NoisePerm[NoisePerm[NoisePerm[x] + y] + z];
     h &= 15;
     Float u = h < 8 || h == 12 || h == 13 ? dx : dy;
@@ -92,14 +96,15 @@ inline Float Grad(int x, int y, int z, Float dx, Float dy, Float dz) {
     return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
 }
 
-inline Float NoiseWeight(Float t) {
+inline Float NoiseWeight(Float t)
+{
     Float t3 = t * t * t;
     Float t4 = t3 * t;
     return 6 * t4 * t - 15 * t4 + 10 * t3;
 }
 
-Float FBm(const Point3f &p, const Vector3f &dpdx, const Vector3f &dpdy,
-          Float omega, int maxOctaves) {
+Float FBm(const Point3f &p, const Vector3f &dpdx, const Vector3f &dpdy, Float omega, int maxOctaves)
+{
     // Compute number of octaves for antialiased FBm
     Float len2 = std::max(dpdx.LengthSquared(), dpdy.LengthSquared());
     Float n = Clamp(-1 - .5f * Log2(len2), 0, maxOctaves);
@@ -144,7 +149,8 @@ Float Turbulence(const Point3f &p, const Vector3f &dpdx, const Vector3f &dpdy,
 }
 
 // Texture Function Definitions
-Float Lanczos(Float x, Float tau) {
+Float Lanczos(Float x, Float tau)
+{
     x = std::abs(x);
     if (x < 1e-5f) return 1;
     if (x > 1.f) return 0;

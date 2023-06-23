@@ -40,7 +40,7 @@ Spectrum DiffuseAreaLight::Sample_Li(const Interaction &ref, const Point2f &u,
 {
     //ProfilePhase _(Prof::LightSample);
     Interaction pShape = shape->Sample(ref, u, pdf);
-    //pShape.mediumInterface = mediumInterface;
+    pShape.mediumInterface = mediumInterface;
     if (*pdf == 0 || (pShape.p - ref.p).LengthSquared() == 0)   //如果pdf为0或者相交点和光源距离非常近
     {
         *pdf = 0;
@@ -64,7 +64,7 @@ Spectrum DiffuseAreaLight::Sample_Le(const Point2f &u1, const Point2f &u2,
     //ProfilePhase _(Prof::LightSample);
     // Sample a point on the area light's _Shape_, _pShape_
     Interaction pShape = shape->Sample(u1, pdfPos);
-    //pShape.mediumInterface = mediumInterface;
+    pShape.mediumInterface = mediumInterface;
     *nLight = pShape.n;
 
     // Sample a cosine-weighted outgoing direction _w_ for area light

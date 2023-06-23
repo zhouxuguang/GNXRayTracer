@@ -24,10 +24,6 @@ private:
     Vector3f dxCamera, dyCamera;
 };
 
-//PerspectiveCamera *CreatePerspectiveCamera(const ParamSet &params,
-//                                           const AnimatedTransform &cam2world,
-//                                           Film *film, const Medium *medium);
-
-}  // namespace pbrt
+}  // namespace pbr
 
 #endif  // PBRT_CAMERAS_PERSPECTIVE_H
