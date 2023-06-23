@@ -34,6 +34,7 @@ PerspectiveCamera::PerspectiveCamera(const int rasterWidth, const int rasterHeig
 
 Float PerspectiveCamera::GenerateRay(const CameraSample &sample, Ray *ray) const
 {
+    //ProfilePhase prof(Prof::GenerateCameraRay);
     // Compute raster and camera sample positions
     Point3f pFilm = Point3f(sample.pFilm.x, sample.pFilm.y, 0);
     Point3f pCamera = RasterToCamera(pFilm);
@@ -45,13 +46,15 @@ Float PerspectiveCamera::GenerateRay(const CameraSample &sample, Ray *ray) const
         Point2f pLens = lensRadius * ConcentricSampleDisk(sample.pLens);
 
         // Compute point on plane of focus
-        float ft = focalDistance / ray->d.z;
+        Float ft = focalDistance / ray->d.z;
         Point3f pFocus = (*ray)(ft);
 
         // Update ray for effect of lens
         ray->o = Point3f(pLens.x, pLens.y, 0);
         ray->d = Normalize(pFocus - ray->o);
     }
+    ray->time = Lerp(sample.time, shutterOpen, shutterClose);
+    ray->medium = medium;
     *ray = CameraToWorld(*ray);
     return 1;
 }
@@ -65,7 +68,8 @@ Float PerspectiveCamera::GenerateRayDifferential(const CameraSample &sample, Ray
     Vector3f dir = Normalize(Vector3f(pCamera.x, pCamera.y, pCamera.z));
     *ray = RayDifferential(Point3f(0, 0, 0), dir);
     // Modify ray for depth of field
-    if (lensRadius > 0) {
+    if (lensRadius > 0)
+    {
         // Sample point on lens
         Point2f pLens = lensRadius * ConcentricSampleDisk(sample.pLens);
 

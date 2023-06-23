@@ -3,6 +3,7 @@
 
 #include "Geometry.h"
 #include "Material.h"
+#include "Medium.h"
 
 
 namespace pbr 
@@ -31,8 +32,10 @@ public:
 	virtual Bounds3f WorldBound() const;
 	virtual bool Intersect(const Ray &r, SurfaceInteraction *isect) const;
 	virtual bool IntersectP(const Ray &r) const;
-	GeometricPrimitive(const std::shared_ptr<Shape> &shape, const std::shared_ptr<Material> &material,
-                       const std::shared_ptr<AreaLight> &areaLight);
+	GeometricPrimitive(const std::shared_ptr<Shape> &shape,
+                       const std::shared_ptr<Material> &material,
+                       const std::shared_ptr<AreaLight> &areaLight,
+                       const MediumInterface &mediumInterface);
     const AreaLight *GetAreaLight() const;
     const Material *GetMaterial() const;
     void ComputeScatteringFunctions(SurfaceInteraction *isect,
@@ -44,6 +47,7 @@ private:
 	std::shared_ptr<Shape> shape;
     std::shared_ptr<Material> material;
     std::shared_ptr<AreaLight> areaLight;
+    MediumInterface mediumInterface;
 };
 
 

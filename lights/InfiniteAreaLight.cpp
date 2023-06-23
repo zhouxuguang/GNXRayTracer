@@ -116,8 +116,7 @@ Spectrum InfiniteAreaLight::Sample_Li(const Interaction &ref, const Point2f &u,
     if (sinTheta == 0) *pdf = 0;
 
     // Return radiance value for infinite light direction
-    *vis = VisibilityTester(ref, Interaction(ref.p + *wi * (2 * worldRadius),
-                                             ref.time));
+    *vis = VisibilityTester(ref, Interaction(ref.p + *wi * (2 * worldRadius), ref.time, mediumInterface));
     return Spectrum(Lmap->Lookup(uv), SpectrumType::Illuminant);
 }
 

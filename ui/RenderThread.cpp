@@ -210,7 +210,7 @@ void RenderThread::run()
     //将物体填充到基元
     for (int i = 0; i < nTrianglesFloor; ++i)
     {
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], whiteWallMaterial, nullptr));
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], whiteWallMaterial, nullptr, MediumInterface()));
     }
 
     
@@ -237,7 +237,7 @@ void RenderThread::run()
             tris.push_back(std::make_shared<Triangle>(&tri_Object2World, &tri_World2Object, false, mesh, i));
 
         for (int i = 0; i < plyi.nTriangles; ++i)
-            prims.push_back(std::make_shared<GeometricPrimitive>(tris[i], dragonMaterial, nullptr));
+            prims.push_back(std::make_shared<GeometricPrimitive>(tris[i], dragonMaterial, nullptr, MediumInterface()));
         plyi.Release();
     }
     

@@ -42,6 +42,8 @@ core/LightDistribution.h
 core/LightDistribution.cpp
 core/Material.h
 core/Material.cpp
+core/Medium.h
+core/Medium.cpp
 core/Memory.h
 core/Memory.cpp
 core/MicroFacet.h

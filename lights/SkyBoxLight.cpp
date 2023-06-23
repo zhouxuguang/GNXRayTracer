@@ -48,7 +48,7 @@ Spectrum SkyBoxLight::Sample_Li(const Interaction &ref, const Point2f &u, Vector
 	float sinPhi = std::sin(phi), cosPhi = std::cos(phi);
 	*wi = LightToWorld(Vector3f(sinTheta * cosPhi, sinTheta * sinPhi, cosTheta));
 	*pdf = 1.f / (4 * Pi);
-	*vis = VisibilityTester(ref, Interaction(ref.p + *wi * (2 * worldRadius), ref.time));
+	*vis = VisibilityTester(ref, Interaction(ref.p + *wi * (2 * worldRadius), ref.time, mediumInterface));
 	return 16 * getLightValue(u.x, u.y);
 }
 

@@ -49,7 +49,7 @@ public:
     // Light Public Data
     const int flags;
     const int nSamples;
-    //const MediumInterface mediumInterface;
+    const MediumInterface mediumInterface;
 
 protected:
     // Light Protected Data

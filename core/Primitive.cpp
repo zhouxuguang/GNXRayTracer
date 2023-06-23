@@ -10,9 +10,14 @@ static long long primitiveMemory = 0;
 Primitive::~Primitive() {}
 
 // GeometricPrimitive Method Definitions
-GeometricPrimitive::GeometricPrimitive(const std::shared_ptr<Shape> &shape, const std::shared_ptr<Material> &material,
-                                       const std::shared_ptr<AreaLight> &areaLight) :
-    shape(shape), material(material), areaLight(areaLight)
+GeometricPrimitive::GeometricPrimitive(const std::shared_ptr<Shape> &shape,
+                                       const std::shared_ptr<Material> &material,
+                                       const std::shared_ptr<AreaLight> &areaLight,
+                                       const MediumInterface &mediumInterface)
+    : shape(shape),
+    material(material),
+    areaLight(areaLight),
+    mediumInterface(mediumInterface)
 {
     primitiveMemory += sizeof(*this);
 }
@@ -26,16 +31,17 @@ bool GeometricPrimitive::IntersectP(const Ray &r) const
 
 bool GeometricPrimitive::Intersect(const Ray &r, SurfaceInteraction *isect) const
 {
-    float tHit;
+    Float tHit;
     if (!shape->Intersect(r, &tHit, isect)) return false;
     r.tMax = tHit;
     isect->primitive = this;
-    
     CHECK_GE(Dot(isect->n, isect->shading.n), 0.);
-    assert(Dot(isect->n, isect->shading.n) >= 0.0);
-    
     // Initialize _SurfaceInteraction::mediumInterface_ after _Shape_
     // intersection
+    if (mediumInterface.IsMediumTransition())
+        isect->mediumInterface = mediumInterface;
+    else
+        isect->mediumInterface = MediumInterface(r.medium);
     return true;
 }
 

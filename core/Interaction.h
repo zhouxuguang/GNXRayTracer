@@ -4,6 +4,7 @@
 #include "Shape.h"
 #include "Primitive.h"
 #include "Spectrum.h"
+#include "Medium.h"
 
 namespace pbr 
 {
@@ -13,19 +14,21 @@ struct Interaction
 	// Interaction Public Methods
 	Interaction() : time(0) {}
     
-    Interaction(const Point3f &p, const Vector3f &wo, Float time)
-        : p(p), time(time), wo(wo) {}
+    Interaction(const Point3f &p, const Vector3f &wo, Float time, const MediumInterface &mediumInterface)
+        : p(p), time(time), wo(wo), mediumInterface(mediumInterface) {}
     
-    Interaction(const Point3f &p, Float time)
-        : p(p), time(time) {}
+    Interaction(const Point3f &p, Float time, const MediumInterface &mediumInterface)
+        : p(p), time(time), mediumInterface(mediumInterface) {}
     
 	Interaction(const Point3f &p, const Normal3f &n, const Vector3f &pError,
-		const Vector3f &wo, float time)
+		const Vector3f &wo, float time, const MediumInterface &mediumInterface)
 		: p(p),
 		time(time),
         pError(pError),
 		wo(Normalize(wo)),
-		n(n) {}
+		n(n),
+        mediumInterface(mediumInterface)
+    {}
     
     Ray SpawnRay(const Vector3f &d) const
     {
@@ -53,44 +56,42 @@ struct Interaction
     
     bool IsMediumInteraction() const
     {
-        return false;
-        //return !IsSurfaceInteraction();
+        return !IsSurfaceInteraction();
     }
     
     const Medium *GetMedium(const Vector3f &w) const
     {
-        return nullptr;
-        //return Dot(w, n) > 0 ? mediumInterface.outside : mediumInterface.inside;
+        return Dot(w, n) > 0 ? mediumInterface.outside : mediumInterface.inside;
     }
     
     const Medium *GetMedium() const
     {
         CHECK_EQ(mediumInterface.inside, mediumInterface.outside);
-        return nullptr;
-        //return mediumInterface.inside;
+        return mediumInterface.inside;
     }
     
 	// Interaction Public Data
-	Point3f p;
-	float time;
-	Vector3f wo;
-	Normal3f n;
+    Point3f p;
+    Float time;
     Vector3f pError;
+    Vector3f wo;
+    Normal3f n;
+    MediumInterface mediumInterface;
 };
 
-//class MediumInteraction : public Interaction
-//{
-//public:
-//    // MediumInteraction Public Methods
-//    MediumInteraction() : phase(nullptr) {}
-//    MediumInteraction(const Point3f &p, const Vector3f &wo, Float time,
-//                      const Medium *medium, const PhaseFunction *phase)
-//        : Interaction(p, wo, time, medium), phase(phase) {}
-//    bool IsValid() const { return phase != nullptr; }
-//
-//    // MediumInteraction Public Data
-//    const PhaseFunction *phase;
-//};
+class MediumInteraction : public Interaction
+{
+public:
+    // MediumInteraction Public Methods
+    MediumInteraction() : phase(nullptr) {}
+    MediumInteraction(const Point3f &p, const Vector3f &wo, Float time,
+                      const Medium *medium, const PhaseFunction *phase)
+        : Interaction(p, wo, time, medium), phase(phase) {}
+    bool IsValid() const { return phase != nullptr; }
+
+    // MediumInteraction Public Data
+    const PhaseFunction *phase;
+};
 
 class SurfaceInteraction : public Interaction
 {

@@ -108,10 +108,10 @@ Spectrum EstimateDirect(const Interaction &it, const Point2f &uScattering,
         //参与介质
         else {
             // Evaluate phase function for light sampling strategy
-//            const MediumInteraction &mi = (const MediumInteraction &)it;
-//            Float p = mi.phase->p(mi.wo, wi);
-//            f = Spectrum(p);
-//            scatteringPdf = p;
+            const MediumInteraction &mi = (const MediumInteraction &)it;
+            Float p = mi.phase->p(mi.wo, wi);
+            f = Spectrum(p);
+            scatteringPdf = p;
             //VLOG(2) << "  medium p: " << p;
         }
         if (!f.IsBlack()) {
@@ -158,10 +158,10 @@ Spectrum EstimateDirect(const Interaction &it, const Point2f &uScattering,
         //参与介质
         else {
             // Sample scattered direction for medium interactions
-//            const MediumInteraction &mi = (const MediumInteraction &)it;
-//            Float p = mi.phase->Sample_p(mi.wo, &wi, uScattering);
-//            f = Spectrum(p);
-//            scatteringPdf = p;
+            const MediumInteraction &mi = (const MediumInteraction &)it;
+            Float p = mi.phase->Sample_p(mi.wo, &wi, uScattering);
+            f = Spectrum(p);
+            scatteringPdf = p;
         }
 //        VLOG(2) << "  BSDF / phase sampling f: " << f << ", scatteringPdf: " <<
 //            scatteringPdf;
@@ -181,7 +181,7 @@ Spectrum EstimateDirect(const Interaction &it, const Point2f &uScattering,
 //            bool foundSurfaceInteraction =
 //                handleMedia ? scene.IntersectTr(ray, sampler, &lightIsect, &Tr)
 //                            : scene.Intersect(ray, &lightIsect);
-            
+
             bool foundSurfaceInteraction = scene.Intersect(ray, &lightIsect);
 
             // Add light contribution from material sampling
