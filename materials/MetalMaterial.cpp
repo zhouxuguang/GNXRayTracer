@@ -102,4 +102,4 @@ const Float CopperK[CopperSamples] = {
 //                             remapRoughness);
 //}
 
-}  // namespace pbrt
+}  // namespace pbr

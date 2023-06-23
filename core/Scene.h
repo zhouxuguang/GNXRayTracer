@@ -9,7 +9,7 @@
 namespace pbr
 {
 
-// Scene Declarations
+// 场景定义
 class Scene
 {
 public:
