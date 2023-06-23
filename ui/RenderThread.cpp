@@ -24,6 +24,7 @@
 #include "materials/GlassMaterial.h"
 #include "core/Texture.h"
 #include "textures/ConstantTexture.h"
+#include "textures/ImageTexture.h"
 #include "lights/PointLight.h"
 #include "lights/DiffuseAreaLight.h"
 #include "lights/SkyBoxLight.h"
@@ -57,6 +58,23 @@ std::string getResourcesDir()
 }
 
 void showMemoryInfo(void);
+
+inline std::shared_ptr<Material> getSmileFacePlasticMaterial()
+{
+    std::unique_ptr<TextureMapping2D> map = std::make_unique<UVMapping2D>(1.f, 1.f, 0.f, 0.f);
+    std::string filename = getResourcesDir() + "awesomeface.jpg";
+    ImageWrap wrapMode = ImageWrap::Repeat;
+    bool trilerp = false;
+    float maxAniso = 8.f;
+    float scale = 1.f;
+    bool gamma = false; //
+    std::shared_ptr<Texture<Spectrum>> Kt =
+        std::make_shared<ImageTexture<RGBSpectrum, Spectrum>>(std::move(map), filename, trilerp, maxAniso, wrapMode, scale, gamma);
+
+    std::shared_ptr<Texture<float>> plasticRoughness = std::make_shared<ConstantTexture<float>>(0.1f);
+    std::shared_ptr<Texture<float>> bumpMap = std::make_shared<ConstantTexture<float>>(0.0f);
+    return std::make_shared<PlasticMaterial>(Kt, Kt, plasticRoughness, bumpMap, true);
+}
 
 inline std::shared_ptr<Material> getPurplePlasticMaterial() 
 {
