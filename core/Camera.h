@@ -40,9 +40,10 @@ struct CameraSample
     Float time;
 };
 
-inline std::ostream &operator<<(std::ostream &os, const CameraSample &cs) {
-//    os << "[ pFilm: " << cs.pFilm << " , pLens: " << cs.pLens <<
-//        StringPrintf(", time %f ]", cs.time);
+inline std::ostream &operator<<(std::ostream &os, const CameraSample &cs)
+{
+    os << "[ pFilm: " << cs.pFilm << " , pLens: " << cs.pLens <<
+        StringPrintf(", time %f ]", cs.time);
     return os;
 }
 
