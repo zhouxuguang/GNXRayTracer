@@ -133,8 +133,7 @@ Spectrum EstimateDirect(const Interaction &it, const Point2f &uScattering,
                 if (IsDeltaLight(light.flags))
                     Ld += f * Li / lightPdf;
                 else {
-                    Float weight =
-                        PowerHeuristic(1, lightPdf, 1, scatteringPdf);
+                    Float weight = PowerHeuristic(1, lightPdf, 1, scatteringPdf);
                     Ld += f * Li * weight / lightPdf;
                 }
             }
@@ -178,11 +177,9 @@ Spectrum EstimateDirect(const Interaction &it, const Point2f &uScattering,
             SurfaceInteraction lightIsect;
             Ray ray = it.SpawnRay(wi);
             Spectrum Tr(1.f);
-//            bool foundSurfaceInteraction =
-//                handleMedia ? scene.IntersectTr(ray, sampler, &lightIsect, &Tr)
-//                            : scene.Intersect(ray, &lightIsect);
-
-            bool foundSurfaceInteraction = scene.Intersect(ray, &lightIsect);
+            bool foundSurfaceInteraction =
+                handleMedia ? scene.IntersectTr(ray, sampler, &lightIsect, &Tr)
+                            : scene.Intersect(ray, &lightIsect);
 
             // Add light contribution from material sampling
             Spectrum Li(0.f);

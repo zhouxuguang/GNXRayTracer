@@ -15,7 +15,7 @@ class DiffuseAreaLight : public AreaLight
 {
   public:
     // DiffuseAreaLight Public Methods
-    DiffuseAreaLight(const Transform &LightToWorld,
+    DiffuseAreaLight(const Transform &LightToWorld, const MediumInterface &mediumInterface,
                      const Spectrum &Le,
                      int nSamples, const std::shared_ptr<Shape> &shape,
                      bool twoSided = false);

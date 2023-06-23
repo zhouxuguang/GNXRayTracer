@@ -15,8 +15,8 @@ class PointLight : public Light
 {
 public:
     // PointLight Public Methods
-    PointLight(const Transform &LightToWorld, const Spectrum &I)
-        : Light((int)LightFlags::DeltaPosition, LightToWorld),
+    PointLight(const Transform &LightToWorld, const MediumInterface &mediumInterface, const Spectrum &I)
+        : Light((int)LightFlags::DeltaPosition, LightToWorld, mediumInterface),
           pLight(LightToWorld(Point3f(0, 0, 0))),
           I(I) {}
     Spectrum Sample_Li(const Interaction &ref, const Point2f &u, Vector3f *wi,

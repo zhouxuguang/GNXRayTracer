@@ -12,7 +12,7 @@ namespace pbr
 InfiniteAreaLight::InfiniteAreaLight(const Transform &LightToWorld,
                                      const Spectrum &L, int nSamples,
                                      const std::string &texmap)
-    : Light((int)LightFlags::Infinite, LightToWorld, nSamples)
+    : Light((int)LightFlags::Infinite, LightToWorld, MediumInterface(), nSamples)
 {
     // Read texel data from _texmap_ and initialize _Lmap_
     Point2i resolution;

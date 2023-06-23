@@ -149,8 +149,18 @@ integrators/PathIntegrator.h
 integrators/PathIntegrator.cpp
 integrators/WhittedIntegrator.h
 integrators/WhittedIntegrator.cpp
+integrators/VolPathIntegrator.h
+integrators/VolPathIntegrator.cpp
 )
 source_group("integrators" FILES ${INTEGRATORS_FILES})
+
+set(MEDIA_FILES 
+media/HomogeneousMedium.h
+media/HomogeneousMedium.cpp
+media/GridDensityMedium.h
+media/GridDensityMedium.cpp
+)
+source_group("media" FILES ${MEDIA_FILES})
 
 set(UI_FILES 
 ui/FrameBuffer.h
@@ -190,6 +200,7 @@ add_executable(GNXRayTracer
              ${MATERIALS_FILES}
              ${LIGHTS_FILES}
              ${INTEGRATORS_FILES}
+             ${MEDIA_FILES}
              ${UI_FILES}
              ${3RD_FILES}
         )

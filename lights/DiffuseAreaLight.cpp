@@ -9,11 +9,11 @@ namespace pbr
 {
 
 // DiffuseAreaLight Method Definitions
-DiffuseAreaLight::DiffuseAreaLight(const Transform &LightToWorld,
+DiffuseAreaLight::DiffuseAreaLight(const Transform &LightToWorld, const MediumInterface &mediumInterface,
                                    const Spectrum &Lemit, int nSamples,
                                    const std::shared_ptr<Shape> &shape,
                                    bool twoSided)
-    : AreaLight(LightToWorld, nSamples),
+    : AreaLight(LightToWorld, mediumInterface, nSamples),
       Lemit(Lemit),
       shape(shape),
       twoSided(twoSided),

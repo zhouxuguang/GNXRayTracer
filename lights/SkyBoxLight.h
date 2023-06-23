@@ -12,7 +12,7 @@ class SkyBoxLight : public Light
 public:
     // SkyBoxLight Public Methods
     SkyBoxLight(const Transform &LightToWorld, const Point3f& worldCenter, float worldRadius, const char * file,  int nSamples)
-		: Light((int)LightFlags::Infinite, LightToWorld, nSamples),
+		: Light((int)LightFlags::Infinite, LightToWorld, mediumInterface, nSamples),
 		  worldCenter(worldCenter),
 		  worldRadius(worldRadius)
     {
