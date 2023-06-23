@@ -29,6 +29,11 @@
 #include "lights/DiffuseAreaLight.h"
 #include "lights/SkyBoxLight.h"
 #include "lights/InfiniteAreaLight.h"
+
+#include "core/Medium.h"
+#include "media/HomogeneousMedium.h"
+#include "media/GridDensityMedium.h"
+
 #include "integrators/WhittedIntegrator.h"
 #include "integrators/PathIntegrator.h"
 
@@ -181,6 +186,11 @@ void RenderThread::run()
         whiteLightMaterial = std::make_shared<MatteMaterial>(KdWhite, sigma, bumpMap);
         mirrorMaterial = std::make_shared<MirrorMaterial>(KrDragon, bumpMap);
     }
+    
+    //参与介质
+    //根据自己的喜好进行调整
+    HomogeneousMedium homogeneousMedium(2.4, 1.4, 0.5); //该接口给我们的模型使用
+    MediumInterface mediumDragon(&homogeneousMedium, nullptr);
 
     
     Transform tri_Object2World , tri_World2Object;
