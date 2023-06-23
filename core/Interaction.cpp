@@ -53,7 +53,7 @@ void SurfaceInteraction::SetShadingGeometry(const Vector3f &dpdus,
     shading.dndv = dndvs;
 }
 
-void SurfaceInteraction::ComputeScatteringFunctions(const Ray &ray,
+void SurfaceInteraction::ComputeScatteringFunctions(const RayDifferential &ray,
                                                     MemoryArena &arena,
                                                     bool allowMultipleLobes,
                                                     TransportMode mode)

@@ -111,7 +111,7 @@ public:
                             bool orientationIsAuthoritative);
     
     void ComputeScatteringFunctions(
-        const Ray &ray, MemoryArena &arena,
+        const RayDifferential &ray, MemoryArena &arena,
         bool allowMultipleLobes = false,
         TransportMode mode = TransportMode::Radiance);
     
