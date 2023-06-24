@@ -107,6 +107,8 @@ lights/InfiniteAreaLight.h
 lights/InfiniteAreaLight.cpp
 lights/SkyBoxLight.h
 lights/SkyBoxLight.cpp
+lights/SpotLight.h
+lights/SpotLight.cpp
 )
 source_group("lights" FILES ${LIGHTS_FILES})
 
