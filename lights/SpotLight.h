@@ -29,9 +29,9 @@ public:
 
 private:
     // SpotLight Private Data
-    const Point3f pLight;
+    const Point3f pLight;   //光源位置
     const Spectrum I;
-    const Float cosTotalWidth, cosFalloffStart;
+    const Float cosTotalWidth, cosFalloffStart;  //分别是光亮度为0的角度，以及开始衰减的角度
 };
 
 }  // namespace pbr

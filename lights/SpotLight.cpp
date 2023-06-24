@@ -24,9 +24,8 @@ Spectrum SpotLight::Sample_Li(const Interaction &ref, const Point2f &u,
     //ProfilePhase _(Prof::LightSample);
     *wi = Normalize(pLight - ref.p);
     *pdf = 1.f;
-    *vis =
-        VisibilityTester(ref, Interaction(pLight, ref.time, mediumInterface));
-    return I * Falloff(-*wi) / DistanceSquared(pLight, ref.p);
+    *vis = VisibilityTester(ref, Interaction(pLight, ref.time, mediumInterface));
+    return I * Falloff(-*wi) / DistanceSquared(pLight, ref.p);  //计算最终的光强
 }
 
 Float SpotLight::Falloff(const Vector3f &w) const
@@ -36,8 +35,7 @@ Float SpotLight::Falloff(const Vector3f &w) const
     if (cosTheta < cosTotalWidth) return 0;
     if (cosTheta >= cosFalloffStart) return 1;
     // Compute falloff inside spotlight cone
-    Float delta =
-        (cosTheta - cosTotalWidth) / (cosFalloffStart - cosTotalWidth);
+    Float delta = (cosTheta - cosTotalWidth) / (cosFalloffStart - cosTotalWidth);  //当前角度对比整个变化角度的比例
     return (delta * delta) * (delta * delta);
 }
 
