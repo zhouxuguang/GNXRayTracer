@@ -67,12 +67,12 @@ inline Vector3f Reflect(const Vector3f &wo, const Vector3f &n)
 
 inline bool Refract(const Vector3f &wi, const Normal3f &n, Float eta, Vector3f *wt)
 {
-    // Compute $\cos \theta_\roman{t}$ using Snell's law
+    // 根据菲涅尔定律计算sin2ThetaT
     Float cosThetaI = Dot(n, wi);
     Float sin2ThetaI = std::max(Float(0), Float(1 - cosThetaI * cosThetaI));
     Float sin2ThetaT = eta * eta * sin2ThetaI;
 
-    // Handle total internal reflection for transmission
+    // 处理全内反射
     if (sin2ThetaT >= 1) return false;
     Float cosThetaT = std::sqrt(1 - sin2ThetaT);
     *wt = eta * -wi + (eta * cosThetaI - cosThetaT) * Vector3f(n);
@@ -315,6 +315,7 @@ public:
     std::string ToString() const { return "[ FresnelNoOp ]"; }
 };
 
+//镜面反射
 class SpecularReflection : public BxDF
 {
 public:
@@ -325,6 +326,7 @@ public:
           fresnel(fresnel) {}
     Spectrum f(const Vector3f &wo, const Vector3f &wi) const
     {
+        // 从实践意义上来说，几乎不可能出射方向刚好等于反射方向
         return Spectrum(0.f);
     }
     Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &sample,

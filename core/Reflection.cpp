@@ -16,7 +16,7 @@ namespace pbr
 Float FrDielectric(Float cosThetaI, Float etaI, Float etaT)
 {
     cosThetaI = Clamp(cosThetaI, -1, 1);
-    // Potentially swap indices of refraction
+    // Potentially swap indices of refraction， 判断光线是否从物体内部射入到着色点
     bool entering = cosThetaI > 0.f;
     if (!entering) {
         std::swap(etaI, etaT);
@@ -27,7 +27,7 @@ Float FrDielectric(Float cosThetaI, Float etaI, Float etaT)
     Float sinThetaI = std::sqrt(std::max((Float)0, 1 - cosThetaI * cosThetaI));
     Float sinThetaT = etaI / etaT * sinThetaI;
 
-    // Handle total internal reflection
+    // 全内反射
     if (sinThetaT >= 1) return 1;
     Float cosThetaT = std::sqrt(std::max((Float)0, 1 - sinThetaT * sinThetaT));
     Float Rparl = ((etaT * cosThetaI) - (etaI * cosThetaT)) /
@@ -90,7 +90,7 @@ Spectrum SpecularReflection::Sample_f(const Vector3f &wo, Vector3f *wi,
                                       const Point2f &sample, Float *pdf,
                                       BxDFType *sampledType) const
 {
-    // Compute perfect specular reflection direction
+    // 计算完美镜面反射方向
     *wi = Vector3f(-wo.x, -wo.y, wo.z);
     *pdf = 1;
     return fresnel->Evaluate(CosTheta(*wi)) * R / AbsCosTheta(*wi);
@@ -107,7 +107,7 @@ Spectrum SpecularTransmission::Sample_f(const Vector3f &wo, Vector3f *wi,
                                         BxDFType *sampledType) const
 {
     // Figure out which $\eta$ is incident and which is transmitted
-    bool entering = CosTheta(wo) > 0;
+    bool entering = CosTheta(wo) > 0;  //大于0表示从外部进入到介质内
     Float etaI = entering ? etaA : etaB;
     Float etaT = entering ? etaB : etaA;
 
@@ -202,8 +202,8 @@ Spectrum MicrofacetReflection::f(const Vector3f& wo, const Vector3f& wi) const
     Float cosThetaO = AbsCosTheta(wo), cosThetaI = AbsCosTheta(wi);
     Vector3f wh = wi + wo;
     // Handle degenerate cases for microfacet reflection
-    if (cosThetaI == 0 || cosThetaO == 0) return Spectrum(0.);
-    if (wh.x == 0 && wh.y == 0 && wh.z == 0) return Spectrum(0.);
+    if (cosThetaI == 0 || cosThetaO == 0) return Spectrum(0.);    //辐射出射方向平行于表面法线或者入射方向平行于表面法线
+    if (wh.x == 0 && wh.y == 0 && wh.z == 0) return Spectrum(0.);  //入射方向与出射方向平行且方向相反
     wh = Normalize(wh);
     // For the Fresnel call, make sure that wh is in the same hemisphere
     // as the surface normal, so that TIR is handled correctly.
@@ -320,7 +320,7 @@ Spectrum FresnelSpecular::Sample_f(const Vector3f& wo, Vector3f* wi, const Point
 {
     Float F = FrDielectric(CosTheta(wo), etaA, etaB);
     if (u[0] < F) {
-        // Compute specular reflection for _FresnelSpecular_
+        // 采样镜面反射
 
         // Compute perfect specular reflection direction
         *wi = Vector3f(-wo.x, -wo.y, wo.z);
@@ -330,7 +330,7 @@ Spectrum FresnelSpecular::Sample_f(const Vector3f& wo, Vector3f* wi, const Point
         return F * R / AbsCosTheta(*wi);
     }
     else {
-        // Compute specular transmission for _FresnelSpecular_
+        // 采样折射方向
 
         // Figure out which $\eta$ is incident and which is transmitted
         bool entering = CosTheta(wo) > 0;
