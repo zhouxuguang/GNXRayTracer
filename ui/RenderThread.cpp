@@ -29,6 +29,7 @@
 #include "lights/DiffuseAreaLight.h"
 #include "lights/SkyBoxLight.h"
 #include "lights/InfiniteAreaLight.h"
+#include "lights/SpotLight.h"
 
 #include "core/Medium.h"
 #include "media/HomogeneousMedium.h"
@@ -322,11 +323,17 @@ void RenderThread::run()
     //
     for (int i = 0; i < nTrianglesAreaLight; ++i)
     {
-        std::shared_ptr<AreaLight> area =
-            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, MediumInterface(), Spectrum(5.0f), 5, trisAreaLight[i], false);
-        lights.push_back(area);
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i], dragonMaterial, area, MediumInterface()));
+//        std::shared_ptr<AreaLight> area =
+//            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, MediumInterface(), Spectrum(5.0f), 5, trisAreaLight[i], false);
+//        lights.push_back(area);
+//        prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i], dragonMaterial, area, MediumInterface()));
     }
+    
+    //聚光灯
+    Transform tri_Object2World_SpotLight = Translate(Vector3f(0.0f, 2.43f, 0.0f)) * Rotate(90, Vector3f(1.0f, 0.0f, 0.0f));
+    Transform tri_World2Object_SpotLight = Inverse(tri_Object2World_AreaLight);
+    std::shared_ptr<Light> spotLight = std::make_shared<SpotLight>(tri_Object2World_SpotLight, MediumInterface(), Spectrum(25.0f), 45, 30);
+    lights.push_back(spotLight);
     
     //构造环境光源
     Transform SkyBoxToWorld;
@@ -354,8 +361,8 @@ void RenderThread::run()
     std::shared_ptr<ClockRandSampler> sampler = std::make_unique<ClockRandSampler>(64, imageBound);
     
     Bounds2i ScreenBound(Point2i(0, 0), Point2i(WIDTH, HEIGHT));
-    //std::shared_ptr<Integrator> integrator = std::make_shared<WhittedIntegrator>(5, camera, sampler, ScreenBound, m_pFramebuffer);
-    std::shared_ptr<Integrator> integrator = std::make_shared<PathIntegrator>(15, camera, sampler, ScreenBound, m_pFramebuffer, 1.f, "spatial");
+    std::shared_ptr<Integrator> integrator = std::make_shared<WhittedIntegrator>(5, camera, sampler, ScreenBound, m_pFramebuffer);
+    //std::shared_ptr<Integrator> integrator = std::make_shared<PathIntegrator>(15, camera, sampler, ScreenBound, m_pFramebuffer, 1.f, "spatial");
     
     
     emit PrintString((char*)"Start Rendering");
