@@ -13,7 +13,7 @@ namespace pbr
 // Sampler Declarations
 class Sampler
 {
-  public:
+public:
     // Sampler Interface
     virtual ~Sampler();
     Sampler(int64_t samplesPerPixel);
@@ -39,7 +39,7 @@ class Sampler
     // Sampler Public Data
     const int64_t samplesPerPixel;
 
-  protected:
+protected:
     // Sampler Protected Data
     Point2i currentPixel;
     int64_t currentPixelSampleIndex;
@@ -47,13 +47,15 @@ class Sampler
     std::vector<std::vector<Float>> sampleArray1D;
     std::vector<std::vector<Point2f>> sampleArray2D;
 
-  private:
+private:
     // Sampler Private Data
     size_t array1DOffset, array2DOffset;
 };
 
-class PixelSampler : public Sampler {
-  public:
+//像素采样器
+class PixelSampler : public Sampler
+{
+public:
     // PixelSampler Public Methods
     PixelSampler(int64_t samplesPerPixel, int nSampledDimensions);
     bool StartNextSample();
@@ -61,7 +63,7 @@ class PixelSampler : public Sampler {
     Float Get1D();
     Point2f Get2D();
 
-  protected:
+protected:
     // PixelSampler Protected Data
     std::vector<std::vector<Float>> samples1D;
     std::vector<std::vector<Point2f>> samples2D;
@@ -69,8 +71,10 @@ class PixelSampler : public Sampler {
     RNG rng;
 };
 
-class GlobalSampler : public Sampler {
-  public:
+//全局采样器
+class GlobalSampler : public Sampler
+{
+public:
     // GlobalSampler Public Methods
     bool StartNextSample();
     void StartPixel(const Point2i &);
@@ -81,7 +85,7 @@ class GlobalSampler : public Sampler {
     virtual int64_t GetIndexForSample(int64_t sampleNum) const = 0;
     virtual Float SampleDimension(int64_t index, int dimension) const = 0;
 
-  private:
+private:
     // GlobalSampler Private Data
     int dimension;
     int64_t intervalSampleIndex;
@@ -99,8 +103,9 @@ inline double getClockRandom()
     return rand() / (RAND_MAX + 1.0);
 }
 
-// ClockRandSampler Declarations
-class ClockRandSampler : public GlobalSampler {
+// 随机采样器
+class ClockRandSampler : public GlobalSampler
+{
 public:
     // HaltonSampler Public Methods
     ClockRandSampler(int samplesPerPixel = 16, const Bounds2i& sampleBounds = Bounds2i(Point2i(0, 0), Point2i(100, 100))) :GlobalSampler(samplesPerPixel) {

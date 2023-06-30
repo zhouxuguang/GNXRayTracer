@@ -19,46 +19,53 @@ CameraSample Sampler::GetCameraSample(const Point2i &pRaster) {
     return cs;
 }
 
-void Sampler::StartPixel(const Point2i &p) {
+void Sampler::StartPixel(const Point2i &p)
+{
     currentPixel = p;
     currentPixelSampleIndex = 0;
     // Reset array offsets for next pixel sample
     array1DOffset = array2DOffset = 0;
 }
 
-bool Sampler::StartNextSample() {
+bool Sampler::StartNextSample()
+{
     // Reset array offsets for next pixel sample
     array1DOffset = array2DOffset = 0;
     return ++currentPixelSampleIndex < samplesPerPixel;
 }
 
-bool Sampler::SetSampleNumber(int64_t sampleNum) {
+bool Sampler::SetSampleNumber(int64_t sampleNum)
+{
     // Reset array offsets for next pixel sample
     array1DOffset = array2DOffset = 0;
     currentPixelSampleIndex = sampleNum;
     return currentPixelSampleIndex < samplesPerPixel;
 }
 
-void Sampler::Request1DArray(int n) {
+void Sampler::Request1DArray(int n)
+{
     CHECK_EQ(RoundCount(n), n);
     samples1DArraySizes.push_back(n);
     sampleArray1D.push_back(std::vector<Float>(n * samplesPerPixel));
 }
 
-void Sampler::Request2DArray(int n) {
+void Sampler::Request2DArray(int n)
+{
     CHECK_EQ(RoundCount(n), n);
     samples2DArraySizes.push_back(n);
     sampleArray2D.push_back(std::vector<Point2f>(n * samplesPerPixel));
 }
 
-const Float *Sampler::Get1DArray(int n) {
+const Float *Sampler::Get1DArray(int n)
+{
     if (array1DOffset == sampleArray1D.size()) return nullptr;
     CHECK_EQ(samples1DArraySizes[array1DOffset], n);
     CHECK_LT(currentPixelSampleIndex, samplesPerPixel);
     return &sampleArray1D[array1DOffset++][currentPixelSampleIndex * n];
 }
 
-const Point2f *Sampler::Get2DArray(int n) {
+const Point2f *Sampler::Get2DArray(int n)
+{
     if (array2DOffset == sampleArray2D.size()) return nullptr;
     CHECK_EQ(samples2DArraySizes[array2DOffset], n);
     CHECK_LT(currentPixelSampleIndex, samplesPerPixel);
@@ -66,24 +73,28 @@ const Point2f *Sampler::Get2DArray(int n) {
 }
 
 PixelSampler::PixelSampler(int64_t samplesPerPixel, int nSampledDimensions)
-    : Sampler(samplesPerPixel) {
+    : Sampler(samplesPerPixel)
+{
     for (int i = 0; i < nSampledDimensions; ++i) {
         samples1D.push_back(std::vector<Float>(samplesPerPixel));
         samples2D.push_back(std::vector<Point2f>(samplesPerPixel));
     }
 }
 
-bool PixelSampler::StartNextSample() {
+bool PixelSampler::StartNextSample()
+{
     current1DDimension = current2DDimension = 0;
     return Sampler::StartNextSample();
 }
 
-bool PixelSampler::SetSampleNumber(int64_t sampleNum) {
+bool PixelSampler::SetSampleNumber(int64_t sampleNum)
+{
     current1DDimension = current2DDimension = 0;
     return Sampler::SetSampleNumber(sampleNum);
 }
 
-Float PixelSampler::Get1D() {
+Float PixelSampler::Get1D()
+{
     //ProfilePhase _(Prof::GetSample);
     CHECK_LT(currentPixelSampleIndex, samplesPerPixel);
     if (current1DDimension < samples1D.size())
@@ -92,7 +103,8 @@ Float PixelSampler::Get1D() {
         return rng.UniformFloat();
 }
 
-Point2f PixelSampler::Get2D() {
+Point2f PixelSampler::Get2D()
+{
     //ProfilePhase _(Prof::GetSample);
     CHECK_LT(currentPixelSampleIndex, samplesPerPixel);
     if (current2DDimension < samples2D.size())
@@ -101,7 +113,8 @@ Point2f PixelSampler::Get2D() {
         return Point2f(rng.UniformFloat(), rng.UniformFloat());
 }
 
-void GlobalSampler::StartPixel(const Point2i &p) {
+void GlobalSampler::StartPixel(const Point2i &p)
+{
     //ProfilePhase _(Prof::StartPixel);
     Sampler::StartPixel(p);
     dimension = 0;
@@ -132,26 +145,30 @@ void GlobalSampler::StartPixel(const Point2i &p) {
     CHECK_EQ(arrayEndDim, dim);
 }
 
-bool GlobalSampler::StartNextSample() {
+bool GlobalSampler::StartNextSample()
+{
     dimension = 0;
     intervalSampleIndex = GetIndexForSample(currentPixelSampleIndex + 1);
     return Sampler::StartNextSample();
 }
 
-bool GlobalSampler::SetSampleNumber(int64_t sampleNum) {
+bool GlobalSampler::SetSampleNumber(int64_t sampleNum)
+{
     dimension = 0;
     intervalSampleIndex = GetIndexForSample(sampleNum);
     return Sampler::SetSampleNumber(sampleNum);
 }
 
-Float GlobalSampler::Get1D() {
+Float GlobalSampler::Get1D()
+{
     //ProfilePhase _(Prof::GetSample);
     if (dimension >= arrayStartDim && dimension < arrayEndDim)
         dimension = arrayEndDim;
     return SampleDimension(intervalSampleIndex, dimension++);
 }
 
-Point2f GlobalSampler::Get2D() {
+Point2f GlobalSampler::Get2D()
+{
     //ProfilePhase _(Prof::GetSample);
     if (dimension + 1 >= arrayStartDim && dimension < arrayEndDim)
         dimension = arrayEndDim;
