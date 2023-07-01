@@ -52,6 +52,8 @@ core/MIPMap.h
 core/MIPMap.cpp
 core/Primitive.h
 core/Primitive.cpp
+core/Quaternion.h
+core/Quaternion.cpp
 core/RNG.h
 core/Reflection.h
 core/Reflection.cpp
