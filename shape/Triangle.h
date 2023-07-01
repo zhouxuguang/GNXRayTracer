@@ -24,7 +24,7 @@ struct TriangleMesh
     std::unique_ptr<Normal3f[]> n;
     std::unique_ptr<Vector3f[]> s;
     std::unique_ptr<Point2f[]> uv;
-    //std::shared_ptr<Texture<Float>> alphaMask, shadowAlphaMask;
+    std::shared_ptr<Texture<Float>> alphaMask, shadowAlphaMask;
     std::vector<int> faceIndices;
 };
 

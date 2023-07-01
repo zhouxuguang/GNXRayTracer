@@ -1,7 +1,7 @@
 // shapes/triangle.cpp*
 #include "Triangle.h"
 #include "core/Interaction.h"
-//#include "texture.h"
+#include "core/Texture.h"
 //#include "textures/constant.h"
 //#include "paramset.h"
 #include "core/Sampling.h"
@@ -204,6 +204,14 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
 
     Point2f uvHit = b0 * uv[0] + b1 * uv[1] + b2 * uv[2];
     Point3f pHit = b0 * p0 + b1 * p1 + b2 * p2;
+    
+    // Test intersection against alpha texture, if present
+    if (testAlphaTexture && mesh->alphaMask) {
+        SurfaceInteraction isectLocal(pHit, Vector3f(0, 0, 0), uvHit, -ray.d,
+                                      dpdu, dpdv, Normal3f(0, 0, 0),
+                                      Normal3f(0, 0, 0), ray.time, this);
+        if (mesh->alphaMask->Evaluate(isectLocal) == 0) return false;
+    }
 
 
     // Fill in _SurfaceInteraction_ from triangle hit
@@ -399,7 +407,6 @@ bool Triangle::IntersectP(const Ray &ray, bool testAlphaTexture) const
                    std::abs(invDet);
     if (t <= deltaT) return false;
 
-#if 0
     // Test shadow ray intersection against alpha texture, if present
     if (testAlphaTexture && (mesh->alphaMask || mesh->shadowAlphaMask)) {
         // Compute triangle partial derivatives
@@ -440,8 +447,7 @@ bool Triangle::IntersectP(const Ray &ray, bool testAlphaTexture) const
             mesh->shadowAlphaMask->Evaluate(isectLocal) == 0)
             return false;
     }
-    ++nHits;
-#endif
+    //++nHits;
     
     return true;
 }
