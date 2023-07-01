@@ -31,4 +31,4 @@ void MatteMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
     }
 }
 
-}  // namespace pbrt
+}  // namespace pbr

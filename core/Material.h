@@ -27,6 +27,6 @@ public:
                      SurfaceInteraction *si);
 };
 
-}  // namespace pbrt
+}  // namespace pbr
 
-#endif  // PBRT_CORE_MATERIAL_H
+#endif  // PBR_CORE_MATERIAL_H

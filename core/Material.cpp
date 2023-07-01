@@ -15,7 +15,6 @@ Material::~Material() {}
 
 void Material::Bump(const std::shared_ptr<Texture<Float>> &d, SurfaceInteraction *si)
 {
-#if 0
     // Compute offset positions and evaluate displacement texture
     SurfaceInteraction siEval = *si;
 
@@ -50,7 +49,6 @@ void Material::Bump(const std::shared_ptr<Texture<Float>> &d, SurfaceInteraction
                     (vDisplace - displace) / dv * Vector3f(si->shading.n) +
                     displace * Vector3f(si->shading.dndv);
     si->SetShadingGeometry(dpdu, dpdv, si->shading.dndu, si->shading.dndv, false);
-#endif
 }
 
-}  // namespace pbrt
+}  // namespace pbr
