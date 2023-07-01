@@ -13,7 +13,7 @@ namespace pbr
 
 // PerspectiveCamera Method Definitions
 
-PerspectiveCamera::PerspectiveCamera(const int rasterWidth, const int rasterHeight, const Transform &CameraToWorld,
+PerspectiveCamera::PerspectiveCamera(const int rasterWidth, const int rasterHeight, const AnimatedTransform &CameraToWorld,
     const Bounds2f &screenWindow, float lensRadius, float focalDistance, float fov)
     : ProjectiveCamera(rasterWidth, rasterHeight, CameraToWorld, Perspective(fov, 1e-2f, 1000.f),
         screenWindow, 0, 0, lensRadius, focalDistance, nullptr, nullptr)
@@ -111,7 +111,7 @@ Float PerspectiveCamera::GenerateRayDifferential(const CameraSample &sample, Ray
     return 1;
 }
 
-PerspectiveCamera *CreatePerspectiveCamera(const int RasterWidth, const int RasterHeight, const Transform &cam2world)
+PerspectiveCamera *CreatePerspectiveCamera(const int RasterWidth, const int RasterHeight, const AnimatedTransform &cam2world)
 {
     float lensradius = 0.0f;
     float focaldistance = 3.0f;

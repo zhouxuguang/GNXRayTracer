@@ -13,7 +13,7 @@ class PerspectiveCamera : public ProjectiveCamera
 {
   public:
     // PerspectiveCamera Public Methods
-    PerspectiveCamera(const int rasterWidth, const int rasterHeight, const Transform &CameraToWorld,
+    PerspectiveCamera(const int rasterWidth, const int rasterHeight, const AnimatedTransform &CameraToWorld,
                       const Bounds2f &screenWindow, float lensRadius, float focalDistance, float fov);
     
     Float GenerateRay(const CameraSample &sample, Ray *) const;

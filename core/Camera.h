@@ -14,7 +14,7 @@ class Camera
 {
 public:
     // Camera Interface
-    Camera(const Transform &CameraToWorld, Float shutterOpen,
+    Camera(const AnimatedTransform &CameraToWorld, Float shutterOpen,
            Float shutterClose, Film *film, const Medium *medium);
     virtual ~Camera();
     virtual Float GenerateRay(const CameraSample &sample, Ray *ray) const = 0;
@@ -27,7 +27,7 @@ public:
                                VisibilityTester *vis) const;
 
     // Camera Public Data
-    Transform CameraToWorld;
+    AnimatedTransform CameraToWorld;
     const Float shutterOpen, shutterClose;
     // Film *film;
     const Medium *medium;
@@ -51,7 +51,7 @@ class ProjectiveCamera : public Camera
 {
   public:
     // ProjectiveCamera Public Methods
-    ProjectiveCamera(const int RasterWidth, const int RasterHeight, const Transform &CameraToWorld,
+    ProjectiveCamera(const int RasterWidth, const int RasterHeight, const AnimatedTransform &CameraToWorld,
                      const Transform &CameraToScreen,
                      const Bounds2f &screenWindow, Float shutterOpen,
                      Float shutterClose, Float lensr, Float focald, Film *film,
@@ -84,8 +84,8 @@ protected:
 class PerspectiveCamera;
 class OrthographicCamera;
 
-PerspectiveCamera *CreatePerspectiveCamera(const int RasterWidth, const int RasterHeight, const Transform &cam2world);
-OrthographicCamera *CreateOrthographicCamera(const int RasterWidth, const int RasterHeight, const Transform &cam2world);
+PerspectiveCamera *CreatePerspectiveCamera(const int RasterWidth, const int RasterHeight, const AnimatedTransform &cam2world);
+OrthographicCamera *CreateOrthographicCamera(const int RasterWidth, const int RasterHeight, const AnimatedTransform &cam2world);
 
 }  // namespace pbr
 

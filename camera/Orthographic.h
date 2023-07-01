@@ -12,7 +12,7 @@ class OrthographicCamera : public ProjectiveCamera
 {
   public:
     // OrthographicCamera Public Methods
-    OrthographicCamera(const int RasterWidth, const int RasterHeight, const Transform &CameraToWorld,
+    OrthographicCamera(const int RasterWidth, const int RasterHeight, const AnimatedTransform &CameraToWorld,
                        const Bounds2f &screenWindow, float lensRadius,
                        float focalDistance)
         : ProjectiveCamera(RasterWidth, RasterHeight, CameraToWorld, Orthographic(0, 10), screenWindow,

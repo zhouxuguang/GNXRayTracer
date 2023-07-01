@@ -87,7 +87,7 @@ Float OrthographicCamera::GenerateRayDifferential(const CameraSample &sample, Ra
     return 1;
 }
 
-OrthographicCamera *CreateOrthographicCamera(const int RasterWidth, const int RasterHeight, const Transform &cam2world)
+OrthographicCamera *CreateOrthographicCamera(const int RasterWidth, const int RasterHeight, const AnimatedTransform &cam2world)
 {
     float frame = (float)RasterWidth / (float)RasterHeight;
     Bounds2f screen;

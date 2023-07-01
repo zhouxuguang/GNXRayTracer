@@ -150,8 +150,10 @@ void RenderThread::run()
     Point3f eye(0.f, 0.f, 5.0f), look(0.f, 0.f, 0.0f);
     Transform lookat = LookAt(eye, look, up);
 
-    Transform Camera2World = Inverse(lookat);
-    std::shared_ptr<const Camera> camera = std::shared_ptr<Camera>(CreatePerspectiveCamera(WIDTH, HEIGHT, Camera2World));
+    Transform Camera2WorldStart = Inverse(lookat);
+    Transform Camera2WorldEnd = Camera2WorldStart;
+    AnimatedTransform animatedTrans(&Camera2WorldStart, 0.0f, &Camera2WorldEnd, 1.0f);
+    std::shared_ptr<const Camera> camera = std::shared_ptr<Camera>(CreatePerspectiveCamera(WIDTH, HEIGHT, animatedTrans));
     
     //初始化材质
     emit PrintString((char*)"Init Material");

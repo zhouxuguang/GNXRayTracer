@@ -13,7 +13,7 @@ Camera::~Camera()
 //    delete film;
 }
 
-Camera::Camera(const Transform &CameraToWorld, Float shutterOpen,
+Camera::Camera(const AnimatedTransform &CameraToWorld, Float shutterOpen,
                Float shutterClose, Film *film, const Medium *medium)
     : CameraToWorld(CameraToWorld),
       shutterOpen(shutterOpen),
