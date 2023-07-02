@@ -4,7 +4,8 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-	setMinimumSize(800, 800);
+	//setMinimumSize(800, 800);
+    setWindowState(Qt::WindowMaximized);
 
 	setCentralWidget(&centralWidget);
 
@@ -52,17 +53,11 @@ void MainWindow::setRendering()
 
 	if (!m_DisplayWidget.renderFlag)
     {
-		// Æô¶¯äÖÈ¾
+		// 
 		m_InteractionDockWidget.renderButton->setText("Rendering");
 
 		m_DisplayWidget.startRenderThread();
 	}
 
 }
-
-
-
-
-
-
 

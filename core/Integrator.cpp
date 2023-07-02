@@ -296,7 +296,7 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
         }
     }
     
-    m_FrameBuffer->saveToFile("/Users/zhouxuguang/work/source/GNXRayTracer/test.png");
+    //m_FrameBuffer->saveToFile("/Users/zhouxuguang/work/source/GNXRayTracer/test.png");
 
     // 结束时间
     double end = omp_get_wtime();
