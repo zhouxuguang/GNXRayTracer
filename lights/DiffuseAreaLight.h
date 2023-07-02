@@ -21,7 +21,9 @@ class DiffuseAreaLight : public AreaLight
                      bool twoSided = false);
     Spectrum L(const Interaction &intr, const Vector3f &w) const
     {
-        return (twoSided || Dot(intr.n, w) > 0) ? Lemit : Spectrum(0.f);
+        bool dotNW = Dot(intr.n, w);
+        //dotNW = true;
+        return (twoSided || dotNW > 0) ? Lemit : Spectrum(0.f);
     }
     Spectrum Power() const;
     Spectrum Sample_Li(const Interaction &ref, const Point2f &u, Vector3f *wo,

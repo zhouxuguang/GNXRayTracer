@@ -2,12 +2,13 @@
 
 #ifndef __FrameBuffer_H__
 #define __FrameBuffer_H__
-#include "DebugText.h"
 
+#include "DebugText.h"
 #include <QObject>
 
 
-class FrameBuffer : public QObject {
+class FrameBuffer : public QObject
+{
 	Q_OBJECT
 
 public:
@@ -132,7 +133,7 @@ public:
 		float weight = (1.0f / (float)curRenderCount);
 		fbuffer[offset] = weight * dat + (1.0f - weight) * fbuffer[offset];
         
-		//É«µ÷Ó³Éä
+		//
         float exposure = 0.75;
         float temp_c = 1.0f -expf(-fbuffer[offset] * 1.0f / (1 - exposure));
 
@@ -141,6 +142,8 @@ public:
 	}
 
 	unsigned char * getUCbuffer() { return ubuffer; }
+    
+    void saveToFile(const std::string& fileName);
 
 private:
 	unsigned char * ubuffer;

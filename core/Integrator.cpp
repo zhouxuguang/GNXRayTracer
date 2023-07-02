@@ -204,7 +204,7 @@ std::unique_ptr<Distribution1D> ComputeLightPowerDistribution(const Scene &scene
         new Distribution1D(&lightPower[0], lightPower.size()));
 }
 
-//#define TEST_MIPMAP
+#define TEST_MIPMAP
 
 // SamplerIntegrator Method Definitions
 void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
@@ -295,6 +295,8 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
             m_FrameBuffer->set_uc(i, j, 3, 255);
         }
     }
+    
+    //m_FrameBuffer->saveToFile("/Users/zhouxuguang/work/source/GNXRayTracer/test.png");
 
     // 结束时间
     double end = omp_get_wtime();
