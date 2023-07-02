@@ -9,8 +9,8 @@ static DebugText *dt = NULL;
 
 
 DebugText::DebugText(QWidget * parent) : QWidget(parent) {
-	setMinimumSize(800,800);
-	
+    setWindowState(Qt::WindowMaximized);
+    
 	qlayout = new QHBoxLayout(this);
 	ShowDebugArea = new QTextEdit(this);
 	ShowDebugArea->setFontPointSize(18);

@@ -38,7 +38,7 @@ void IMAGraphicsView::mousePressEvent(QMouseEvent *event)
 	QPoint viewPoint = event->pos();
 	//QGraphicsScene зјБъ
 	QPointF scenePoint = mapToScene(viewPoint);
-	DebugText::getDebugText()->addContents(QString::number(scenePoint.x()) + " " + QString::number(scenePoint.y()));
+//	DebugText::getDebugText()->addContents(QString::number(scenePoint.x()) + " " + QString::number(scenePoint.y()));
 }
 
 void IMAGraphicsView::mouseReleaseEvent(QMouseEvent *event)
@@ -47,7 +47,7 @@ void IMAGraphicsView::mouseReleaseEvent(QMouseEvent *event)
 	QPoint viewPoint = event->pos();
 	//QGraphicsScene зјБъ
 	QPointF scenePoint = mapToScene(viewPoint);
-	DebugText::getDebugText()->addContents(QString::number(scenePoint.x()) + " " + QString::number(scenePoint.y()));
+//	DebugText::getDebugText()->addContents(QString::number(scenePoint.x()) + " " + QString::number(scenePoint.y()));
 }
 
 void IMAGraphicsView::drawBackground(QPainter *painter, const QRectF &rect)

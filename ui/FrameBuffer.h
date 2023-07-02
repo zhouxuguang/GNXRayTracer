@@ -138,7 +138,7 @@ public:
         float fValue = weight * dat + (1.0f - weight) * fbuffer[offset];
 		fbuffer[offset] = fValue;
         
-		//
+		//色调映射
         float exposure = 0.75;
         float temp_c = 1.0f -expf(-fbuffer[offset] * 1.0f / (1 - exposure));
         //float temp_c = fbuffer[offset];
