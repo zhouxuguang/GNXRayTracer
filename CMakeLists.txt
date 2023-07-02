@@ -34,6 +34,8 @@ core/Geometry.h
 core/Geometry.cpp
 core/Integrator.h
 core/Integrator.cpp
+core/Interpolation.h
+core/Interpolation.cpp
 core/Interaction.h
 core/Interaction.cpp
 core/Light.h
@@ -57,6 +59,8 @@ core/Quaternion.cpp
 core/RNG.h
 core/Reflection.h
 core/Reflection.cpp
+core/SubReflection.h
+core/SubReflection.cpp
 core/Sampler.h
 core/Sampler.cpp
 core/Sampling.h
