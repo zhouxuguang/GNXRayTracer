@@ -47,7 +47,9 @@ public:
 			return;
 		}
 		ubuffer = new unsigned char[width * height * channals];
+        memset(ubuffer, 0, width * height * channals);
 		fbuffer = new float[width * height * channals];
+        memset(fbuffer, 0, width * height * channals * 4);
 		if (nullptr == ubuffer || nullptr == fbuffer) {
 			TextDinodonS("Initialize Error: FrameBuffer has not applied for enough memory!");
 			this->width = 0;
@@ -77,7 +79,9 @@ public:
 		if (nullptr != fbuffer) delete[] fbuffer;
 		this->width = width; this->height = width;
 		ubuffer = new unsigned char[width * height * channals];
+        memset(ubuffer, 0, width * height * channals);
 		fbuffer = new float[width * height * channals];
+        memset(fbuffer, 0, width * height * channals * 4);
 		if (nullptr == ubuffer || nullptr == fbuffer) {
 			TextDinodonS("Resize Error: FrameBuffer has not applied for enough memory!");
 			this->width = 0;
@@ -131,11 +135,14 @@ public:
 		}
 		int offset = (w + h * width) * channals + shifting;
 		float weight = (1.0f / (float)curRenderCount);
-		fbuffer[offset] = weight * dat + (1.0f - weight) * fbuffer[offset];
+        float fValue = weight * dat + (1.0f - weight) * fbuffer[offset];
+		fbuffer[offset] = fValue;
         
 		//
         float exposure = 0.75;
         float temp_c = 1.0f -expf(-fbuffer[offset] * 1.0f / (1 - exposure));
+        //float temp_c = fbuffer[offset];
+        //printf("tempc = %f\n", temp_c * 255);
 
         ubuffer[offset] = temp_c * 255;
         return true;
