@@ -143,6 +143,33 @@ std::string LambertianReflection::ToString() const
            std::string(" ]");
 }
 
+Spectrum LambertianTransmission::Sample_f(const Vector3f &wo, Vector3f *wi,
+                                          const Point2f &u, Float *pdf,
+                                          BxDFType *sampledType) const
+{
+    *wi = CosineSampleHemisphere(u);
+    if (wo.z > 0) wi->z *= -1;
+    *pdf = Pdf(wo, *wi);
+    return f(wo, *wi);
+}
+
+Float LambertianTransmission::Pdf(const Vector3f &wo,
+                                  const Vector3f &wi) const
+{
+    return !SameHemisphere(wo, wi) ? AbsCosTheta(wi) * InvPi : 0;
+}
+
+Spectrum LambertianTransmission::f(const Vector3f &wo, const Vector3f &wi) const
+{
+    return T * InvPi;
+}
+
+std::string LambertianTransmission::ToString() const
+{
+    return std::string("[ LambertianTransmission T: ") + T.ToString() +
+           std::string(" ]");
+}
+
 Spectrum OrenNayar::f(const Vector3f& wo, const Vector3f& wi) const 
 {
     Float sinThetaI = SinTheta(wi);
