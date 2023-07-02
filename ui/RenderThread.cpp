@@ -29,6 +29,7 @@
 #include "lights/DiffuseAreaLight.h"
 #include "lights/SkyBoxLight.h"
 #include "lights/InfiniteAreaLight.h"
+#include "lights/DistantLight.h"
 #include "lights/SpotLight.h"
 
 #include "core/Medium.h"
@@ -320,17 +321,21 @@ void RenderThread::run()
     //
     for (int i = 0; i < nTrianglesAreaLight; ++i)
     {
-//        std::shared_ptr<AreaLight> area =
-//            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, MediumInterface(), Spectrum(5.0f), 5, trisAreaLight[i], false);
-//        lights.push_back(area);
-//        prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i], dragonMaterial, area, MediumInterface()));
+        std::shared_ptr<AreaLight> area =
+            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, MediumInterface(), Spectrum(5.0f), 5, trisAreaLight[i], false);
+        lights.push_back(area);
+        prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i], dragonMaterial, area, MediumInterface()));
     }
     
     //聚光灯
-    Transform tri_Object2World_SpotLight = Translate(Vector3f(0.0f, 2.43f, 0.0f)) * Rotate(90, Vector3f(1.0f, 0.0f, 0.0f));
-    Transform tri_World2Object_SpotLight = Inverse(tri_Object2World_AreaLight);
-    std::shared_ptr<Light> spotLight = std::make_shared<SpotLight>(tri_Object2World_SpotLight, MediumInterface(), Spectrum(25.0f), 45, 30);
-    lights.push_back(spotLight);
+//    Transform tri_Object2World_SpotLight = Translate(Vector3f(0.0f, 2.43f, 0.0f)) * Rotate(90, Vector3f(1.0f, 0.0f, 0.0f));
+//    std::shared_ptr<Light> spotLight = std::make_shared<SpotLight>(tri_Object2World_SpotLight, MediumInterface(), Spectrum(25.0f), 45, 30);
+//    lights.push_back(spotLight);
+    
+    //平行光
+//    Transform tri_Object2World_DistantLight;
+//    std::shared_ptr<Light> distantLight = std::make_shared<DistantLight>(tri_Object2World_DistantLight, Spectrum(25.0f), Vector3f(0.0f, 0.0f, 1.0f));
+//    lights.push_back(distantLight);
     
     //构造环境光源
     Transform SkyBoxToWorld;

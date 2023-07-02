@@ -109,6 +109,8 @@ lights/PointLight.h
 lights/PointLight.cpp
 lights/DiffuseAreaLight.h
 lights/DiffuseAreaLight.cpp
+lights/DistantLight.h
+lights/DistantLight.cpp
 lights/InfiniteAreaLight.h
 lights/InfiniteAreaLight.cpp
 lights/SkyBoxLight.h
