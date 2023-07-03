@@ -6,8 +6,6 @@
 // core/mipmap.h*
 #include "Spectrum.h"
 #include "Texture.h"
-//#include "stats.h"
-//#include "parallel.h"
 
 namespace pbr 
 {
@@ -228,7 +226,6 @@ template <typename T>
 T MIPMap<T>::Lookup(const Point2f &st, Float width) const 
 {
     ++nTrilerpLookups;
-    //ProfilePhase p(Prof::TexFiltTrilerp);
     // Compute MIPMap level for trilinear filtering
     Float level = Levels() - 1 + Log2(std::max(width, (Float)1e-8));
 

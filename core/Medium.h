@@ -22,7 +22,8 @@ public:
     virtual std::string ToString() const = 0;
 };
 
-inline std::ostream &operator<<(std::ostream &os, const PhaseFunction &p) {
+inline std::ostream &operator<<(std::ostream &os, const PhaseFunction &p)
+{
     os << p.ToString();
     return os;
 }

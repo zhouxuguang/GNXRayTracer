@@ -72,7 +72,7 @@ inline bool Refract(const Vector3f &wi, const Normal3f &n, Float eta, Vector3f *
     Float sin2ThetaI = std::max(Float(0), Float(1 - cosThetaI * cosThetaI));
     Float sin2ThetaT = eta * eta * sin2ThetaI;
 
-    // 处理全内反射
+    // 处理全内反射，这个时候只有折射
     if (sin2ThetaT >= 1) return false;
     Float cosThetaT = std::sqrt(1 - sin2ThetaT);
     *wt = eta * -wi + (eta * cosThetaI - cosThetaT) * Vector3f(n);

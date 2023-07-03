@@ -64,7 +64,7 @@ extern const Float RGBIllum2SpectBlue[nRGB2SpectSamples];
 template <int nSpectrumSamples>
 class CoefficientSpectrum
 {
-  public:
+public:
     // CoefficientSpectrum Public Methods
     CoefficientSpectrum(Float v = 0.f) {
         for (int i = 0; i < nSpectrumSamples; ++i) c[i] = v;
@@ -246,14 +246,14 @@ class CoefficientSpectrum
     // CoefficientSpectrum Public Data
     static const int nSamples = nSpectrumSamples;
 
-  protected:
+protected:
     // CoefficientSpectrum Protected Data
     Float c[nSpectrumSamples];
 };
 
 class SampledSpectrum : public CoefficientSpectrum<nSpectralSamples>
 {
-  public:
+public:
     // SampledSpectrum Public Methods
     SampledSpectrum(Float v = 0.f) : CoefficientSpectrum(v) {}
     SampledSpectrum(const CoefficientSpectrum<nSpectralSamples> &v)
@@ -379,7 +379,7 @@ class SampledSpectrum : public CoefficientSpectrum<nSpectralSamples>
     SampledSpectrum(const RGBSpectrum &r,
                     SpectrumType type = SpectrumType::Reflectance);
 
-  private:
+private:
     // SampledSpectrum Private Data
     static SampledSpectrum X, Y, Z;
     static SampledSpectrum rgbRefl2SpectWhite, rgbRefl2SpectCyan;
@@ -396,7 +396,7 @@ class RGBSpectrum : public CoefficientSpectrum<3>
 {
     using CoefficientSpectrum<3>::c;
 
-  public:
+public:
     // RGBSpectrum Public Methods
     RGBSpectrum(Float v = 0.f) : CoefficientSpectrum<3>(v) {}
     RGBSpectrum(const CoefficientSpectrum<3> &v) : CoefficientSpectrum<3>(v) {}
@@ -456,15 +456,17 @@ class RGBSpectrum : public CoefficientSpectrum<3>
 
 // Spectrum Inline Functions
 template <int nSpectrumSamples>
-inline CoefficientSpectrum<nSpectrumSamples> Pow(
-    const CoefficientSpectrum<nSpectrumSamples> &s, Float e) {
+inline CoefficientSpectrum<nSpectrumSamples> Pow(const CoefficientSpectrum<nSpectrumSamples> &s, Float e)
+{
     CoefficientSpectrum<nSpectrumSamples> ret;
     for (int i = 0; i < nSpectrumSamples; ++i) ret.c[i] = std::pow(s.c[i], e);
     DCHECK(!ret.HasNaNs());
     return ret;
 }
 
-inline RGBSpectrum Lerp(Float t, const RGBSpectrum &s1, const RGBSpectrum &s2) {
+//线性插值
+inline RGBSpectrum Lerp(Float t, const RGBSpectrum &s1, const RGBSpectrum &s2)
+{
     return (1 - t) * s1 + t * s2;
 }
 

@@ -44,7 +44,7 @@ inline Spectrum FrSchlick(const Spectrum &R0, Float cosTheta)
 
 // For a dielectric, R(0) = (eta - 1)^2 / (eta + 1)^2, assuming we're
 // coming from air..
-// 从折射率计算R0
+// 从折射率计算R0，基础反射率
 inline Float SchlickR0FromEta(Float eta) { return sqr(eta - 1) / sqr(eta + 1); }
 
 ///////////////////////////////////////////////////////////////////////////

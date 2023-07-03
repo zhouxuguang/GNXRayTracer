@@ -63,4 +63,4 @@ Spectrum DirectLightingIntegrator::Li(const RayDifferential &ray,
     return L;
 }
 
-}  // namespace pbrt
+}  // namespace pbr

@@ -213,7 +213,8 @@ Vector3f BeckmannDistribution::Sample_wh(const Vector3f &wo, const Point2f &u) c
 }
 
 static void TrowbridgeReitzSample11(Float cosTheta, Float U1, Float U2,
-                                    Float *slope_x, Float *slope_y) {
+                                    Float *slope_x, Float *slope_y)
+{
     // special case (normal incidence)
     if (cosTheta > .9999) {
         Float r = sqrt(U1 / (1 - U1));
@@ -259,7 +260,8 @@ static void TrowbridgeReitzSample11(Float cosTheta, Float U1, Float U2,
 }
 
 static Vector3f TrowbridgeReitzSample(const Vector3f &wi, Float alpha_x,
-                                      Float alpha_y, Float U1, Float U2) {
+                                      Float alpha_y, Float U1, Float U2)
+{
     // 1. stretch wi
     Vector3f wiStretched =
         Normalize(Vector3f(alpha_x * wi.x, alpha_y * wi.y, wi.z));
@@ -282,7 +284,8 @@ static Vector3f TrowbridgeReitzSample(const Vector3f &wi, Float alpha_x,
 }
 
 Vector3f TrowbridgeReitzDistribution::Sample_wh(const Vector3f &wo,
-                                                const Point2f &u) const {
+                                                const Point2f &u) const
+{
     Vector3f wh;
     if (!sampleVisibleArea) {
         Float cosTheta = 0, phi = (2 * Pi) * u[1];

@@ -229,7 +229,7 @@ Spectrum MicrofacetReflection::f(const Vector3f& wo, const Vector3f& wi) const
     Float cosThetaO = AbsCosTheta(wo), cosThetaI = AbsCosTheta(wi);
     Vector3f wh = wi + wo;
     // Handle degenerate cases for microfacet reflection
-    if (cosThetaI == 0 || cosThetaO == 0) return Spectrum(0.);    //辐射出射方向平行于表面法线或者入射方向平行于表面法线
+    if (cosThetaI == 0 || cosThetaO == 0) return Spectrum(0.);   //辐射出射方向平行于表面法线或者入射方向平行于表面法线
     if (wh.x == 0 && wh.y == 0 && wh.z == 0) return Spectrum(0.);  //入射方向与出射方向平行且方向相反
     wh = Normalize(wh);
     // For the Fresnel call, make sure that wh is in the same hemisphere
@@ -562,11 +562,12 @@ Float BSDF::Pdf(const Vector3f &woWorld, const Vector3f &wiWorld, BxDFType flags
     return v;
 }
 
-std::string BSDF::ToString() const {
+std::string BSDF::ToString() const
+{
     std::string s = StringPrintf("[ BSDF eta: %f nBxDFs: %d", eta, nBxDFs);
     for (int i = 0; i < nBxDFs; ++i)
         s += StringPrintf("\n  bxdfs[%d]: ", i) + bxdfs[i]->ToString();
     return s + std::string(" ]");
 }
 
-}  // namespace pbrt
+}  // namespace pbr
