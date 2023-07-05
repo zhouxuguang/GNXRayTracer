@@ -6,7 +6,8 @@ namespace pbr
 {
 
 // Spline Interpolation Definitions
-Float CatmullRom(int size, const Float *nodes, const Float *values, Float x) {
+Float CatmullRom(int size, const Float *nodes, const Float *values, Float x)
+{
     if (!(x >= nodes[0] && x <= nodes[size - 1])) return 0;
     int idx = FindInterval(size, [&](int i) { return nodes[i] <= x; });
     Float x0 = nodes[idx], x1 = nodes[idx + 1];
@@ -28,8 +29,8 @@ Float CatmullRom(int size, const Float *nodes, const Float *values, Float x) {
            (t3 - 2 * t2 + t) * d0 + (t3 - t2) * d1;
 }
 
-bool CatmullRomWeights(int size, const Float *nodes, Float x, int *offset,
-                       Float *weights) {
+bool CatmullRomWeights(int size, const Float *nodes, Float x, int *offset, Float *weights)
+{
     // Return _false_ if _x_ is out of bounds
     if (!(x >= nodes[0] && x <= nodes[size - 1])) return false;
 

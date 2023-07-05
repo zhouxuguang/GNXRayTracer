@@ -193,6 +193,8 @@ ui/InteractionDockWidget.h
 ui/InteractionDockWidget.cpp
 ui/MainWindow.h
 ui/MainWindow.cpp
+ui/MaterialList.h
+ui/MaterialList.cpp
 ui/main.cpp
 )
 source_group("ui" FILES ${UI_FILES})
