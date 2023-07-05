@@ -195,6 +195,10 @@ ui/MainWindow.h
 ui/MainWindow.cpp
 ui/MaterialList.h
 ui/MaterialList.cpp
+ui/ModelList.h
+ui/ModelList.cpp
+ui/Utils.h
+ui/Utils.cpp
 ui/main.cpp
 )
 source_group("ui" FILES ${UI_FILES})

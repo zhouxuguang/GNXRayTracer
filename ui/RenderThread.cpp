@@ -7,8 +7,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "shape/Triangle.h"
-#include "shape/plyRead.h"
 #include "core/Interaction.h"
 #include "core/Spectrum.h"
 #include "core/Scene.h"
@@ -17,11 +15,6 @@
 #include "camera/Perspective.h"
 #include "samplers/HaltonSampler.h"
 #include "lights/PointLight.h"
-#include "lights/DiffuseAreaLight.h"
-#include "lights/SkyBoxLight.h"
-#include "lights/InfiniteAreaLight.h"
-#include "lights/DistantLight.h"
-#include "lights/SpotLight.h"
 
 #include "core/Medium.h"
 #include "media/HomogeneousMedium.h"
@@ -31,12 +24,12 @@
 #include "integrators/PathIntegrator.h"
 
 #include "MaterialList.h"
+#include "ModelList.h"
+#include "Utils.h"
 
 #include <omp.h>
 
 using namespace pbr;
-
-void showMemoryInfo(void);
 
 
 RenderThread::RenderThread()
@@ -119,157 +112,43 @@ void RenderThread::run()
     
     std::vector<std::shared_ptr<Primitive>> prims;
     
-    //地板
-    int nTrianglesFloor = 2;
-    int vertexIndicesFloor[6] = { 0 ,1 ,2 ,3 ,4 ,5 };
-    int nVerticesFloor = 6;
-    const float yPos_Floor = -2.0;
-    Point3f P_Floor[6] = {
-        Point3f(-6.0, yPos_Floor, 6.0) ,Point3f(6.0, yPos_Floor, 6.0) , Point3f(-6.0, yPos_Floor, -6.0) ,
-        Point3f(6.0, yPos_Floor, 6.0) ,Point3f(6.0, yPos_Floor, -6.0), Point3f(-6.0, yPos_Floor, -6.0)
-    };
-    
-    Transform tri_Object2World2, tri_World2Object2;
-    std::shared_ptr<TriangleMesh> meshFloor = std::make_shared<TriangleMesh>(tri_Object2World2, nTrianglesFloor, vertexIndicesFloor,
-    nVerticesFloor, P_Floor, nullptr, nullptr, nullptr, nullptr);
-    
-    std::vector<std::shared_ptr<Shape>> trisFloor;
-    for (int i = 0; i < nTrianglesFloor; ++i)
-    {
-        trisFloor.push_back(std::make_shared<Triangle>(&tri_Object2World2, &tri_World2Object2, false, meshFloor, i));
-    }
-    
-    //将物体填充到基元
-//    for (int i = 0; i < nTrianglesFloor; ++i)
-//    {
-//        prims.push_back(std::make_shared<GeometricPrimitive>(trisFloor[i], whiteWallMaterial, nullptr, MediumInterface()));
-//    }
-
+    //AddFloor(prims, whiteWallMaterial);
     
     emit PrintString((char*)"Init Mesh...");
     {
-        std::shared_ptr<TriangleMesh> mesh;
-        std::vector<std::shared_ptr<Shape>> tris;
-    
-        Transform tri_Object2World, tri_World2Object;
-
-        tri_Object2World = Translate(Vector3f(0.f, -2.9f, 0.f)) * tri_Object2World;
-        tri_World2Object = Inverse(tri_Object2World);
-
-        plyInfo plyi(getResourcesDir() + "dragon.3d");
-        mesh = std::make_shared<TriangleMesh>(tri_Object2World, plyi.nTriangles, plyi.vertexIndices, plyi.nVertices, plyi.vertexArray, nullptr, nullptr, nullptr, nullptr);
-        tris.reserve(plyi.nTriangles);
- 
-        for (int i = 0; i < plyi.nTriangles; ++i)
-            tris.push_back(std::make_shared<Triangle>(&tri_Object2World, &tri_World2Object, false, mesh, i));
-
-        for (int i = 0; i < plyi.nTriangles; ++i)
-            prims.push_back(std::make_shared<GeometricPrimitive>(tris[i], dragonMaterial, nullptr, MediumInterface()));
-        plyi.Release();
+        AddModel(prims, dragonMaterial);
     }
     
     emit PrintString((char*)"Init Cornell Box...");
     {
-        //三角形个数
-        const int nTrianglesWall = 2 * 5;
-        int vertexIndicesWall[nTrianglesWall * 3];
-        for (int i = 0; i < nTrianglesWall * 3; i++)
-            vertexIndicesWall[i] = i;
-        const int nVerticesWall = nTrianglesWall * 3;
-        const float length_Wall = 5.0f;
-        Point3f P_Wall[nVerticesWall] =
-        {
-            //底座
-            Point3f(0.f,0.f,length_Wall),Point3f(length_Wall,0.f,length_Wall), Point3f(0.f,0.f,0.f),
-            Point3f(length_Wall,0.f,length_Wall),Point3f(length_Wall,0.f,0.f),Point3f(0.f,0.f,0.f),
-            //天花板
-            Point3f(0.f,length_Wall,length_Wall),Point3f(0.f,length_Wall,0.f),Point3f(length_Wall,length_Wall,length_Wall),
-            Point3f(length_Wall,length_Wall,length_Wall),Point3f(0.f,length_Wall,0.f),Point3f(length_Wall,length_Wall,0.f),
-            //后墙
-            Point3f(0.f,0.f,0.f),Point3f(length_Wall,0.f,0.f), Point3f(length_Wall,length_Wall,0.f),
-            Point3f(0.f,0.f,0.f), Point3f(length_Wall,length_Wall,0.f),Point3f(0.f,length_Wall,0.f),
-            //右墙
-            Point3f(0.f,0.f,0.f),Point3f(0.f,length_Wall,length_Wall), Point3f(0.f,0.f,length_Wall),
-            Point3f(0.f,0.f,0.f), Point3f(0.f,length_Wall,0.f),Point3f(0.f,length_Wall,length_Wall),
-            //左墙
-            Point3f(length_Wall,0.f,0.f),Point3f(length_Wall,length_Wall,length_Wall), Point3f(length_Wall,0.f,length_Wall),
-            Point3f(length_Wall,0.f,0.f), Point3f(length_Wall,length_Wall,0.f),Point3f(length_Wall,length_Wall,length_Wall)
-        };
-        Transform tri_ConBox2World = Translate(Vector3f(-0.5*length_Wall,-0.5*length_Wall,-0.5*length_Wall));
-        Transform tri_World2ConBox = Inverse(tri_ConBox2World);
-        std::shared_ptr<TriangleMesh> meshConBox = std::make_shared<TriangleMesh>
-            (tri_ConBox2World, nTrianglesWall, vertexIndicesWall, nVerticesWall, P_Wall, nullptr, nullptr, nullptr, nullptr);
-        std::vector<std::shared_ptr<Shape>> trisConBox;
-        for (int i = 0; i < nTrianglesWall; ++i)
-            trisConBox.push_back(std::make_shared<Triangle>(&tri_ConBox2World, &tri_World2ConBox, false, meshConBox, i));
-
-        //增加三角形到图元
-        for (int i = 0; i < nTrianglesWall; ++i)
-        {
-            if (i == 6 || i == 7)
-                prims.push_back(std::make_shared<GeometricPrimitive>(trisConBox[i], redWallMaterial, nullptr, MediumInterface()));
-            else if (i == 8 || i == 9)
-                prims.push_back(std::make_shared<GeometricPrimitive>(trisConBox[i], blueWallMaterial, nullptr, MediumInterface()));
-            else
-                prims.push_back(std::make_shared<GeometricPrimitive>(trisConBox[i], whiteWallMaterial, nullptr, MediumInterface()));
-        }
+        AddCornell(prims, redWallMaterial, blueWallMaterial, whiteWallMaterial);
     }
     
+    // 光源列表
+    std::vector<std::shared_ptr<Light>> lights;
     
     //初始化面光源
     emit PrintString((char*)"Init AreaLight");
-    
-    // 面光源
-    std::vector<std::shared_ptr<Light>> lights;
-    int nTrianglesAreaLight = 2;
-    int vertexIndicesAreaLight[6] = {0, 1, 2, 3, 4, 5};
-    int nVerticesAreaLight = 6;
-    const float yPos_AreaLight = 0.0;
-    Point3f P_AreaLight[6] = { Point3f(-1.4,0.0,1.4), Point3f(-1.4,0.0,-1.4), Point3f(1.4,0.0,1.4),
-        Point3f(1.4,0.0,1.4), Point3f(-1.4,0.0,-1.4), Point3f(1.4,0.0,-1.4)};
-    Transform tri_Object2World_AreaLight = Translate(Vector3f(0.0f, 2.45f, 0.0f));
-    Transform tri_World2Object_AreaLight = Inverse(tri_Object2World_AreaLight);
-
-    std::shared_ptr<TriangleMesh> meshAreaLight = std::make_shared<TriangleMesh>
-        (tri_Object2World_AreaLight, nTrianglesAreaLight, vertexIndicesAreaLight, nVerticesAreaLight, P_AreaLight, nullptr, nullptr, nullptr, nullptr);
-    std::vector<std::shared_ptr<Shape>> trisAreaLight;
-  
-    for (int i = 0; i < nTrianglesAreaLight; ++i)
-        trisAreaLight.push_back(std::make_shared<Triangle>(&tri_Object2World_AreaLight, &tri_World2Object_AreaLight, false, meshAreaLight, i));
-    //
-    for (int i = 0; i < nTrianglesAreaLight; ++i)
     {
-        std::shared_ptr<AreaLight> area =
-            std::make_shared<DiffuseAreaLight>(tri_Object2World_AreaLight, MediumInterface(), Spectrum(5.0f), 5, trisAreaLight[i], false);
-        lights.push_back(area);
-        prims.push_back(std::make_shared<GeometricPrimitive>(trisAreaLight[i], dragonMaterial, area, MediumInterface()));
+        AddAreaLight(prims, lights, dragonMaterial);
     }
     
+    
     //聚光灯
-//    Transform tri_Object2World_SpotLight = Translate(Vector3f(0.0f, 2.43f, 0.0f)) * Rotate(90, Vector3f(1.0f, 0.0f, 0.0f));
-//    std::shared_ptr<Light> spotLight = std::make_shared<SpotLight>(tri_Object2World_SpotLight, MediumInterface(), Spectrum(25.0f), 45, 30);
-//    lights.push_back(spotLight);
+    //AddSpotLight(lights);
     
     //平行光
-//    Transform tri_Object2World_DistantLight;
-//    std::shared_ptr<Light> distantLight = std::make_shared<DistantLight>(tri_Object2World_DistantLight, Spectrum(25.0f), Vector3f(0.0f, 0.0f, 1.0f));
-//    lights.push_back(distantLight);
+    //AddDistLight(lights);
+    
     
     //构造环境光源
-    Transform SkyBoxToWorld;
-    Point3f SkyBoxCenter(0.f, 0.f, 0.f);
-    Float SkyBoxRadius = 10.0f;
-//    std::shared_ptr<Light> skyBoxLight = std::make_shared<SkyBoxLight>(SkyBoxToWorld, SkyBoxCenter, SkyBoxRadius, "1", 1);
-//    lights.push_back(skyBoxLight);
+    AddSkyLight(lights);
+    
     
     //构造无限远面光源
 //    emit PrintString((char*)"Init InfiniteLight...");
 //    {
-//        Transform InfinityLightToWorld = RotateX(20) * RotateY(-90) * RotateX(-90);
-//        Spectrum power(1.0f);
-//        std::shared_ptr<Light> infinityLight =
-//            std::make_shared<InfiniteAreaLight>(InfinityLightToWorld, power, 10, getResourcesDir() + "MonValley1000.hdr");
-//        lights.push_back(infinityLight);
+//        AddInfLight(lights);
 //    }
     
     emit PrintString((char*)"Init worldScene");
@@ -307,58 +186,4 @@ void RenderThread::run()
 	
 }
 
-#ifdef _WIN32
 
-
-#include <windows.h>
-#include <psapi.h>
-#pragma comment(lib, "psapi.lib") 
-void showMemoryInfo(void)
-{
-
-    //  SIZE_T PeakWorkingSetSize; //峰值内存使用
-    //  SIZE_T WorkingSetSize; //内存使用
-    //  SIZE_T PagefileUsage; //虚拟内存使用
-    //  SIZE_T PeakPagefileUsage; //峰值虚拟内存使用
-
-    EmptyWorkingSet(GetCurrentProcess());
-
-    HANDLE handle = GetCurrentProcess();
-    PROCESS_MEMORY_COUNTERS pmc;
-    GetProcessMemoryInfo(handle, &pmc, sizeof(pmc));
-
-    g_RenderStatus.setDataChanged("Memory Use", "WorkingSetSize", QString::number(pmc.WorkingSetSize / 1000.f / 1000.f), "M");
-    g_RenderStatus.setDataChanged("Memory Use", "PeakWorkingSetSize", QString::number(pmc.PeakWorkingSetSize / 1000.f / 1000.f), "M");
-    g_RenderStatus.setDataChanged("Memory Use", "PagefileUsage", QString::number(pmc.PagefileUsage / 1000.f / 1000.f), "M");
-    g_RenderStatus.setDataChanged("Memory Use", "PeakPagefileUsage", QString::number(pmc.PeakPagefileUsage / 1000.f / 1000.f), "M");
-
-}
-
-#else
-
-#import <mach/mach.h>
-
-void showMemoryInfo(void)
-{
-    int64_t memoryUsageInByte = 0;
-    task_vm_info_data_t vmInfo;
-    mach_msg_type_number_t count = TASK_VM_INFO_COUNT;
-    kern_return_t kernelReturn = task_info(mach_task_self(), TASK_VM_INFO, (task_info_t) &vmInfo, &count);
-    if(kernelReturn == KERN_SUCCESS)
-    {
-        memoryUsageInByte = (int64_t) vmInfo.phys_footprint;
-        //NSLog(@"Memory in use (in bytes): %lld", memoryUsageInByte);
-    }
-    else
-    {
-        //NSLog(@"Error with task_info(): %s", mach_error_string(kernelReturn));
-    }
-    
-    g_RenderStatus.setDataChanged("Memory Use", "WorkingSetSize", QString::number(vmInfo.resident_size / 1000.f / 1000.f), "M");
-    g_RenderStatus.setDataChanged("Memory Use", "PeakWorkingSetSize", QString::number(vmInfo.resident_size_peak / 1000.f / 1000.f), "M");
-    g_RenderStatus.setDataChanged("Memory Use", "PagefileUsage", QString::number(vmInfo.phys_footprint / 1000.f / 1000.f), "M");
-    g_RenderStatus.setDataChanged("Memory Use", "PeakPagefileUsage", QString::number(vmInfo.phys_footprint / 1000.f / 1000.f), "M");
-    //return memoryUsageInByte;
-}
-
-#endif // _WIN32
