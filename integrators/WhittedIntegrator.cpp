@@ -56,9 +56,6 @@ Spectrum WhittedIntegrator::Li(const RayDifferential &ray, const Scene &scene,
             lightL += f * Li * AbsDot(wi, n) / pdf;
     }
     
-    //这里除以灯光的数量，因为实际一个光源当成了多个光源
-    //lightL /= scene.lights.size();
-    //lightL /= 2;   //先写死了
     L += lightL;
     
     if (depth + 1 < maxDepth)
