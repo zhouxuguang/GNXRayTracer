@@ -135,6 +135,7 @@ void Shuffle(T *samp, int count, int nDimensions, RNG &rng)
     }
 }
 
+// 在余弦半球内进行采样的函数
 inline Vector3f CosineSampleHemisphere(const Point2f &u)
 {
     Point2f d = ConcentricSampleDisk(u);
@@ -142,13 +143,16 @@ inline Vector3f CosineSampleHemisphere(const Point2f &u)
     return Vector3f(d.x, d.y, z);
 }
 
+//计算余弦半球采样概率密度函数值
 inline Float CosineHemispherePdf(Float cosTheta) { return cosTheta * InvPi; }
 
+// 计算平衡性采样权重
 inline Float BalanceHeuristic(int nf, Float fPdf, int ng, Float gPdf)
 {
     return (nf * fPdf) / (nf * fPdf + ng * gPdf);
 }
 
+// 计算重要性采样权重
 inline Float PowerHeuristic(int nf, Float fPdf, int ng, Float gPdf)
 {
     Float f = nf * fPdf, g = ng * gPdf;

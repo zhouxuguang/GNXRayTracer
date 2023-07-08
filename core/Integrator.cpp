@@ -78,6 +78,18 @@ Spectrum UniformSampleOneLight(const Interaction &it, const Scene &scene,
                           scene, sampler, arena, handleMedia) / lightPdf;
 }
 
+/**
+ 这段代码是为了估计直接光照的贡献。函数EstimateDirect接受多个参数，包括交互对象it、散射点uScattering、光源light、光源采样点uLight、场景scene、采样器sampler、内存区域arena、是否处理介质handleMedia和是否考虑镜面反射specular等。
+
+ 首先，函数中定义了一系列变量，包括光线方向wi、光源采样pdf值lightPdf、散射pdf值scatteringPdf和能量贡献值Ld等。
+
+ 然后，函数使用多重重要性采样对光源进行采样，得到光源的辐射能量Li和光线方向wi。如果光源采样pdf值大于0且光源的辐射能量不为零，则计算出BSDF（双向散射分布函数）或相位函数在光源采样方向上的值。如果交互对象是表面交互类型，则根据光源采样策略评估BSDF的值，并计算出散射pdf值。如果交互对象是介质交互类型，则根据光源采样策略评估相位函数的值，并将其作为BSDF的值。如果BSDF的值不为零，则根据能见度判断光源是否可见，并根据光源是否是delta光源来计算贡献能量。最后，将光源的贡献能量加到总的贡献能量Ld中。
+
+ 接着，函数使用多重重要性采样对BSDF进行采样。如果光源不是delta光源，则根据表面交互类型评估散射方向并计算散射pdf值，或者根据介质交互类型评估散射方向并计算散射pdf值。如果散射方向不为零且散射pdf值大于0，则对光源的贡献能量进行考虑。如果采样不是镜面反射，则计算光源的采样pdf值，并根据多重重要性采样原理计算权重。然后，通过光线与场景求交，计算透射率，判断是否找到了表面交互，如果找到了则判断表面交互所在的primitive是否是当前光源的Area Light，如果是，则计算光源的辐射能量，如果没有找到表面交互，则计算光源的辐射能量。最后，将光源的贡献能量加到总的贡献能量Ld中。
+
+ 最后，函数返回总的贡献能量Ld。
+ */
+
 Spectrum EstimateDirect(const Interaction &it, const Point2f &uScattering,
                         const Light &light, const Point2f &uLight,
                         const Scene &scene, Sampler &sampler,
@@ -90,17 +102,20 @@ Spectrum EstimateDirect(const Interaction &it, const Point2f &uScattering,
     Vector3f wi;
     Float lightPdf = 0, scatteringPdf = 0;
     VisibilityTester visibility;
+    
+    //采样光
     Spectrum Li = light.Sample_Li(it, uLight, &wi, &lightPdf, &visibility);
 //    VLOG(2) << "EstimateDirect uLight:" << uLight << " -> Li: " << Li << ", wi: "
 //            << wi << ", pdf: " << lightPdf;
+    
+    //如果采样光的Pdf>0且光源不是黑的(即光有发出能量)，就可以采样光源
     if (lightPdf > 0 && !Li.IsBlack()) {
         // Compute BSDF or phase function's value for light sample
         Spectrum f;
         if (it.IsSurfaceInteraction()) {
             // Evaluate BSDF for light sampling strategy
             const SurfaceInteraction &isect = (const SurfaceInteraction &)it;
-            f = isect.bsdf->f(isect.wo, wi, bsdfFlags) *
-                AbsDot(wi, isect.shading.n);
+            f = isect.bsdf->f(isect.wo, wi, bsdfFlags) * AbsDot(wi, isect.shading.n);
             scatteringPdf = isect.bsdf->Pdf(isect.wo, wi, bsdfFlags);
             //VLOG(2) << "  surf f*dot :" << f << ", scatteringPdf: " << scatteringPdf;
         }
@@ -140,7 +155,7 @@ Spectrum EstimateDirect(const Interaction &it, const Point2f &uScattering,
         }
     }
 
-    // Sample BSDF with multiple importance sampling
+    // Sample BSDF with multiple importance sampling， 如果当前光源不是Delta类型的光源(不是点光源、方向光源)，就可以采样BSDF
     if (!IsDeltaLight(light.flags)) {
         Spectrum f;
         bool sampledSpecular = false;

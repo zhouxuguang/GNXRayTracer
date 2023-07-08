@@ -48,6 +48,7 @@ void LatinHypercube(Float *samples, int nSamples, int nDim, RNG &rng)
     }
 }
 
+//二维圆盘上的拒绝采样
 Point2f RejectionSampleDisk(RNG &rng) 
 {
     Point2f p;
