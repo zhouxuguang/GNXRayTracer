@@ -109,4 +109,4 @@ HaltonSampler *CreateHaltonSampler(const Bounds2i &sampleBounds)
     return new HaltonSampler(nsamp, sampleBounds, sampleAtCenter);
 }
 
-}  // namespace pbrt
+}  // namespace pbr

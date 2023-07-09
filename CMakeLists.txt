@@ -26,10 +26,12 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 
-set(CORE_FILES 
+set(CORE_FILES
 core/GNXRayTracer.h
 core/Camera.h 
 core/Camera.cpp
+core/Filter.h
+core/Filter.cpp
 core/Geometry.h 
 core/Geometry.cpp
 core/Integrator.h
