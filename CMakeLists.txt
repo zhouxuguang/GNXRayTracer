@@ -91,6 +91,11 @@ camera/Perspective.cpp
 )
 source_group("camera" FILES ${CAMERA_FILES})
 
+set(FILTERS_FILES
+filters/GaussianFilter.h
+filters/GaussianFilter.cpp)
+source_group("filters" FILES ${FILTERS_FILES})
+
 set(SHAPE_FILES 
 shape/Sphere.h
 shape/Sphere.cpp
@@ -213,6 +218,7 @@ source_group("3rd" FILES ${3RD_FILES})
 add_executable(GNXRayTracer
              ${CORE_FILES}
              ${CAMERA_FILES}
+             ${FILTERS_FILES}
              ${SHAPE_FILES}
              ${ACCELERATOR_FILES}
              ${SAMPLERS_FILES}
