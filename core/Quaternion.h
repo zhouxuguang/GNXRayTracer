@@ -10,7 +10,7 @@
 namespace pbr
 {
 
-// Quaternion Declarations
+// 四元数类的声明
 struct Quaternion
 {
     // Quaternion Public Methods

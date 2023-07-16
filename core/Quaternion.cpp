@@ -9,7 +9,8 @@ namespace pbr
 {
 
 // Quaternion Method Definitions
-Transform Quaternion::ToTransform() const {
+Transform Quaternion::ToTransform() const
+{
     Float xx = v.x * v.x, yy = v.y * v.y, zz = v.z * v.z;
     Float xy = v.x * v.y, xz = v.x * v.z, yz = v.y * v.z;
     Float wx = v.x * w, wy = v.y * w, wz = v.z * w;
@@ -29,7 +30,8 @@ Transform Quaternion::ToTransform() const {
     return Transform(Transpose(m), m);
 }
 
-Quaternion::Quaternion(const Transform &t) {
+Quaternion::Quaternion(const Transform &t)
+{
     const Matrix4x4 &m = t.m;
     Float trace = m.m[0][0] + m.m[1][1] + m.m[2][2];
     if (trace > 0.f) {
@@ -62,7 +64,8 @@ Quaternion::Quaternion(const Transform &t) {
     }
 }
 
-Quaternion Slerp(Float t, const Quaternion &q1, const Quaternion &q2) {
+Quaternion Slerp(Float t, const Quaternion &q1, const Quaternion &q2)
+{
     Float cosTheta = Dot(q1, q2);
     if (cosTheta > .9995f)
         return Normalize((1 - t) * q1 + t * q2);

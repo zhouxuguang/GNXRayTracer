@@ -32,13 +32,11 @@ inline Float SchlickWeight(Float cosTheta)
 
 inline Float FrSchlick(Float R0, Float cosTheta)
 {
-    //return R0 + (1 - R0) * SchlickWeight(cosTheta);
     return Lerp(SchlickWeight(cosTheta), R0, 1);
 }
 
 inline Spectrum FrSchlick(const Spectrum &R0, Float cosTheta)
 {
-    //return R0 + (1 - R0) * SchlickWeight(cosTheta);
     return Lerp(SchlickWeight(cosTheta), R0, Spectrum(1.));
 }
 

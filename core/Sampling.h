@@ -15,6 +15,7 @@ void StratifiedSample2D(Point2f *samples, int nx, int ny, RNG &rng,
                         bool jitter = true);
 void LatinHypercube(Float *samples, int nSamples, int nDim, RNG &rng);
 
+// 一维分布的类，它用于计算和采样一维函数的概率分布
 struct Distribution1D
 {
     // Distribution1D Public Methods
