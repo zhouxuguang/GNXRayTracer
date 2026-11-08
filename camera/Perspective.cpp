@@ -1,12 +1,7 @@
 
 // cameras/perspective.cpp*
 #include "Perspective.h"
-//#include "paramset.h"
-//#include "sampler.h"
 #include "core/Sampling.h"
-//#include "light.h"
-//#include "stats.h"
-
 
 namespace pbr
 {
@@ -83,7 +78,8 @@ Float PerspectiveCamera::GenerateRayDifferential(const CameraSample &sample, Ray
     }
 
     // Compute offset rays for _PerspectiveCamera_ ray differentials
-    if (lensRadius > 0) {
+    if (lensRadius > 0) 
+    {
         // Compute _PerspectiveCamera_ ray differentials accounting for lens
 
         // Sample point on lens
@@ -99,7 +95,9 @@ Float PerspectiveCamera::GenerateRayDifferential(const CameraSample &sample, Ray
         pFocus = Point3f(0, 0, 0) + (ft * dy);
         ray->ryOrigin = Point3f(pLens.x, pLens.y, 0);
         ray->ryDirection = Normalize(pFocus - ray->ryOrigin);
-    } else {
+    } 
+    else 
+    {
         ray->rxOrigin = ray->ryOrigin = ray->o;
         ray->rxDirection = Normalize(Vector3f(pCamera) + dxCamera);
         ray->ryDirection = Normalize(Vector3f(pCamera) + dyCamera);
@@ -117,13 +115,15 @@ PerspectiveCamera *CreatePerspectiveCamera(const int RasterWidth, const int Rast
     float focaldistance = 3.0f;
     float frame = (float)RasterWidth / (float)RasterHeight;
     Bounds2f screen;
-    if (frame > 1.f) {
+    if (frame > 1.f) 
+    {
         screen.pMin.x = -frame;
         screen.pMax.x = frame;
         screen.pMin.y = -1.f;
         screen.pMax.y = 1.f;
     }
-    else {
+    else 
+    {
         screen.pMin.x = -1.f;
         screen.pMax.x = 1.f;
         screen.pMin.y = -1.f / frame;

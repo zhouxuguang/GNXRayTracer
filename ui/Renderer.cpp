@@ -1,13 +1,26 @@
 #include "Renderer.h"
 #include <MiniFB.h>
+#include <cmath>
 #include <thread>
 #include <vector>
+
+#include "camera/Perspective.h"
 
 Renderer::Renderer(int w, int h)
 	: mViewportWidth(w), 
 	mViewportHeight(h)
 {
 	mCurrentPixelIndex = 0;
+
+	// 相机位于原点、朝 +Z 观察，与课程第3讲一致
+	pbr::Vector3f up(0.f, 1.f, 0.f);
+	pbr::Point3f eye(0.f, 0.f, 0.f), look(0.f, 0.f, 1.f);
+	// Inverse 是 Transform 的友元函数，只能通过 ADL 找到
+	pbr::Transform worldToCamera = pbr::LookAt(eye, look, up);
+	mCameraToWorld = Inverse(worldToCamera);
+	pbr::AnimatedTransform cameraMotion(&mCameraToWorld, 0.f, &mCameraToWorld, 1.f);
+	mCamera = std::shared_ptr<const pbr::Camera>(
+		pbr::CreatePerspectiveCamera(mViewportWidth, mViewportHeight, cameraMotion));
 }
 
 void Renderer::Run()
@@ -45,15 +58,27 @@ void Renderer::Run()
 
 pbr::Spectrum Renderer::RenderPixel(int x, int y)
 {
-	pbr::Spectrum color;
-	color[0] = (float)x / mViewportWidth;
-	color[1] = (float)y / mViewportHeight;
-	color[2] = 0.0f;
+	pbr::Spectrum color(0.f);
+	if (!mCamera)
+		return color;
+
+	// 工程相机使用连续胶片坐标，取像素中心；pLens / time 预留给景深与快门
+	pbr::CameraSample sample;
+	sample.pFilm = pbr::Point2f(x + 0.5f, y + 0.5f);
+	sample.pLens = pbr::Point2f(0.f, 0.f);
+	sample.time = 0.f;
+
+	pbr::Ray ray;
+	mCamera->GenerateRay(sample, &ray);
+
+	// 把 ray.d 从 [-1, 1] 映射到 [0, 1] 显示（课程第3讲的方向可视化）
+	color[0] = ray.d.x * 0.5f + 0.5f;
+	color[1] = ray.d.y * 0.5f + 0.5f;
+	color[2] = ray.d.z * 0.5f + 0.5f;
 
 	//std::this_thread::sleep_for(std::chrono::milliseconds(1)); // 模拟渲染每个像素点需要的时间
 
 	return color;
-
 }
 
 // 渲染线程的入口函数，负责执行渲染循环
