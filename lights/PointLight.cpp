@@ -21,7 +21,10 @@ Spectrum PointLight::Sample_Li(const Interaction &ref, const Point2f &u,
     return I / DistanceSquared(pLight, ref.p);
 }
 
-Spectrum PointLight::Power() const { return 4 * Pi * I; }
+Spectrum PointLight::Power() const
+{
+    return 4 * Pi * I;
+}
 
 Float PointLight::Pdf_Li(const Interaction &, const Vector3f &) const
 {
@@ -47,4 +50,4 @@ void PointLight::Pdf_Le(const Ray &, const Normal3f &, Float *pdfPos, Float *pdf
     *pdfDir = UniformSpherePdf();
 }
 
-}  // namespace pbr
+} // namespace pbr

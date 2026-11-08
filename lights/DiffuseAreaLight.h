@@ -13,7 +13,7 @@ namespace pbr
 // DiffuseAreaLight Declarations
 class DiffuseAreaLight : public AreaLight
 {
-  public:
+public:
     // DiffuseAreaLight Public Methods
     DiffuseAreaLight(const Transform &LightToWorld, const MediumInterface &mediumInterface,
                      const Spectrum &Le,
@@ -46,6 +46,6 @@ private:
     const Float area;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_LIGHTS_DIFFUSE_H
+#endif // PBR_LIGHTS_DIFFUSE_H

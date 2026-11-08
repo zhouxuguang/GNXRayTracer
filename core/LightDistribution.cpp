@@ -10,7 +10,9 @@
 namespace pbr
 {
 
-LightDistribution::~LightDistribution() {}
+LightDistribution::~LightDistribution()
+{
+}
 
 std::unique_ptr<LightDistribution> CreateLightSampleDistribution(const std::string &name, const Scene &scene)
 {
@@ -23,26 +25,31 @@ std::unique_ptr<LightDistribution> CreateLightSampleDistribution(const std::stri
     else if (name == "spatial")
         return std::unique_ptr<LightDistribution>{
             new SpatialLightDistribution(scene)};
-    else {
-//        Error(
-//            "Light sample distribution type \"%s\" unknown. Using \"spatial\".",
-//            name.c_str());
+    else
+    {
+        //        Error(
+        //            "Light sample distribution type \"%s\" unknown. Using \"spatial\".",
+        //            name.c_str());
         return std::unique_ptr<LightDistribution>{
             new SpatialLightDistribution(scene)};
     }
 }
 
-UniformLightDistribution::UniformLightDistribution(const Scene &scene) {
+UniformLightDistribution::UniformLightDistribution(const Scene &scene)
+{
     std::vector<Float> prob(scene.lights.size(), Float(1));
     distrib.reset(new Distribution1D(&prob[0], int(prob.size())));
 }
 
-const Distribution1D *UniformLightDistribution::Lookup(const Point3f &p) const {
+const Distribution1D *UniformLightDistribution::Lookup(const Point3f &p) const
+{
     return distrib.get();
 }
 
 PowerLightDistribution::PowerLightDistribution(const Scene &scene)
-    : distrib(ComputeLightPowerDistribution(scene)) {}
+    : distrib(ComputeLightPowerDistribution(scene))
+{
+}
 
 const Distribution1D *PowerLightDistribution::Lookup(const Point3f &p) const
 {
@@ -69,14 +76,16 @@ static const uint64_t invalidPackedPos = 0xffffffffffffffff;
 
 SpatialLightDistribution::SpatialLightDistribution(const Scene &scene,
                                                    int maxVoxels)
-    : scene(scene) {
+    : scene(scene)
+{
     // Compute the number of voxels so that the widest scene bounding box
     // dimension has maxVoxels voxels and the other dimensions have a number
     // of voxels so that voxels are roughly cube shaped.
     Bounds3f b = scene.WorldBound();
     Vector3f diag = b.Diagonal();
     Float bmax = diag[b.MaximumExtent()];
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 3; ++i)
+    {
         nVoxels[i] = std::max(1, int(std::round(diag[i] / bmax * maxVoxels)));
         // In the Lookup() method, we require that 20 or fewer bits be
         // sufficient to represent each coordinate value. It's fairly hard
@@ -86,33 +95,37 @@ SpatialLightDistribution::SpatialLightDistribution(const Scene &scene,
 
     hashTableSize = 4 * nVoxels[0] * nVoxels[1] * nVoxels[2];
     hashTable.reset(new HashEntry[hashTableSize]);
-    for (int i = 0; i < hashTableSize; ++i) {
+    for (int i = 0; i < hashTableSize; ++i)
+    {
         hashTable[i].packedPos.store(invalidPackedPos);
         hashTable[i].distribution.store(nullptr);
     }
 
-//    LOG(INFO) << "SpatialLightDistribution: scene bounds " << b <<
-//        ", voxel res (" << nVoxels[0] << ", " << nVoxels[1] << ", " <<
-//        nVoxels[2] << ")";
+    //    LOG(INFO) << "SpatialLightDistribution: scene bounds " << b <<
+    //        ", voxel res (" << nVoxels[0] << ", " << nVoxels[1] << ", " <<
+    //        nVoxels[2] << ")";
 }
 
-SpatialLightDistribution::~SpatialLightDistribution() {
+SpatialLightDistribution::~SpatialLightDistribution()
+{
     // Gather statistics about how well the computed distributions are across
     // the buckets.
-    for (size_t i = 0; i < hashTableSize; ++i) {
+    for (size_t i = 0; i < hashTableSize; ++i)
+    {
         HashEntry &entry = hashTable[i];
         if (entry.distribution.load())
             delete entry.distribution.load();
     }
 }
 
-const Distribution1D *SpatialLightDistribution::Lookup(const Point3f &p) const {
+const Distribution1D *SpatialLightDistribution::Lookup(const Point3f &p) const
+{
     //ProfilePhase _(Prof::LightDistribLookup);
     ++nLookups;
 
     // First, compute integer voxel coordinates for the given point |p|
     // with respect to the overall voxel grid.
-    Vector3f offset = scene.WorldBound().Offset(p);  // offset in [0,1].
+    Vector3f offset = scene.WorldBound().Offset(p); // offset in [0,1].
     Point3i pi;
     for (int i = 0; i < 3; ++i)
         // The clamp should almost never be necessary, but is there to be
@@ -144,16 +157,19 @@ const Distribution1D *SpatialLightDistribution::Lookup(const Point3f &p) const {
     // another value; step stores the square root of the probe step.
     int step = 1;
     int nProbes = 0;
-    while (true) {
+    while (true)
+    {
         ++nProbes;
         HashEntry &entry = hashTable[hash];
         // Does the hash table entry at offset |hash| match the current point?
         uint64_t entryPackedPos = entry.packedPos.load(std::memory_order_acquire);
-        if (entryPackedPos == packedPos) {
+        if (entryPackedPos == packedPos)
+        {
             // Yes! Most of the time, there should already by a light
             // sampling distribution available.
             Distribution1D *dist = entry.distribution.load(std::memory_order_acquire);
-            if (dist == nullptr) {
+            if (dist == nullptr)
+            {
                 // Rarely, another thread will have already done a lookup
                 // at this point, found that there isn't a sampling
                 // distribution, and will already be computing the
@@ -172,7 +188,9 @@ const Distribution1D *SpatialLightDistribution::Lookup(const Point3f &p) const {
             // We have a valid sampling distribution.
             //ReportValue(nProbesPerLookup, nProbes);
             return dist;
-        } else if (entryPackedPos != invalidPackedPos) {
+        }
+        else if (entryPackedPos != invalidPackedPos)
+        {
             // The hash table entry we're checking has already been
             // allocated for another voxel. Advance to the next entry with
             // quadratic probing.
@@ -180,13 +198,16 @@ const Distribution1D *SpatialLightDistribution::Lookup(const Point3f &p) const {
             if (hash >= hashTableSize)
                 hash %= hashTableSize;
             ++step;
-        } else {
+        }
+        else
+        {
             // We have found an invalid entry. (Though this may have
             // changed since the load into entryPackedPos above.)  Use an
             // atomic compare/exchange to try to claim this entry for the
             // current position.
             uint64_t invalid = invalidPackedPos;
-            if (entry.packedPos.compare_exchange_weak(invalid, packedPos)) {
+            if (entry.packedPos.compare_exchange_weak(invalid, packedPos))
+            {
                 // Success; we've claimed this position for this voxel's
                 // distribution. Now compute the sampling distribution and
                 // add it to the hash table. As long as packedPos has been
@@ -229,7 +250,8 @@ SpatialLightDistribution::ComputeDistribution(Point3i pi) const
     // is likely to contribute to illumination in the voxel.
     int nSamples = 128;
     std::vector<Float> lightContrib(scene.lights.size(), Float(0));
-    for (int i = 0; i < nSamples; ++i) {
+    for (int i = 0; i < nSamples; ++i)
+    {
         Point3f po = voxelBounds.Lerp(Point3f(
             RadicalInverse(0, i), RadicalInverse(1, i), RadicalInverse(2, i)));
         Interaction intr(po, Normal3f(), Vector3f(), Vector3f(1, 0, 0), 0 /* time */, MediumInterface());
@@ -237,12 +259,14 @@ SpatialLightDistribution::ComputeDistribution(Point3i pi) const
         // Use the next two Halton dimensions to sample a point on the
         // light source.
         Point2f u(RadicalInverse(3, i), RadicalInverse(4, i));
-        for (size_t j = 0; j < scene.lights.size(); ++j) {
+        for (size_t j = 0; j < scene.lights.size(); ++j)
+        {
             Float pdf;
             Vector3f wi;
             VisibilityTester vis;
             Spectrum Li = scene.lights[j]->Sample_Li(intr, u, &wi, &pdf, &vis);
-            if (pdf > 0) {
+            if (pdf > 0)
+            {
                 // TODO: look at tracing shadow rays / computing beam
                 // transmittance.  Probably shouldn't give those full weight
                 // but instead e.g. have an occluded shadow ray scale down
@@ -261,16 +285,17 @@ SpatialLightDistribution::ComputeDistribution(Point3i pi) const
         std::accumulate(lightContrib.begin(), lightContrib.end(), Float(0));
     Float avgContrib = sumContrib / (nSamples * lightContrib.size());
     Float minContrib = (avgContrib > 0) ? .001 * avgContrib : 1;
-    for (size_t i = 0; i < lightContrib.size(); ++i) {
-//        VLOG(2) << "Voxel pi = " << pi << ", light " << i << " contrib = "
-//                << lightContrib[i];
+    for (size_t i = 0; i < lightContrib.size(); ++i)
+    {
+        //        VLOG(2) << "Voxel pi = " << pi << ", light " << i << " contrib = "
+        //                << lightContrib[i];
         lightContrib[i] = std::max(lightContrib[i], minContrib);
     }
-//    LOG(INFO) << "Initialized light distribution in voxel pi= " <<  pi <<
-//        ", avgContrib = " << avgContrib;
+    //    LOG(INFO) << "Initialized light distribution in voxel pi= " <<  pi <<
+    //        ", avgContrib = " << avgContrib;
 
     // Compute a sampling distribution from the accumulated contributions.
     return new Distribution1D(&lightContrib[0], int(lightContrib.size()));
 }
 
-}  // namespace pbrt
+} // namespace pbrt

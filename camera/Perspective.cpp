@@ -9,9 +9,9 @@ namespace pbr
 // PerspectiveCamera Method Definitions
 
 PerspectiveCamera::PerspectiveCamera(const int rasterWidth, const int rasterHeight, const AnimatedTransform &CameraToWorld,
-    const Bounds2f &screenWindow, float lensRadius, float focalDistance, float fov)
+                                     const Bounds2f &screenWindow, float lensRadius, float focalDistance, float fov)
     : ProjectiveCamera(rasterWidth, rasterHeight, CameraToWorld, Perspective(fov, 1e-2f, 1000.f),
-        screenWindow, 0, 0, lensRadius, focalDistance, nullptr, nullptr)
+                       screenWindow, 0, 0, lensRadius, focalDistance, nullptr, nullptr)
 {
     // Compute differential changes in origin for perspective camera rays
     dxCamera =
@@ -78,7 +78,7 @@ Float PerspectiveCamera::GenerateRayDifferential(const CameraSample &sample, Ray
     }
 
     // Compute offset rays for _PerspectiveCamera_ ray differentials
-    if (lensRadius > 0) 
+    if (lensRadius > 0)
     {
         // Compute _PerspectiveCamera_ ray differentials accounting for lens
 
@@ -95,8 +95,8 @@ Float PerspectiveCamera::GenerateRayDifferential(const CameraSample &sample, Ray
         pFocus = Point3f(0, 0, 0) + (ft * dy);
         ray->ryOrigin = Point3f(pLens.x, pLens.y, 0);
         ray->ryDirection = Normalize(pFocus - ray->ryOrigin);
-    } 
-    else 
+    }
+    else
     {
         ray->rxOrigin = ray->ryOrigin = ray->o;
         ray->rxDirection = Normalize(Vector3f(pCamera) + dxCamera);
@@ -115,14 +115,14 @@ PerspectiveCamera *CreatePerspectiveCamera(const int RasterWidth, const int Rast
     float focaldistance = 3.0f;
     float frame = (float)RasterWidth / (float)RasterHeight;
     Bounds2f screen;
-    if (frame > 1.f) 
+    if (frame > 1.f)
     {
         screen.pMin.x = -frame;
         screen.pMax.x = frame;
         screen.pMin.y = -1.f;
         screen.pMax.y = 1.f;
     }
-    else 
+    else
     {
         screen.pMin.x = -1.f;
         screen.pMax.x = 1.f;
@@ -134,5 +134,4 @@ PerspectiveCamera *CreatePerspectiveCamera(const int RasterWidth, const int Rast
     return new PerspectiveCamera(RasterWidth, RasterHeight, cam2world, screen, lensradius, focaldistance, fov);
 }
 
-}  // namespace pbr
-
+} // namespace pbr

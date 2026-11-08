@@ -9,33 +9,25 @@
 
 class RenderThread : public QThread
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	RenderThread();
-	~RenderThread();
+    RenderThread();
+    ~RenderThread();
 
 public:
-	bool renderFlag;
-	bool paintFlag;
-	FrameBuffer* m_pFramebuffer;
+    bool renderFlag;
+    bool paintFlag;
+    FrameBuffer *m_pFramebuffer;
 
 signals:
-	void PrintString(char* s);
-	void PrintDataD(const char* s, const double data);
-	void PaintBuffer(unsigned char* buffer, int width, int height, int channals);
+    void PrintString(char *s);
+    void PrintDataD(const char *s, const double data);
+    void PaintBuffer(unsigned char *buffer, int width, int height, int channals);
 private slots:
 
 public:
-	void run();
-
-
+    void run();
 };
 
 
 #endif
-
-
-
-
-
-

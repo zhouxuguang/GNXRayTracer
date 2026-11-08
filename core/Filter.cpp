@@ -6,6 +6,8 @@ namespace pbr
 {
 
 // Filter Method Definitions
-Filter::~Filter() {}
+Filter::~Filter()
+{
+}
 
-}  // namespace pbr
+} // namespace pbr

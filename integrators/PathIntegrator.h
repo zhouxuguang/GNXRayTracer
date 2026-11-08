@@ -16,11 +16,11 @@ public:
     // PathIntegrator Public Methods
     PathIntegrator(int maxDepth, std::shared_ptr<const Camera> camera,
                    std::shared_ptr<Sampler> sampler,
-                   const Bounds2i &pixelBounds, FrameBuffer * pFrameBuffer, Float rrThreshold = 1,
+                   const Bounds2i &pixelBounds, FrameBuffer *pFrameBuffer, Float rrThreshold = 1,
                    const std::string &lightSampleStrategy = "spatial");
 
     void Preprocess(const Scene &scene, Sampler &sampler);
-    
+
     Spectrum Li(const RayDifferential &ray, const Scene &scene,
                 Sampler &sampler, MemoryArena &arena, int depth) const;
 
@@ -32,6 +32,6 @@ private:
     std::unique_ptr<LightDistribution> lightDistribution;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_INTEGRATORS_PATH_INCLUDE_H
+#endif // PBR_INTEGRATORS_PATH_INCLUDE_H

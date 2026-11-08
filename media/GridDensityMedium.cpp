@@ -36,14 +36,18 @@ Spectrum GridDensityMedium::Sample(const Ray &rWorld, Sampler &sampler, MemoryAr
     // Compute $[\tmin, \tmax]$ interval of _ray_'s overlap with medium bounds
     const Bounds3f b(Point3f(0, 0, 0), Point3f(1, 1, 1));
     Float tMin, tMax;
-    if (!b.IntersectP(ray, &tMin, &tMax)) return Spectrum(1.f);
+    if (!b.IntersectP(ray, &tMin, &tMax))
+        return Spectrum(1.f);
 
     // Run delta-tracking iterations to sample a medium interaction
     Float t = tMin;
-    while (true) {
+    while (true)
+    {
         t -= std::log(1 - sampler.Get1D()) * invMaxDensity / sigma_t;
-        if (t >= tMax) break;
-        if (Density(ray(t)) * invMaxDensity > sampler.Get1D()) {
+        if (t >= tMax)
+            break;
+        if (Density(ray(t)) * invMaxDensity > sampler.Get1D())
+        {
             // Populate _mi_ with medium interaction information and return
             PhaseFunction *phase = ARENA_ALLOC(arena, HenyeyGreenstein)(g);
             *mi = MediumInteraction(rWorld(t), -rWorld.d, rWorld.time, this,
@@ -64,26 +68,31 @@ Spectrum GridDensityMedium::Tr(const Ray &rWorld, Sampler &sampler) const
     // Compute $[\tmin, \tmax]$ interval of _ray_'s overlap with medium bounds
     const Bounds3f b(Point3f(0, 0, 0), Point3f(1, 1, 1));
     Float tMin, tMax;
-    if (!b.IntersectP(ray, &tMin, &tMax)) return Spectrum(1.f);
+    if (!b.IntersectP(ray, &tMin, &tMax))
+        return Spectrum(1.f);
 
     // Perform ratio tracking to estimate the transmittance value
     Float Tr = 1, t = tMin;
-    while (true) {
+    while (true)
+    {
         ++nTrSteps;
         t -= std::log(1 - sampler.Get1D()) * invMaxDensity / sigma_t;
-        if (t >= tMax) break;
+        if (t >= tMax)
+            break;
         Float density = Density(ray(t));
         Tr *= 1 - std::max((Float)0, density * invMaxDensity);
         // Added after book publication: when transmittance gets low,
         // start applying Russian roulette to terminate sampling.
         const Float rrThreshold = .1;
-        if (Tr < rrThreshold) {
+        if (Tr < rrThreshold)
+        {
             Float q = std::max((Float).05, 1 - Tr);
-            if (sampler.Get1D() < q) return 0;
+            if (sampler.Get1D() < q)
+                return 0;
             Tr /= 1 - q;
         }
     }
     return Spectrum(Tr);
 }
 
-}  // namespace pbr
+} // namespace pbr

@@ -24,32 +24,41 @@ struct Matrix4x4
     Matrix4x4(Float t00, Float t01, Float t02, Float t03, Float t10, Float t11,
               Float t12, Float t13, Float t20, Float t21, Float t22, Float t23,
               Float t30, Float t31, Float t32, Float t33);
-    bool operator==(const Matrix4x4 &m2) const {
+    bool operator==(const Matrix4x4 &m2) const
+    {
         for (int i = 0; i < 4; ++i)
             for (int j = 0; j < 4; ++j)
-                if (m[i][j] != m2.m[i][j]) return false;
+                if (m[i][j] != m2.m[i][j])
+                    return false;
         return true;
     }
-    bool operator!=(const Matrix4x4 &m2) const {
+    bool operator!=(const Matrix4x4 &m2) const
+    {
         for (int i = 0; i < 4; ++i)
             for (int j = 0; j < 4; ++j)
-                if (m[i][j] != m2.m[i][j]) return true;
+                if (m[i][j] != m2.m[i][j])
+                    return true;
         return false;
     }
     friend Matrix4x4 Transpose(const Matrix4x4 &);
-    void Print(FILE *f) const {
+    void Print(FILE *f) const
+    {
         fprintf(f, "[ ");
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < 4; ++i)
+        {
             fprintf(f, "  [ ");
-            for (int j = 0; j < 4; ++j) {
+            for (int j = 0; j < 4; ++j)
+            {
                 fprintf(f, "%f", m[i][j]);
-                if (j != 3) fprintf(f, ", ");
+                if (j != 3)
+                    fprintf(f, ", ");
             }
             fprintf(f, " ]\n");
         }
         fprintf(f, " ] ");
     }
-    static Matrix4x4 Mul(const Matrix4x4 &m1, const Matrix4x4 &m2) {
+    static Matrix4x4 Mul(const Matrix4x4 &m1, const Matrix4x4 &m2)
+    {
         Matrix4x4 r;
         for (int i = 0; i < 4; ++i)
             for (int j = 0; j < 4; ++j)
@@ -59,7 +68,8 @@ struct Matrix4x4
     }
     friend Matrix4x4 Inverse(const Matrix4x4 &);
 
-    friend std::ostream &operator<<(std::ostream &os, const Matrix4x4 &m) {
+    friend std::ostream &operator<<(std::ostream &os, const Matrix4x4 &m)
+    {
         // clang-format off
          os << StringPrintf("[ [ %f, %f, %f, %f ] "
                             "[ %f, %f, %f, %f ] "
@@ -77,20 +87,29 @@ struct Matrix4x4
 };
 
 // 变换类定义
-class Transform 
+class Transform
 {
 public:
     // Transform Public Methods
-    Transform() {}
-    Transform(const Float mat[4][4]) {
+    Transform()
+    {
+    }
+    Transform(const Float mat[4][4])
+    {
         m = Matrix4x4(mat[0][0], mat[0][1], mat[0][2], mat[0][3], mat[1][0],
                       mat[1][1], mat[1][2], mat[1][3], mat[2][0], mat[2][1],
                       mat[2][2], mat[2][3], mat[3][0], mat[3][1], mat[3][2],
                       mat[3][3]);
         mInv = Inverse(m);
     }
-    Transform(const Matrix4x4 &m) : m(m), mInv(Inverse(m)) {}
-    Transform(const Matrix4x4 &m, const Matrix4x4 &mInv) : m(m), mInv(mInv) {}
+    Transform(const Matrix4x4 &m)
+        : m(m), mInv(Inverse(m))
+    {
+    }
+    Transform(const Matrix4x4 &m, const Matrix4x4 &mInv)
+        : m(m), mInv(mInv)
+    {
+    }
     void Print(FILE *f) const;
     friend Transform Inverse(const Transform &t)
     {
@@ -113,12 +132,14 @@ public:
         for (int i = 0; i < 4; ++i)
             for (int j = 0; j < 4; ++j)
             {
-                if (m.m[i][j] < t2.m.m[i][j]) return true;
-                if (m.m[i][j] > t2.m.m[i][j]) return false;
+                if (m.m[i][j] < t2.m.m[i][j])
+                    return true;
+                if (m.m[i][j] > t2.m.m[i][j])
+                    return false;
             }
         return false;
     }
-    
+
     bool IsIdentity() const
     {
         return (m.m[0][0] == 1.f && m.m[0][1] == 0.f && m.m[0][2] == 0.f &&
@@ -128,8 +149,14 @@ public:
                 m.m[3][0] == 0.f && m.m[3][1] == 0.f && m.m[3][2] == 0.f &&
                 m.m[3][3] == 1.f);
     }
-    const Matrix4x4 &GetMatrix() const { return m; }
-    const Matrix4x4 &GetInverseMatrix() const { return mInv; }
+    const Matrix4x4 &GetMatrix() const
+    {
+        return m;
+    }
+    const Matrix4x4 &GetInverseMatrix() const
+    {
+        return mInv;
+    }
     bool HasScale() const
     {
         Float la2 = (*this)(Vector3f(1, 0, 0)).LengthSquared();
@@ -169,7 +196,8 @@ public:
                           const Vector3f &dErrorIn, Vector3f *oErrorOut,
                           Vector3f *dErrorOut) const;
 
-    friend std::ostream &operator<<(std::ostream &os, const Transform &t) {
+    friend std::ostream &operator<<(std::ostream &os, const Transform &t)
+    {
         os << "t=" << t.m << ", inv=" << t.mInv;
         return os;
     }
@@ -235,7 +263,8 @@ inline Ray Transform::operator()(const Ray &r) const
     // Offset ray origin to edge of error bounds and compute _tMax_
     Float lengthSquared = d.LengthSquared();
     Float tMax = r.tMax;
-    if (lengthSquared > 0) {
+    if (lengthSquared > 0)
+    {
         Float dt = Dot(Abs(d), oError) / lengthSquared;
         o += d * dt;
         tMax -= dt;
@@ -243,7 +272,7 @@ inline Ray Transform::operator()(const Ray &r) const
     return Ray(o, d, tMax, r.time, r.medium);
 }
 
-inline RayDifferential Transform::operator()(const RayDifferential &r) const 
+inline RayDifferential Transform::operator()(const RayDifferential &r) const
 {
     Ray tr = (*this)(Ray(r));
     RayDifferential ret(tr.o, tr.d, tr.tMax, tr.time, tr.medium);
@@ -257,7 +286,7 @@ inline RayDifferential Transform::operator()(const RayDifferential &r) const
 
 template <typename T>
 inline Point3<T> Transform::operator()(const Point3<T> &p,
-                                       Vector3<T> *pError) const 
+                                       Vector3<T> *pError) const
 {
     T x = p.x, y = p.y, z = p.z;
     // Compute transformed coordinates from point _pt_
@@ -365,12 +394,14 @@ inline Vector3<T> Transform::operator()(const Vector3<T> &v,
 }
 
 inline Ray Transform::operator()(const Ray &r, Vector3f *oError,
-                                 Vector3f *dError) const {
+                                 Vector3f *dError) const
+{
     Point3f o = (*this)(r.o, oError);
     Vector3f d = (*this)(r.d, dError);
     Float tMax = r.tMax;
     Float lengthSquared = d.LengthSquared();
-    if (lengthSquared > 0) {
+    if (lengthSquared > 0)
+    {
         Float dt = Dot(Abs(d), *oError) / lengthSquared;
         o += d * dt;
         //        tMax -= dt;
@@ -380,12 +411,14 @@ inline Ray Transform::operator()(const Ray &r, Vector3f *oError,
 
 inline Ray Transform::operator()(const Ray &r, const Vector3f &oErrorIn,
                                  const Vector3f &dErrorIn, Vector3f *oErrorOut,
-                                 Vector3f *dErrorOut) const {
+                                 Vector3f *dErrorOut) const
+{
     Point3f o = (*this)(r.o, oErrorIn, oErrorOut);
     Vector3f d = (*this)(r.d, dErrorIn, dErrorOut);
     Float tMax = r.tMax;
     Float lengthSquared = d.LengthSquared();
-    if (lengthSquared > 0) {
+    if (lengthSquared > 0)
+    {
         Float dt = Dot(Abs(d), *oErrorOut) / lengthSquared;
         o += d * dt;
         //        tMax -= dt;
@@ -423,18 +456,24 @@ private:
     Quaternion R[2];
     Matrix4x4 S[2];
     bool hasRotation;
-    struct DerivativeTerm {
-        DerivativeTerm() {}
+    struct DerivativeTerm
+    {
+        DerivativeTerm()
+        {
+        }
         DerivativeTerm(Float c, Float x, Float y, Float z)
-            : kc(c), kx(x), ky(y), kz(z) {}
+            : kc(c), kx(x), ky(y), kz(z)
+        {
+        }
         Float kc, kx, ky, kz;
-        Float Eval(const Point3f &p) const {
+        Float Eval(const Point3f &p) const
+        {
             return kc + kx * p.x + ky * p.y + kz * p.z;
         }
     };
     DerivativeTerm c1[3], c2[3], c3[3], c4[3], c5[3];
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_CORE_TRANSFORM_H
+#endif // PBR_CORE_TRANSFORM_H

@@ -15,13 +15,19 @@ class ConstantTexture : public Texture<T>
 {
 public:
     // ConstantTexture Public Methods
-    ConstantTexture(const T &value) : value(value) {}
-    T Evaluate(const SurfaceInteraction &) const { return value; }
+    ConstantTexture(const T &value)
+        : value(value)
+    {
+    }
+    T Evaluate(const SurfaceInteraction &) const
+    {
+        return value;
+    }
 
 private:
     T value;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBRT_TEXTURES_CONSTANT_H
+#endif // PBRT_TEXTURES_CONSTANT_H

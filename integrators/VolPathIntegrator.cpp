@@ -39,20 +39,25 @@ Spectrum VolPathIntegrator::Li(const RayDifferential &r, const Scene &scene,
     // out of a medium and thus have their beta value increased.
     Float etaScale = 1;
 
-    for (bounces = 0; ; ++bounces) {
+    for (bounces = 0;; ++bounces)
+    {
         // Intersect _ray_ with scene and store intersection in _isect_
         SurfaceInteraction isect;
         bool foundIntersection = scene.Intersect(ray, &isect);
 
         // Sample the participating medium, if present
         MediumInteraction mi;
-        if (ray.medium) beta *= ray.medium->Sample(ray, sampler, arena, &mi);
-        if (beta.IsBlack()) break;
+        if (ray.medium)
+            beta *= ray.medium->Sample(ray, sampler, arena, &mi);
+        if (beta.IsBlack())
+            break;
 
         // Handle an interaction with a medium or a surface
-        if (mi.IsValid()) {
+        if (mi.IsValid())
+        {
             // Terminate path if ray escaped or _maxDepth_ was reached
-            if (bounces >= maxDepth) break;
+            if (bounces >= maxDepth)
+                break;
 
             ++volumeInteractions;
             // Handle scattering at point in medium for volumetric path tracer
@@ -64,12 +69,15 @@ Spectrum VolPathIntegrator::Li(const RayDifferential &r, const Scene &scene,
             mi.phase->Sample_p(wo, &wi, sampler.Get2D());
             ray = mi.SpawnRay(wi);
             specularBounce = false;
-        } else {
+        }
+        else
+        {
             ++surfaceInteractions;
             // Handle scattering at point on surface for volumetric path tracer
 
             // Possibly add emitted light at intersection
-            if (bounces == 0 || specularBounce) {
+            if (bounces == 0 || specularBounce)
+            {
                 // Add emitted light at path vertex or from the environment
                 if (foundIntersection)
                     L += beta * isect.Le(-ray.d);
@@ -79,11 +87,13 @@ Spectrum VolPathIntegrator::Li(const RayDifferential &r, const Scene &scene,
             }
 
             // Terminate path if ray escaped or _maxDepth_ was reached
-            if (!foundIntersection || bounces >= maxDepth) break;
+            if (!foundIntersection || bounces >= maxDepth)
+                break;
 
             // Compute scattering functions and skip over medium boundaries
             isect.ComputeScatteringFunctions(ray, arena, true);
-            if (!isect.bsdf) {
+            if (!isect.bsdf)
+            {
                 ray = isect.SpawnRay(ray.d);
                 bounces--;
                 continue;
@@ -102,11 +112,13 @@ Spectrum VolPathIntegrator::Li(const RayDifferential &r, const Scene &scene,
             BxDFType flags;
             Spectrum f = isect.bsdf->Sample_f(wo, &wi, sampler.Get2D(), &pdf,
                                               BSDF_ALL, &flags);
-            if (f.IsBlack() || pdf == 0.f) break;
+            if (f.IsBlack() || pdf == 0.f)
+                break;
             beta *= f * AbsDot(wi, isect.shading.n) / pdf;
             DCHECK(std::isinf(beta.y()) == false);
             specularBounce = (flags & BSDF_SPECULAR) != 0;
-            if ((flags & BSDF_SPECULAR) && (flags & BSDF_TRANSMISSION)) {
+            if ((flags & BSDF_SPECULAR) && (flags & BSDF_TRANSMISSION))
+            {
                 Float eta = isect.bsdf->eta;
                 // Update the term that tracks radiance scaling for refraction
                 // depending on whether the ray is entering or leaving the
@@ -118,38 +130,40 @@ Spectrum VolPathIntegrator::Li(const RayDifferential &r, const Scene &scene,
 
             //次表面反射的内容
             // Account for attenuated subsurface scattering, if applicable
-//            if (isect.bssrdf && (flags & BSDF_TRANSMISSION)) {
-//                // Importance sample the BSSRDF
-//                SurfaceInteraction pi;
-//                Spectrum S = isect.bssrdf->Sample_S(
-//                    scene, sampler.Get1D(), sampler.Get2D(), arena, &pi, &pdf);
-//                DCHECK(std::isinf(beta.y()) == false);
-//                if (S.IsBlack() || pdf == 0) break;
-//                beta *= S / pdf;
-//
-//                // Account for the attenuated direct subsurface scattering
-//                // component
-//                L += beta *
-//                     UniformSampleOneLight(pi, scene, arena, sampler, true,
-//                                           lightDistribution->Lookup(pi.p));
-//
-//                // Account for the indirect subsurface scattering component
-//                Spectrum f = pi.bsdf->Sample_f(pi.wo, &wi, sampler.Get2D(),
-//                                               &pdf, BSDF_ALL, &flags);
-//                if (f.IsBlack() || pdf == 0) break;
-//                beta *= f * AbsDot(wi, pi.shading.n) / pdf;
-//                DCHECK(std::isinf(beta.y()) == false);
-//                specularBounce = (flags & BSDF_SPECULAR) != 0;
-//                ray = pi.SpawnRay(wi);
-//            }
+            //            if (isect.bssrdf && (flags & BSDF_TRANSMISSION)) {
+            //                // Importance sample the BSSRDF
+            //                SurfaceInteraction pi;
+            //                Spectrum S = isect.bssrdf->Sample_S(
+            //                    scene, sampler.Get1D(), sampler.Get2D(), arena, &pi, &pdf);
+            //                DCHECK(std::isinf(beta.y()) == false);
+            //                if (S.IsBlack() || pdf == 0) break;
+            //                beta *= S / pdf;
+            //
+            //                // Account for the attenuated direct subsurface scattering
+            //                // component
+            //                L += beta *
+            //                     UniformSampleOneLight(pi, scene, arena, sampler, true,
+            //                                           lightDistribution->Lookup(pi.p));
+            //
+            //                // Account for the indirect subsurface scattering component
+            //                Spectrum f = pi.bsdf->Sample_f(pi.wo, &wi, sampler.Get2D(),
+            //                                               &pdf, BSDF_ALL, &flags);
+            //                if (f.IsBlack() || pdf == 0) break;
+            //                beta *= f * AbsDot(wi, pi.shading.n) / pdf;
+            //                DCHECK(std::isinf(beta.y()) == false);
+            //                specularBounce = (flags & BSDF_SPECULAR) != 0;
+            //                ray = pi.SpawnRay(wi);
+            //            }
         }
 
         // Possibly terminate the path with Russian roulette
         // Factor out radiance scaling due to refraction in rrBeta.
         Spectrum rrBeta = beta * etaScale;
-        if (rrBeta.MaxComponentValue() < rrThreshold && bounces > 3) {
+        if (rrBeta.MaxComponentValue() < rrThreshold && bounces > 3)
+        {
             Float q = std::max((Float).05, 1 - rrBeta.MaxComponentValue());
-            if (sampler.Get1D() < q) break;
+            if (sampler.Get1D() < q)
+                break;
             beta /= 1 - q;
             DCHECK(std::isinf(beta.y()) == false);
         }
@@ -158,4 +172,4 @@ Spectrum VolPathIntegrator::Li(const RayDifferential &r, const Scene &scene,
     return L;
 }
 
-}  // namespace pbr
+} // namespace pbr

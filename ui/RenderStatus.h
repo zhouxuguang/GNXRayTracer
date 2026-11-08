@@ -5,29 +5,26 @@
 
 class renderStatus : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	renderStatus(QObject * parent = Q_NULLPTR) { }
-	~renderStatus() {};
+    renderStatus(QObject *parent = Q_NULLPTR)
+    {
+    }
+    ~renderStatus() {};
 
 
-	//清除全部
-	void clearAllStatus() {
-		
-	}
+    //清除全部
+    void clearAllStatus()
+    {
+    }
 
 private:
-
 public:
-
-
 signals:
-	void setDataChanged(const QString& Group, const QString& Name, const QString& Value, const QString& Unit = "", const QString& Icon = "");
+    void setDataChanged(const QString &Group, const QString &Name, const QString &Value, const QString &Unit = "", const QString &Icon = "");
 
 private slots:
-
-
 };
 
 
@@ -35,14 +32,3 @@ extern renderStatus g_RenderStatus;
 
 
 #endif
-
-
-
-
-
-
-
-
-
-
-

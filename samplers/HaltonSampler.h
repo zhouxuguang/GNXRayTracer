@@ -34,16 +34,17 @@ private:
     bool sampleAtPixelCenter;
 
     // HaltonSampler Private Methods
-    const uint16_t *PermutationForDimension(int dim) const {
-//        if (dim >= PrimeTableSize)
-//            LOG(FATAL) << StringPrintf("HaltonSampler can only sample %d "
-//                                       "dimensions.", PrimeTableSize);
+    const uint16_t *PermutationForDimension(int dim) const
+    {
+        //        if (dim >= PrimeTableSize)
+        //            LOG(FATAL) << StringPrintf("HaltonSampler can only sample %d "
+        //                                       "dimensions.", PrimeTableSize);
         return &radicalInversePermutations[PrimeSums[dim]];
     }
 };
 
 HaltonSampler *CreateHaltonSampler(const Bounds2i &sampleBounds);
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_SAMPLERS_HALTON_H
+#endif // PBR_SAMPLERS_HALTON_H

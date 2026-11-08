@@ -10,7 +10,7 @@
 #ifdef __GNUG__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-security"
-#endif  // __GNUG__
+#endif // __GNUG__
 
 namespace pbr
 {
@@ -20,8 +20,10 @@ inline void stringPrintfRecursive(std::string *s, const char *fmt)
     const char *c = fmt;
     // No args left; make sure there aren't any extra formatting
     // specifiers.
-    while (*c) {
-        if (*c == '%') {
+    while (*c)
+    {
+        if (*c == '%')
+        {
             CHECK_EQ(c[1], '%');
             ++c;
         }
@@ -35,23 +37,30 @@ inline void stringPrintfRecursive(std::string *s, const char *fmt)
 inline std::string copyToFormatString(const char **fmt_ptr, std::string *s)
 {
     const char *&fmt = *fmt_ptr;
-    while (*fmt) {
-        if (*fmt != '%') {
+    while (*fmt)
+    {
+        if (*fmt != '%')
+        {
             *s += *fmt;
             ++fmt;
-        } else if (fmt[1] == '%') {
+        }
+        else if (fmt[1] == '%')
+        {
             // "%%"; let it pass through
             *s += '%';
             *s += '%';
             fmt += 2;
-        } else
+        }
+        else
             // fmt is at the start of a formatting directive.
             break;
     }
 
     std::string nextFmt;
-    if (*fmt) {
-        do {
+    if (*fmt)
+    {
+        do
+        {
             nextFmt += *fmt;
             ++fmt;
             // Incomplete (but good enough?) test for the end of the
@@ -73,7 +82,7 @@ inline std::string formatOne(const char *fmt, T v)
     std::string str;
     str.resize(size);
     snprintf(&str[0], size, fmt, v);
-    str.pop_back();  // remove trailing NUL
+    str.pop_back(); // remove trailing NUL
     return str;
 }
 
@@ -139,8 +148,8 @@ inline std::string StringPrintf(const char *fmt, Args... args)
 
 #ifdef __GNUG__
 #pragma GCC diagnostic pop
-#endif  // __GNUG__
+#endif // __GNUG__
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_CORE_STRINGPRINT_H
+#endif // PBR_CORE_STRINGPRINT_H

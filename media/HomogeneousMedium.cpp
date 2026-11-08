@@ -33,13 +33,15 @@ Spectrum HomogeneousMedium::Sample(const Ray &ray, Sampler &sampler, MemoryArena
     // Return weighting factor for scattering from homogeneous medium
     Spectrum density = sampledMedium ? (sigma_t * Tr) : Tr;
     Float pdf = 0;
-    for (int i = 0; i < Spectrum::nSamples; ++i) pdf += density[i];
+    for (int i = 0; i < Spectrum::nSamples; ++i)
+        pdf += density[i];
     pdf *= 1 / (Float)Spectrum::nSamples;
-    if (pdf == 0) {
+    if (pdf == 0)
+    {
         CHECK(Tr.IsBlack());
         pdf = 1;
     }
     return sampledMedium ? (Tr * sigma_s / pdf) : (Tr / pdf);
 }
 
-}  // namespace pbr
+} // namespace pbr

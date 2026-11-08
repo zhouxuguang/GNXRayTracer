@@ -21,12 +21,14 @@ static int pathLength = 0;
 PathIntegrator::PathIntegrator(int maxDepth,
                                std::shared_ptr<const Camera> camera,
                                std::shared_ptr<Sampler> sampler,
-                               const Bounds2i &pixelBounds, FrameBuffer * pFrameBuffer, Float rrThreshold,
+                               const Bounds2i &pixelBounds, FrameBuffer *pFrameBuffer, Float rrThreshold,
                                const std::string &lightSampleStrategy)
     : SamplerIntegrator(camera, sampler, pixelBounds, pFrameBuffer),
       maxDepth(maxDepth),
       rrThreshold(rrThreshold),
-      lightSampleStrategy(lightSampleStrategy) {}
+      lightSampleStrategy(lightSampleStrategy)
+{
+}
 
 void PathIntegrator::Preprocess(const Scene &scene, Sampler &sampler)
 {
@@ -74,7 +76,7 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
     // Russian roulette; this is worthwhile, since it lets us sometimes
     // avoid terminating refracted rays that are about to be refracted back
     // out of a medium and thus have their beta value increased.
-    
+
     /**
      这段代码是在书籍出版之后添加的内容。其中的"etaScale"变量用于追踪光线穿过折射界面时辐射能量缩放的累积效果。这个累积效果是通过路径
      踪算法的公式推导（可参考第三版书中的第527页）得到的。我们需要跟踪这个值，以便在应用俄罗斯转盘法则（Russian
@@ -87,23 +89,27 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
      */
     Float etaScale = 1;
 
-    for (bounces = 0; ; ++bounces)
+    for (bounces = 0;; ++bounces)
     {
         // Find next path vertex and accumulate contribution
-//        VLOG(2) << "Path tracer bounce " << bounces << ", current L = " << L
-//                << ", beta = " << beta;
+        //        VLOG(2) << "Path tracer bounce " << bounces << ", current L = " << L
+        //                << ", beta = " << beta;
 
         //计算光线与场景的交点
         SurfaceInteraction isect;
         bool foundIntersection = scene.Intersect(ray, &isect);
 
         // Possibly add emitted light at intersection
-        if (bounces == 0 || specularBounce) {
+        if (bounces == 0 || specularBounce)
+        {
             // Add emitted light at path vertex or from the environment
-            if (foundIntersection) {
+            if (foundIntersection)
+            {
                 L += beta * isect.Le(-ray.d);
                 //VLOG(2) << "Added Le -> L = " << L;
-            } else {
+            }
+            else
+            {
                 for (const auto &light : scene.infiniteLights)
                     L += beta * light->Le(ray);
                 //VLOG(2) << "Added infinite area lights -> L = " << L;
@@ -118,7 +124,8 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
 
         // 计算散射函数并跳过介质边界
         isect.ComputeScatteringFunctions(ray, arena, true);
-        if (!isect.bsdf) {
+        if (!isect.bsdf)
+        {
             //VLOG(2) << "Skipping intersection due to null bsdf";
             ray = isect.SpawnRay(ray.d);
             bounces--;
@@ -135,7 +142,8 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
             Spectrum Ld = beta * UniformSampleOneLight(isect, scene, arena,
                                                        sampler, false, distrib);
             //VLOG(2) << "Sampled direct lighting Ld = " << Ld;
-            if (Ld.IsBlack()) ++zeroRadiancePaths;
+            if (Ld.IsBlack())
+                ++zeroRadiancePaths;
             CHECK_GE(Ld.y(), 0.f);
             L += Ld;
         }
@@ -147,13 +155,15 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
         Spectrum f = isect.bsdf->Sample_f(wo, &wi, sampler.Get2D(), &pdf,
                                           BSDF_ALL, &flags);
         //VLOG(2) << "Sampled BSDF, f = " << f << ", pdf = " << pdf;
-        if (f.IsBlack() || pdf == 0.f) break;
+        if (f.IsBlack() || pdf == 0.f)
+            break;
         beta *= f * AbsDot(wi, isect.shading.n) / pdf;
         //VLOG(2) << "Updated beta = " << beta;
         CHECK_GE(beta.y(), 0.f);
         DCHECK(!std::isinf(beta.y()));
         specularBounce = (flags & BSDF_SPECULAR) != 0;
-        if ((flags & BSDF_SPECULAR) && (flags & BSDF_TRANSMISSION)) {
+        if ((flags & BSDF_SPECULAR) && (flags & BSDF_TRANSMISSION))
+        {
             Float eta = isect.bsdf->eta;
             // Update the term that tracks radiance scaling for refraction
             // depending on whether the ray is entering or leaving the
@@ -161,7 +171,7 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
             etaScale *= (Dot(wo, isect.n) > 0) ? (eta * eta) : 1 / (eta * eta);
         }
         ray = isect.SpawnRay(wi);
-        
+
 #if 0
 
         // Account for subsurface scattering, if applicable
@@ -188,7 +198,7 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
             specularBounce = (flags & BSDF_SPECULAR) != 0;
             ray = pi.SpawnRay(wi);
         }
-        
+
 #endif
 
         // Possibly terminate the path with Russian roulette.
@@ -196,9 +206,11 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
         //终止路径的追踪：如果路径的权重beta经过一定的迭代次数后的最大分量小于某个阈值（rrThreshold），并且迭代次数超过了一定的阈
         //值（3），就有一定概率直接终止路径的追踪，这是通过俄罗斯转盘法则实现的。
         Spectrum rrBeta = beta * etaScale;
-        if (rrBeta.MaxComponentValue() < rrThreshold && bounces > 3) {
+        if (rrBeta.MaxComponentValue() < rrThreshold && bounces > 3)
+        {
             Float q = std::max((Float).05, 1 - rrBeta.MaxComponentValue());
-            if (sampler.Get1D() < q) break;
+            if (sampler.Get1D() < q)
+                break;
             beta /= 1 - q;
             DCHECK(!std::isinf(beta.y()));
         }
@@ -207,4 +219,4 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
     return L;
 }
 
-}  // namespace pbr
+} // namespace pbr

@@ -5,13 +5,13 @@
 // core/microfacet.h*
 #include "Geometry.h"
 
-namespace pbr 
+namespace pbr
 {
 
 // MicrofacetDistribution Declarations
-class MicrofacetDistribution 
+class MicrofacetDistribution
 {
- public:
+public:
     // MicrofacetDistribution Public Methods
     virtual ~MicrofacetDistribution();
     virtual Float D(const Vector3f &wh) const = 0;
@@ -32,7 +32,9 @@ class MicrofacetDistribution
 protected:
     // MicrofacetDistribution Protected Methods
     MicrofacetDistribution(bool sampleVisibleArea)
-        : sampleVisibleArea(sampleVisibleArea) {}
+        : sampleVisibleArea(sampleVisibleArea)
+    {
+    }
 
     // MicrofacetDistribution Protected Data
     const bool sampleVisibleArea;
@@ -44,7 +46,7 @@ inline std::ostream &operator<<(std::ostream &os, const MicrofacetDistribution &
     return os;
 }
 
-class BeckmannDistribution : public MicrofacetDistribution 
+class BeckmannDistribution : public MicrofacetDistribution
 {
 public:
     // BeckmannDistribution Public Methods
@@ -58,7 +60,9 @@ public:
     BeckmannDistribution(Float alphax, Float alphay, bool samplevis = true)
         : MicrofacetDistribution(samplevis),
           alphax(std::max(Float(0.001), alphax)),
-          alphay(std::max(Float(0.001), alphay)) {}
+          alphay(std::max(Float(0.001), alphay))
+    {
+    }
     Float D(const Vector3f &wh) const;
     Vector3f Sample_wh(const Vector3f &wo, const Point2f &u) const;
     std::string ToString() const;
@@ -71,7 +75,7 @@ private:
     const Float alphax, alphay;
 };
 
-class TrowbridgeReitzDistribution : public MicrofacetDistribution 
+class TrowbridgeReitzDistribution : public MicrofacetDistribution
 {
 public:
     // TrowbridgeReitzDistribution Public Methods
@@ -80,7 +84,9 @@ public:
                                 bool samplevis = true)
         : MicrofacetDistribution(samplevis),
           alphax(std::max(Float(0.001), alphax)),
-          alphay(std::max(Float(0.001), alphay)) {}
+          alphay(std::max(Float(0.001), alphay))
+    {
+    }
     Float D(const Vector3f &wh) const;
     Vector3f Sample_wh(const Vector3f &wo, const Point2f &u) const;
     std::string ToString() const;
@@ -102,6 +108,6 @@ inline Float TrowbridgeReitzDistribution::RoughnessToAlpha(Float roughness)
            0.000640711f * x * x * x * x;
 }
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_CORE_MICROFACET_H
+#endif // PBR_CORE_MICROFACET_H

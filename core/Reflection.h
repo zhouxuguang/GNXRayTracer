@@ -18,17 +18,32 @@ Spectrum FrConductor(Float cosThetaI, const Spectrum &etaI,
                      const Spectrum &etaT, const Spectrum &k);
 
 // BSDF Inline Functions
-inline Float CosTheta(const Vector3f &w) { return w.z; }
-inline Float Cos2Theta(const Vector3f &w) { return w.z * w.z; }
-inline Float AbsCosTheta(const Vector3f &w) { return std::abs(w.z); }
+inline Float CosTheta(const Vector3f &w)
+{
+    return w.z;
+}
+inline Float Cos2Theta(const Vector3f &w)
+{
+    return w.z * w.z;
+}
+inline Float AbsCosTheta(const Vector3f &w)
+{
+    return std::abs(w.z);
+}
 inline Float Sin2Theta(const Vector3f &w)
 {
     return std::max((Float)0, (Float)1 - Cos2Theta(w));
 }
 
-inline Float SinTheta(const Vector3f &w) { return std::sqrt(Sin2Theta(w)); }
+inline Float SinTheta(const Vector3f &w)
+{
+    return std::sqrt(Sin2Theta(w));
+}
 
-inline Float TanTheta(const Vector3f &w) { return SinTheta(w) / CosTheta(w); }
+inline Float TanTheta(const Vector3f &w)
+{
+    return SinTheta(w) / CosTheta(w);
+}
 
 inline Float Tan2Theta(const Vector3f &w)
 {
@@ -47,9 +62,15 @@ inline Float SinPhi(const Vector3f &w)
     return (sinTheta == 0) ? 0 : Clamp(w.y / sinTheta, -1, 1);
 }
 
-inline Float Cos2Phi(const Vector3f &w) { return CosPhi(w) * CosPhi(w); }
+inline Float Cos2Phi(const Vector3f &w)
+{
+    return CosPhi(w) * CosPhi(w);
+}
 
-inline Float Sin2Phi(const Vector3f &w) { return SinPhi(w) * SinPhi(w); }
+inline Float Sin2Phi(const Vector3f &w)
+{
+    return SinPhi(w) * SinPhi(w);
+}
 
 inline Float CosDPhi(const Vector3f &wa, const Vector3f &wb)
 {
@@ -73,22 +94,26 @@ inline bool Refract(const Vector3f &wi, const Normal3f &n, Float eta, Vector3f *
     Float sin2ThetaT = eta * eta * sin2ThetaI;
 
     // 处理全内反射，这个时候只有折射
-    if (sin2ThetaT >= 1) return false;
+    if (sin2ThetaT >= 1)
+        return false;
     Float cosThetaT = std::sqrt(1 - sin2ThetaT);
     *wt = eta * -wi + (eta * cosThetaI - cosThetaT) * Vector3f(n);
     return true;
 }
 
-inline bool SameHemisphere(const Vector3f &w, const Vector3f &wp) {
+inline bool SameHemisphere(const Vector3f &w, const Vector3f &wp)
+{
     return w.z * wp.z > 0;
 }
 
-inline bool SameHemisphere(const Vector3f &w, const Normal3f &wp) {
+inline bool SameHemisphere(const Vector3f &w, const Normal3f &wp)
+{
     return w.z * wp.z > 0;
 }
 
 // BSDF Declarations
-enum BxDFType {
+enum BxDFType
+{
     BSDF_REFLECTION = 1 << 0,
     BSDF_TRANSMISSION = 1 << 1,
     BSDF_DIFFUSE = 1 << 2,
@@ -108,20 +133,23 @@ public:
           ns(si.shading.n),
           ng(si.n),
           ss(Normalize(si.shading.dpdu)),
-          ts(Cross(ns, ss)) {}
-    
-    void Add(BxDF *b) {
+          ts(Cross(ns, ss))
+    {
+    }
+
+    void Add(BxDF *b)
+    {
         CHECK_LT(nBxDFs, MaxBxDFs);
         bxdfs[nBxDFs++] = b;
     }
     int NumComponents(BxDFType flags = BSDF_ALL) const;
-    
+
     //世界空间向量转换到局部空间
     Vector3f WorldToLocal(const Vector3f &v) const
     {
         return Vector3f(Dot(v, ss), Dot(v, ts), Dot(v, ns));
     }
-    
+
     //局部空间向量转换到世界空间
     Vector3f LocalToWorld(const Vector3f &v) const
     {
@@ -147,7 +175,9 @@ public:
 
 private:
     // BSDF Private Methods
-    ~BSDF() {}
+    ~BSDF()
+    {
+    }
 
     // BSDF Private Data
     const Normal3f ns, ng;
@@ -169,9 +199,17 @@ class BxDF
 {
 public:
     // BxDF Interface
-    virtual ~BxDF() {}
-    BxDF(BxDFType type) : type(type) {}
-    bool MatchesFlags(BxDFType t) const { return (type & t) == type; }
+    virtual ~BxDF()
+    {
+    }
+    BxDF(BxDFType type)
+        : type(type)
+    {
+    }
+    bool MatchesFlags(BxDFType t) const
+    {
+        return (type & t) == type;
+    }
     virtual Spectrum f(const Vector3f &wo, const Vector3f &wi) const = 0;
     virtual Spectrum Sample_f(const Vector3f &wo, Vector3f *wi,
                               const Point2f &sample, Float *pdf,
@@ -199,10 +237,18 @@ class LambertianReflection : public BxDF
 public:
     // LambertianReflection Public Methods
     LambertianReflection(const Spectrum &R)
-        : BxDF(BxDFType(BSDF_REFLECTION | BSDF_DIFFUSE)), R(R) {}
+        : BxDF(BxDFType(BSDF_REFLECTION | BSDF_DIFFUSE)), R(R)
+    {
+    }
     Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
-    Spectrum rho(const Vector3f &, int, const Point2f *) const { return R; }
-    Spectrum rho(int, const Point2f *, const Point2f *) const { return R; }
+    Spectrum rho(const Vector3f &, int, const Point2f *) const
+    {
+        return R;
+    }
+    Spectrum rho(int, const Point2f *, const Point2f *) const
+    {
+        return R;
+    }
     std::string ToString() const;
 
 private:
@@ -215,10 +261,18 @@ class LambertianTransmission : public BxDF
 public:
     // LambertianTransmission Public Methods
     LambertianTransmission(const Spectrum &T)
-        : BxDF(BxDFType(BSDF_TRANSMISSION | BSDF_DIFFUSE)), T(T) {}
+        : BxDF(BxDFType(BSDF_TRANSMISSION | BSDF_DIFFUSE)), T(T)
+    {
+    }
     Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
-    Spectrum rho(const Vector3f &, int, const Point2f *) const { return T; }
-    Spectrum rho(int, const Point2f *, const Point2f *) const { return T; }
+    Spectrum rho(const Vector3f &, int, const Point2f *) const
+    {
+        return T;
+    }
+    Spectrum rho(int, const Point2f *, const Point2f *) const
+    {
+        return T;
+    }
     Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u,
                       Float *pdf, BxDFType *sampledType) const;
     Float Pdf(const Vector3f &wo, const Vector3f &wi) const;
@@ -229,13 +283,13 @@ private:
     Spectrum T;
 };
 
-class OrenNayar : public BxDF 
+class OrenNayar : public BxDF
 {
 public:
     // OrenNayar Public Methods
-    Spectrum f(const Vector3f& wo, const Vector3f& wi) const;
-    OrenNayar(const Spectrum& R, Float sigma)
-        : BxDF(BxDFType(BSDF_REFLECTION | BSDF_DIFFUSE)), R(R) 
+    Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
+    OrenNayar(const Spectrum &R, Float sigma)
+        : BxDF(BxDFType(BSDF_REFLECTION | BSDF_DIFFUSE)), R(R)
     {
         sigma = Radians(sigma);
         Float sigma2 = sigma * sigma;
@@ -255,7 +309,8 @@ inline int BSDF::NumComponents(BxDFType flags) const
 {
     int num = 0;
     for (int i = 0; i < nBxDFs; ++i)
-        if (bxdfs[i]->MatchesFlags(flags)) ++num;
+        if (bxdfs[i]->MatchesFlags(flags))
+            ++num;
     return num;
 }
 
@@ -281,7 +336,9 @@ public:
     Spectrum Evaluate(Float cosThetaI) const;
     FresnelConductor(const Spectrum &etaI, const Spectrum &etaT,
                      const Spectrum &k)
-        : etaI(etaI), etaT(etaT), k(k) {}
+        : etaI(etaI), etaT(etaT), k(k)
+    {
+    }
     std::string ToString() const;
 
 private:
@@ -293,33 +350,41 @@ class FresnelDielectric : public Fresnel
 public:
     // FresnelDielectric Public Methods
     Spectrum Evaluate(Float cosThetaI) const;
-    FresnelDielectric(Float etaI, Float etaT) : etaI(etaI), etaT(etaT) {}
+    FresnelDielectric(Float etaI, Float etaT)
+        : etaI(etaI), etaT(etaT)
+    {
+    }
     std::string ToString() const;
 
 private:
     Float etaI, etaT;
 };
 
-class FresnelSpecular : public BxDF 
+class FresnelSpecular : public BxDF
 {
 public:
     // FresnelSpecular Public Methods
-    FresnelSpecular(const Spectrum& R, const Spectrum& T, Float etaA,
-        Float etaB, TransportMode mode)
+    FresnelSpecular(const Spectrum &R, const Spectrum &T, Float etaA,
+                    Float etaB, TransportMode mode)
         : BxDF(BxDFType(BSDF_REFLECTION | BSDF_TRANSMISSION | BSDF_SPECULAR)),
-        R(R),
-        T(T),
-        etaA(etaA),
-        etaB(etaB),
-        mode(mode) {}
-    Spectrum f(const Vector3f& wo, const Vector3f& wi) const 
+          R(R),
+          T(T),
+          etaA(etaA),
+          etaB(etaB),
+          mode(mode)
+    {
+    }
+    Spectrum f(const Vector3f &wo, const Vector3f &wi) const
     {
         return Spectrum(0.f);
     }
-    Spectrum Sample_f(const Vector3f& wo, Vector3f* wi, const Point2f& u,
-        Float* pdf, BxDFType* sampledType) const;
+    Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u,
+                      Float *pdf, BxDFType *sampledType) const;
 
-    Float Pdf(const Vector3f& wo, const Vector3f& wi) const { return 0; }
+    Float Pdf(const Vector3f &wo, const Vector3f &wi) const
+    {
+        return 0;
+    }
 
     std::string ToString() const;
 
@@ -333,8 +398,14 @@ private:
 class FresnelNoOp : public Fresnel
 {
 public:
-    Spectrum Evaluate(Float) const { return Spectrum(1.); }
-    std::string ToString() const { return "[ FresnelNoOp ]"; }
+    Spectrum Evaluate(Float) const
+    {
+        return Spectrum(1.);
+    }
+    std::string ToString() const
+    {
+        return "[ FresnelNoOp ]";
+    }
 };
 
 //镜面反射
@@ -345,7 +416,9 @@ public:
     SpecularReflection(const Spectrum &R, Fresnel *fresnel)
         : BxDF(BxDFType(BSDF_REFLECTION | BSDF_SPECULAR)),
           R(R),
-          fresnel(fresnel) {}
+          fresnel(fresnel)
+    {
+    }
     Spectrum f(const Vector3f &wo, const Vector3f &wi) const
     {
         // 从实践意义上来说，几乎不可能出射方向刚好等于反射方向
@@ -353,7 +426,10 @@ public:
     }
     Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &sample,
                       Float *pdf, BxDFType *sampledType) const;
-    Float Pdf(const Vector3f &wo, const Vector3f &wi) const { return 0; }
+    Float Pdf(const Vector3f &wo, const Vector3f &wi) const
+    {
+        return 0;
+    }
     std::string ToString() const;
 
 private:
@@ -373,14 +449,19 @@ public:
           etaA(etaA),
           etaB(etaB),
           fresnel(etaA, etaB),
-          mode(mode) {}
+          mode(mode)
+    {
+    }
     Spectrum f(const Vector3f &wo, const Vector3f &wi) const
     {
         return Spectrum(0.f);
     }
     Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &sample,
                       Float *pdf, BxDFType *sampledType) const;
-    Float Pdf(const Vector3f &wo, const Vector3f &wi) const { return 0; }
+    Float Pdf(const Vector3f &wo, const Vector3f &wi) const
+    {
+        return 0;
+    }
     std::string ToString() const;
 
 private:
@@ -395,49 +476,53 @@ class MicrofacetReflection : public BxDF
 {
 public:
     // MicrofacetReflection Public Methods
-    MicrofacetReflection(const Spectrum& R,
-        MicrofacetDistribution* distribution, Fresnel* fresnel)
+    MicrofacetReflection(const Spectrum &R,
+                         MicrofacetDistribution *distribution, Fresnel *fresnel)
         : BxDF(BxDFType(BSDF_REFLECTION | BSDF_GLOSSY)),
-        R(R),
-        distribution(distribution),
-        fresnel(fresnel) {}
-    Spectrum f(const Vector3f& wo, const Vector3f& wi) const;
-    Spectrum Sample_f(const Vector3f& wo, Vector3f* wi, const Point2f& u,
-        Float* pdf, BxDFType* sampledType) const;
-    Float Pdf(const Vector3f& wo, const Vector3f& wi) const;
+          R(R),
+          distribution(distribution),
+          fresnel(fresnel)
+    {
+    }
+    Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
+    Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u,
+                      Float *pdf, BxDFType *sampledType) const;
+    Float Pdf(const Vector3f &wo, const Vector3f &wi) const;
     std::string ToString() const;
 
 private:
     // MicrofacetReflection Private Data
     const Spectrum R;
-    const MicrofacetDistribution* distribution;
-    const Fresnel* fresnel;
+    const MicrofacetDistribution *distribution;
+    const Fresnel *fresnel;
 };
 
 class MicrofacetTransmission : public BxDF
 {
 public:
     // MicrofacetTransmission Public Methods
-    MicrofacetTransmission(const Spectrum& T,
-        MicrofacetDistribution* distribution, Float etaA,
-        Float etaB, TransportMode mode)
+    MicrofacetTransmission(const Spectrum &T,
+                           MicrofacetDistribution *distribution, Float etaA,
+                           Float etaB, TransportMode mode)
         : BxDF(BxDFType(BSDF_TRANSMISSION | BSDF_GLOSSY)),
-        T(T),
-        distribution(distribution),
-        etaA(etaA),
-        etaB(etaB),
-        fresnel(etaA, etaB),
-        mode(mode) {}
-    Spectrum f(const Vector3f& wo, const Vector3f& wi) const;
-    Spectrum Sample_f(const Vector3f& wo, Vector3f* wi, const Point2f& u,
-        Float* pdf, BxDFType* sampledType) const;
-    Float Pdf(const Vector3f& wo, const Vector3f& wi) const;
+          T(T),
+          distribution(distribution),
+          etaA(etaA),
+          etaB(etaB),
+          fresnel(etaA, etaB),
+          mode(mode)
+    {
+    }
+    Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
+    Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u,
+                      Float *pdf, BxDFType *sampledType) const;
+    Float Pdf(const Vector3f &wo, const Vector3f &wi) const;
     std::string ToString() const;
 
 private:
     // MicrofacetTransmission Private Data
     const Spectrum T;
-    const MicrofacetDistribution* distribution;
+    const MicrofacetDistribution *distribution;
     const Float etaA, etaB;
     const FresnelDielectric fresnel;
     const TransportMode mode;
@@ -447,24 +532,28 @@ class FresnelBlend : public BxDF
 {
 public:
     // FresnelBlend Public Methods
-    FresnelBlend(const Spectrum& Rd, const Spectrum& Rs,
-        MicrofacetDistribution* distrib);
-    Spectrum f(const Vector3f& wo, const Vector3f& wi) const;
-    Spectrum SchlickFresnel(Float cosTheta) const {
-        auto pow5 = [](Float v) { return (v * v) * (v * v) * v; };
+    FresnelBlend(const Spectrum &Rd, const Spectrum &Rs,
+                 MicrofacetDistribution *distrib);
+    Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
+    Spectrum SchlickFresnel(Float cosTheta) const
+    {
+        auto pow5 = [](Float v)
+        {
+            return (v * v) * (v * v) * v;
+        };
         return Rs + pow5(1 - cosTheta) * (Spectrum(1.) - Rs);
     }
-    Spectrum Sample_f(const Vector3f& wi, Vector3f* sampled_f, const Point2f& u,
-        Float* pdf, BxDFType* sampledType) const;
-    Float Pdf(const Vector3f& wo, const Vector3f& wi) const;
+    Spectrum Sample_f(const Vector3f &wi, Vector3f *sampled_f, const Point2f &u,
+                      Float *pdf, BxDFType *sampledType) const;
+    Float Pdf(const Vector3f &wo, const Vector3f &wi) const;
     std::string ToString() const;
 
 private:
     // FresnelBlend Private Data
     const Spectrum Rd, Rs;
-    MicrofacetDistribution* distribution;
+    MicrofacetDistribution *distribution;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_CORE_REFLECTION_H
+#endif // PBR_CORE_REFLECTION_H

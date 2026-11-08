@@ -19,7 +19,9 @@ namespace pbr
 static int nCameraRays = 0;
 
 // Integrator Method Definitions
-Integrator::~Integrator() {}
+Integrator::~Integrator()
+{
+}
 
 // Integrator Utility Functions
 Spectrum UniformSampleAllLights(const Interaction &it, const Scene &scene,
@@ -29,19 +31,23 @@ Spectrum UniformSampleAllLights(const Interaction &it, const Scene &scene,
 {
     //ProfilePhase p(Prof::DirectLighting);
     Spectrum L(0.f);
-    for (size_t j = 0; j < scene.lights.size(); ++j) {
+    for (size_t j = 0; j < scene.lights.size(); ++j)
+    {
         // Accumulate contribution of _j_th light to _L_
         const std::shared_ptr<Light> &light = scene.lights[j];
         int nSamples = nLightSamples[j];
         const Point2f *uLightArray = sampler.Get2DArray(nSamples);
         const Point2f *uScatteringArray = sampler.Get2DArray(nSamples);
-        if (!uLightArray || !uScatteringArray) {
+        if (!uLightArray || !uScatteringArray)
+        {
             // Use a single sample for illumination from _light_
             Point2f uLight = sampler.Get2D();
             Point2f uScattering = sampler.Get2D();
             L += EstimateDirect(it, uScattering, *light, uLight, scene, sampler,
                                 arena, handleMedia);
-        } else {
+        }
+        else
+        {
             // Estimate direct lighting using sample arrays
             Spectrum Ld(0.f);
             for (int k = 0; k < nSamples; ++k)
@@ -61,13 +67,18 @@ Spectrum UniformSampleOneLight(const Interaction &it, const Scene &scene,
     //ProfilePhase p(Prof::DirectLighting);
     // Randomly choose a single light to sample, _light_
     int nLights = int(scene.lights.size());
-    if (nLights == 0) return Spectrum(0.f);
+    if (nLights == 0)
+        return Spectrum(0.f);
     int lightNum = 0;
     Float lightPdf;
-    if (lightDistrib) {
+    if (lightDistrib)
+    {
         lightNum = lightDistrib->SampleDiscrete(sampler.Get1D(), &lightPdf);
-        if (lightPdf == 0) return Spectrum(0.f);
-    } else {
+        if (lightPdf == 0)
+            return Spectrum(0.f);
+    }
+    else
+    {
         lightNum = std::min((int)(sampler.Get1D() * nLights), nLights - 1);
         lightPdf = Float(1) / nLights;
     }
@@ -75,7 +86,8 @@ Spectrum UniformSampleOneLight(const Interaction &it, const Scene &scene,
     Point2f uLight = sampler.Get2D();
     Point2f uScattering = sampler.Get2D();
     return EstimateDirect(it, uScattering, *light, uLight,
-                          scene, sampler, arena, handleMedia) / lightPdf;
+                          scene, sampler, arena, handleMedia) /
+           lightPdf;
 }
 
 /**
@@ -102,26 +114,29 @@ Spectrum EstimateDirect(const Interaction &it, const Point2f &uScattering,
     Vector3f wi;
     Float lightPdf = 0, scatteringPdf = 0;
     VisibilityTester visibility;
-    
+
     //采样光
     Spectrum Li = light.Sample_Li(it, uLight, &wi, &lightPdf, &visibility);
-//    VLOG(2) << "EstimateDirect uLight:" << uLight << " -> Li: " << Li << ", wi: "
-//            << wi << ", pdf: " << lightPdf;
-    
+    //    VLOG(2) << "EstimateDirect uLight:" << uLight << " -> Li: " << Li << ", wi: "
+    //            << wi << ", pdf: " << lightPdf;
+
     //如果采样光的Pdf>0且光源不是黑的(即光有发出能量)，就可以采样光源
-    if (lightPdf > 0 && !Li.IsBlack()) {
+    if (lightPdf > 0 && !Li.IsBlack())
+    {
         // Compute BSDF or phase function's value for light sample
         Spectrum f;
-        if (it.IsSurfaceInteraction()) {
+        if (it.IsSurfaceInteraction())
+        {
             // Evaluate BSDF for light sampling strategy
             const SurfaceInteraction &isect = (const SurfaceInteraction &)it;
             f = isect.bsdf->f(isect.wo, wi, bsdfFlags) * AbsDot(wi, isect.shading.n);
             scatteringPdf = isect.bsdf->Pdf(isect.wo, wi, bsdfFlags);
             //VLOG(2) << "  surf f*dot :" << f << ", scatteringPdf: " << scatteringPdf;
         }
-        
+
         //参与介质
-        else {
+        else
+        {
             // Evaluate phase function for light sampling strategy
             const MediumInteraction &mi = (const MediumInteraction &)it;
             Float p = mi.phase->p(mi.wo, wi);
@@ -129,25 +144,33 @@ Spectrum EstimateDirect(const Interaction &it, const Point2f &uScattering,
             scatteringPdf = p;
             //VLOG(2) << "  medium p: " << p;
         }
-        if (!f.IsBlack()) {
+        if (!f.IsBlack())
+        {
             // Compute effect of visibility for light source sample
-            if (handleMedia) {
+            if (handleMedia)
+            {
                 Li *= visibility.Tr(scene, sampler);
                 //VLOG(2) << "  after Tr, Li: " << Li;
-            } else {
-              if (!visibility.Unoccluded(scene)) {
-                //VLOG(2) << "  shadow ray blocked";
-                Li = Spectrum(0.f);
-              } else
-                //VLOG(2) << "  shadow ray unoccluded";
-                  printf("  shadow ray unoccluded");
+            }
+            else
+            {
+                if (!visibility.Unoccluded(scene))
+                {
+                    //VLOG(2) << "  shadow ray blocked";
+                    Li = Spectrum(0.f);
+                }
+                else
+                    //VLOG(2) << "  shadow ray unoccluded";
+                    printf("  shadow ray unoccluded");
             }
 
             // Add light's contribution to reflected radiance
-            if (!Li.IsBlack()) {
+            if (!Li.IsBlack())
+            {
                 if (IsDeltaLight(light.flags))
                     Ld += f * Li / lightPdf;
-                else {
+                else
+                {
                     Float weight = PowerHeuristic(1, lightPdf, 1, scatteringPdf);
                     Ld += f * Li * weight / lightPdf;
                 }
@@ -156,10 +179,12 @@ Spectrum EstimateDirect(const Interaction &it, const Point2f &uScattering,
     }
 
     // Sample BSDF with multiple importance sampling， 如果当前光源不是Delta类型的光源(不是点光源、方向光源)，就可以采样BSDF
-    if (!IsDeltaLight(light.flags)) {
+    if (!IsDeltaLight(light.flags))
+    {
         Spectrum f;
         bool sampledSpecular = false;
-        if (it.IsSurfaceInteraction()) {
+        if (it.IsSurfaceInteraction())
+        {
             // Sample scattered direction for surface interactions
             BxDFType sampledType;
             const SurfaceInteraction &isect = (const SurfaceInteraction &)it;
@@ -168,23 +193,27 @@ Spectrum EstimateDirect(const Interaction &it, const Point2f &uScattering,
             f *= AbsDot(wi, isect.shading.n);
             sampledSpecular = (sampledType & BSDF_SPECULAR) != 0;
         }
-        
+
         //参与介质
-        else {
+        else
+        {
             // Sample scattered direction for medium interactions
             const MediumInteraction &mi = (const MediumInteraction &)it;
             Float p = mi.phase->Sample_p(mi.wo, &wi, uScattering);
             f = Spectrum(p);
             scatteringPdf = p;
         }
-//        VLOG(2) << "  BSDF / phase sampling f: " << f << ", scatteringPdf: " <<
-//            scatteringPdf;
-        if (!f.IsBlack() && scatteringPdf > 0) {
+        //        VLOG(2) << "  BSDF / phase sampling f: " << f << ", scatteringPdf: " <<
+        //            scatteringPdf;
+        if (!f.IsBlack() && scatteringPdf > 0)
+        {
             // Account for light contributions along sampled direction _wi_
             Float weight = 1;
-            if (!sampledSpecular) {
+            if (!sampledSpecular)
+            {
                 lightPdf = light.Pdf_Li(it, wi);
-                if (lightPdf == 0) return Ld;
+                if (lightPdf == 0)
+                    return Ld;
                 weight = PowerHeuristic(1, scatteringPdf, 1, lightPdf);
             }
 
@@ -198,12 +227,15 @@ Spectrum EstimateDirect(const Interaction &it, const Point2f &uScattering,
 
             // Add light contribution from material sampling
             Spectrum Li(0.f);
-            if (foundSurfaceInteraction) {
+            if (foundSurfaceInteraction)
+            {
                 if (lightIsect.primitive->GetAreaLight() == &light)
                     Li = lightIsect.Le(-wi);
-            } else
+            }
+            else
                 Li = light.Le(ray);
-            if (!Li.IsBlack()) Ld += f * Li * Tr * weight / scatteringPdf;
+            if (!Li.IsBlack())
+                Ld += f * Li * Tr * weight / scatteringPdf;
         }
     }
     return Ld;
@@ -211,7 +243,8 @@ Spectrum EstimateDirect(const Interaction &it, const Point2f &uScattering,
 
 std::unique_ptr<Distribution1D> ComputeLightPowerDistribution(const Scene &scene)
 {
-    if (scene.lights.empty()) return nullptr;
+    if (scene.lights.empty())
+        return nullptr;
     std::vector<Float> lightPower;
     for (const auto &light : scene.lights)
         lightPower.push_back(light->Power().y());
@@ -228,16 +261,16 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
     double start = omp_get_wtime(); //渲染开始时间
 
     m_FrameBuffer->renderCountIncrease();
-    
+
     std::shared_ptr<MIPMap<Spectrum>> mp = nullptr;
-    
+
 #ifdef TEST_MIPMAP
-    
+
     int mW = 400, mH = 235;
     Spectrum *mpdata = new Spectrum[mW * mH];
-    for (int j = 0; j < mH; j ++)
+    for (int j = 0; j < mH; j++)
     {
-        for (int i = 0; i <mW; i++)
+        for (int i = 0; i < mW; i++)
         {
             int offset = i + j * mW;
             Spectrum s;
@@ -247,13 +280,13 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
             mpdata[offset] = s;
         }
     }
-    
+
     mp = std::make_shared<MIPMap<Spectrum>>(Point2i(mW, mH), mpdata, true);
-    delete [] mpdata;
-    
+    delete[] mpdata;
+
 #endif
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < pixelBounds.pMax.x; i++)
     {
         for (int j = 0; j < pixelBounds.pMax.y; j++)
@@ -262,36 +295,36 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
             float u = float(i + getClockRandom()) / float(pixelBounds.pMax.x);
             float v = float(j + getClockRandom()) / float(pixelBounds.pMax.y);
             int offset = (pixelBounds.pMax.x * j + i);
-            
+
             MemoryArena arena;
 
             std::unique_ptr<Sampler> pixel_sampler = sampler->Clone(offset);
             Point2i pixel(i, j);
             pixel_sampler->StartPixel(pixel);
-            
+
             Spectrum colObj(.0f);
-            
+
             do
             {
                 CameraSample cs;
                 cs = pixel_sampler->GetCameraSample(pixel);
-//                Ray ray;
-//                camera->GenerateRay(cs, &r);
-                
+                //                Ray ray;
+                //                camera->GenerateRay(cs, &r);
+
                 RayDifferential ray;
                 float rayWeight = camera->GenerateRayDifferential(cs, &ray);
                 ray.ScaleDifferentials(1 / std::sqrt((Float)pixel_sampler->samplesPerPixel));
 
 #ifndef TEST_MIPMAP
                 colObj += Li(ray, scene, *pixel_sampler, arena, 0);
-                
+
 #else
                 // 这里可以测试一些东西
 #endif
             } while (pixel_sampler->StartNextSample());
-            
+
             colObj = colObj / pixel_sampler->samplesPerPixel;
-            
+
             if (mp)
             {
                 if (i < mp->Width() - 1 && j < mp->Height() - 1)
@@ -310,7 +343,7 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
             m_FrameBuffer->set_uc(i, j, 3, 255);
         }
     }
-    
+
     //m_FrameBuffer->saveToFile("/Users/zhouxuguang/work/source/GNXRayTracer/test.png");
 
     // 结束时间
@@ -334,7 +367,8 @@ Spectrum SamplerIntegrator::SpecularReflect(
     {
         // Compute ray differential _rd_ for specular reflection
         RayDifferential rd = isect.SpawnRay(wi);
-        if (ray.hasDifferentials) {
+        if (ray.hasDifferentials)
+        {
             rd.hasDifferentials = true;
             rd.rxOrigin = isect.p + isect.dpdx;
             rd.ryOrigin = isect.p + isect.dpdy;
@@ -359,9 +393,9 @@ Spectrum SamplerIntegrator::SpecularReflect(
 }
 
 Spectrum SamplerIntegrator::SpecularTransmit(const RayDifferential &ray,
-                          const SurfaceInteraction &isect,
-                          const Scene &scene, Sampler &sampler,
-                          MemoryArena &arena, int depth) const
+                                             const SurfaceInteraction &isect,
+                                             const Scene &scene, Sampler &sampler,
+                                             MemoryArena &arena, int depth) const
 {
     Vector3f wo = isect.wo, wi;
     Float pdf;
@@ -371,7 +405,8 @@ Spectrum SamplerIntegrator::SpecularTransmit(const RayDifferential &ray,
                                BxDFType(BSDF_TRANSMISSION | BSDF_SPECULAR));
     Spectrum L = Spectrum(0.f);
     Normal3f ns = isect.shading.n;
-    if (pdf > 0.f && !f.IsBlack() && AbsDot(wi, ns) != 0.f) {
+    if (pdf > 0.f && !f.IsBlack() && AbsDot(wi, ns) != 0.f)
+    {
         // Compute ray differential _rd_ for specular transmission
         RayDifferential rd = isect.SpawnRay(wi);
         if (ray.hasDifferentials)
@@ -389,7 +424,8 @@ Spectrum SamplerIntegrator::SpecularTransmit(const RayDifferential &ray,
             // intersected.  Compute the relative IOR by first out by
             // assuming that the ray is entering the object.
             Float eta = 1 / bsdf.eta;
-            if (Dot(wo, ns) < 0) {
+            if (Dot(wo, ns) < 0)
+            {
                 // If the ray isn't entering, then we need to invert the
                 // relative IOR and negate the normal and its derivatives.
                 eta = 1 / eta;
@@ -442,4 +478,4 @@ Spectrum SamplerIntegrator::SpecularTransmit(const RayDifferential &ray,
 }
 
 
-}  // namespace pbr
+} // namespace pbr

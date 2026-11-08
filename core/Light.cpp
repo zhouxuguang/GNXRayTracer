@@ -19,11 +19,14 @@ Light::Light(int flags, const Transform &LightToWorld,
       nSamples(std::max(1, nSamples)),
       mediumInterface(mediumInterface),
       LightToWorld(LightToWorld),
-      WorldToLight(Inverse(LightToWorld)) {
+      WorldToLight(Inverse(LightToWorld))
+{
     ++numLights;
 }
 
-Light::~Light() {}
+Light::~Light()
+{
+}
 
 bool VisibilityTester::Unoccluded(const Scene &scene) const
 {
@@ -43,16 +46,21 @@ Spectrum VisibilityTester::Tr(const Scene &scene, Sampler &sampler) const
             return Spectrum(0.0f);
 
         // Update transmittance for current ray segment
-        if (ray.medium) Tr *= ray.medium->Tr(ray, sampler);
+        if (ray.medium)
+            Tr *= ray.medium->Tr(ray, sampler);
 
         // Generate next ray segment or return final transmittance
-        if (!hitSurface) break;
+        if (!hitSurface)
+            break;
         ray = isect.SpawnRayTo(p1);
     }
     return Tr;
 }
 
-Spectrum Light::Le(const RayDifferential &ray) const { return Spectrum(0.f); }
+Spectrum Light::Le(const RayDifferential &ray) const
+{
+    return Spectrum(0.f);
+}
 
 AreaLight::AreaLight(const Transform &LightToWorld, const MediumInterface &medium, int nSamples)
     : Light((int)LightFlags::Area, LightToWorld, medium, nSamples)
@@ -60,4 +68,4 @@ AreaLight::AreaLight(const Transform &LightToWorld, const MediumInterface &mediu
     ++numAreaLights;
 }
 
-}  // namespace pbr
+} // namespace pbr

@@ -16,7 +16,7 @@ class DistantLight : public Light
 public:
     // DistantLight Public Methods
     DistantLight(const Transform &LightToWorld, const Spectrum &L, const Vector3f &w);
-    
+
     void Preprocess(const Scene &scene)
     {
         scene.WorldBound().BoundingSphere(&worldCenter, &worldRadius);
@@ -39,6 +39,6 @@ private:
     Float worldRadius;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_LIGHTS_DISTANT_H
+#endif // PBR_LIGHTS_DISTANT_H

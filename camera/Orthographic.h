@@ -10,27 +10,28 @@ namespace pbr
 
 class OrthographicCamera : public ProjectiveCamera
 {
-  public:
+public:
     // OrthographicCamera Public Methods
     OrthographicCamera(const int RasterWidth, const int RasterHeight, const AnimatedTransform &CameraToWorld,
                        const Bounds2f &screenWindow, float lensRadius,
                        float focalDistance)
         : ProjectiveCamera(RasterWidth, RasterHeight, CameraToWorld, Orthographic(0, 10), screenWindow,
-                        0, 0, lensRadius, focalDistance, nullptr, nullptr)
+                           0, 0, lensRadius, focalDistance, nullptr, nullptr)
     {
         // Compute differential changes in origin for orthographic camera rays
         dxCamera = RasterToCamera(Vector3f(1, 0, 0));
         dyCamera = RasterToCamera(Vector3f(0, 1, 0));
     }
-    
+
     Float GenerateRay(const CameraSample &sample, Ray *ray) const;
-    
+
     Float GenerateRayDifferential(const CameraSample &sample,
                                   RayDifferential *) const;
+
 private:
     Vector3f dxCamera, dyCamera;
 };
 
-}  // namespace pbrt
+} // namespace pbrt
 
-#endif  // PBRT_CAMERAS_ORTHOGRAPHIC_H
+#endif // PBRT_CAMERAS_ORTHOGRAPHIC_H

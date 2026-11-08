@@ -5,7 +5,9 @@ namespace pbr
 {
 
 // Shape Method Definitions
-Shape::~Shape() {}
+Shape::~Shape()
+{
+}
 
 Shape::Shape(const Transform *ObjectToWorld, const Transform *WorldToObject,
              bool reverseOrientation)
@@ -16,7 +18,10 @@ Shape::Shape(const Transform *ObjectToWorld, const Transform *WorldToObject,
 {
 }
 
-Bounds3f Shape::WorldBound() const { return (*ObjectToWorld)(ObjectBound()); }
+Bounds3f Shape::WorldBound() const
+{
+    return (*ObjectToWorld)(ObjectBound());
+}
 
 Interaction Shape::Sample(const Interaction &ref, const Point2f &u, Float *pdf) const
 {
@@ -24,12 +29,14 @@ Interaction Shape::Sample(const Interaction &ref, const Point2f &u, Float *pdf) 
     Vector3f wi = intr.p - ref.p;
     if (wi.LengthSquared() == 0)
         *pdf = 0;
-    else {
+    else
+    {
         wi = Normalize(wi);
         // Convert from area measure, as returned by the Sample() call
         // above, to solid angle measure.
         *pdf *= DistanceSquared(ref.p, intr.p) / AbsDot(intr.n, -wi);
-        if (std::isinf(*pdf)) *pdf = 0.f;
+        if (std::isinf(*pdf))
+            *pdf = 0.f;
     }
     return intr;
 }
@@ -43,12 +50,14 @@ Float Shape::Pdf(const Interaction &ref, const Vector3f &wi) const
     // Ignore any alpha textures used for trimming the shape when performing
     // this intersection. Hack for the "San Miguel" scene, where this is used
     // to make an invisible area light.
-    if (!Intersect(ray, &tHit, &isectLight, false)) return 0;
+    if (!Intersect(ray, &tHit, &isectLight, false))
+        return 0;
 
     // Convert light sample weight to solid angle measure
     Float pdf = DistanceSquared(ref.p, isectLight.p) /
                 (AbsDot(isectLight.n, -wi) * Area());
-    if (std::isinf(pdf)) pdf = 0.f;
+    if (std::isinf(pdf))
+        pdf = 0.f;
     return pdf;
 }
 
@@ -67,4 +76,4 @@ Float Shape::Pdf(const Interaction &ref, const Vector3f &wi) const
 //    return solidAngle / nSamples;
 //}
 
-}  // namespace pbrt
+} // namespace pbrt

@@ -8,7 +8,7 @@
 #include "core/Texture.h"
 #include "core/Interaction.h"
 
-namespace pbr 
+namespace pbr
 {
 
 // PlasticMaterial Method Definitions
@@ -17,7 +17,8 @@ void PlasticMaterial::ComputeScatteringFunctions(
     bool allowMultipleLobes) const
 {
     // Perform bump mapping with _bumpMap_, if present
-    if (bumpMap) Bump(bumpMap, si);
+    if (bumpMap)
+        Bump(bumpMap, si);
     si->bsdf = ARENA_ALLOC(arena, BSDF)(*si);
     // Initialize diffuse component of plastic material
     Spectrum kd = Kd->Evaluate(*si).Clamp();
@@ -26,7 +27,8 @@ void PlasticMaterial::ComputeScatteringFunctions(
 
     // Initialize specular component of plastic material
     Spectrum ks = Ks->Evaluate(*si).Clamp();
-    if (!ks.IsBlack()) {
+    if (!ks.IsBlack())
+    {
         Fresnel *fresnel = ARENA_ALLOC(arena, FresnelDielectric)(1.5f, 1.f);
         // Create microfacet distribution _distrib_ for plastic material
         Float rough = roughness->Evaluate(*si);
@@ -40,4 +42,4 @@ void PlasticMaterial::ComputeScatteringFunctions(
     }
 }
 
-}  // namespace pbr
+} // namespace pbr

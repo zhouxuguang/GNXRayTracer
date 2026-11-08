@@ -19,7 +19,7 @@ public:
     virtual ~Camera();
     virtual Float GenerateRay(const CameraSample &sample, Ray *ray) const = 0;
     virtual Float GenerateRayDifferential(const CameraSample &sample, RayDifferential *rd) const;
-    
+
     virtual Spectrum We(const Ray &ray, Point2f *pRaster2 = nullptr) const;
     virtual void Pdf_We(const Ray &ray, Float *pdfPos, Float *pdfDir) const;
     virtual Spectrum Sample_Wi(const Interaction &ref, const Point2f &u,
@@ -42,14 +42,13 @@ struct CameraSample
 
 inline std::ostream &operator<<(std::ostream &os, const CameraSample &cs)
 {
-    os << "[ pFilm: " << cs.pFilm << " , pLens: " << cs.pLens <<
-        StringPrintf(", time %f ]", cs.time);
+    os << "[ pFilm: " << cs.pFilm << " , pLens: " << cs.pLens << StringPrintf(", time %f ]", cs.time);
     return os;
 }
 
 class ProjectiveCamera : public Camera
 {
-  public:
+public:
     // ProjectiveCamera Public Methods
     ProjectiveCamera(const int RasterWidth, const int RasterHeight, const AnimatedTransform &CameraToWorld,
                      const Transform &CameraToScreen,
@@ -57,7 +56,8 @@ class ProjectiveCamera : public Camera
                      Float shutterClose, Float lensr, Float focald, Film *film,
                      const Medium *medium)
         : Camera(CameraToWorld, shutterOpen, shutterClose, film, medium),
-          CameraToScreen(CameraToScreen) {
+          CameraToScreen(CameraToScreen)
+    {
         // Initialize depth of field parameters
         lensRadius = lensr;
         focalDistance = focald;
@@ -87,6 +87,6 @@ class OrthographicCamera;
 PerspectiveCamera *CreatePerspectiveCamera(const int RasterWidth, const int RasterHeight, const AnimatedTransform &cam2world);
 OrthographicCamera *CreateOrthographicCamera(const int RasterWidth, const int RasterHeight, const AnimatedTransform &cam2world);
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_CORE_CAMERA_H
+#endif // PBR_CORE_CAMERA_H

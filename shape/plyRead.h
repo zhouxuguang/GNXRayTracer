@@ -12,50 +12,50 @@ namespace pbr
 class plyInfo
 {
 public:
-	int nVertices, nTriangles;
-	Point3f *vertexArray = nullptr;
-	int *vertexIndices = nullptr;
-    
-	plyInfo(std::string filePath)
+    int nVertices, nTriangles;
+    Point3f *vertexArray = nullptr;
+    int *vertexIndices = nullptr;
+
+    plyInfo(std::string filePath)
     {
-		std::fstream f(filePath);
-		std::string ed;
-		for (int i = 0; i < 2; i++)
+        std::fstream f(filePath);
+        std::string ed;
+        for (int i = 0; i < 2; i++)
         {
-			f >> ed;
-			if (ed == "vertex") f >> nVertices;
-			else if (ed == "face") f >> nTriangles;
-		}
-		
-		vertexArray = new Point3f[nVertices];
-		vertexIndices = new int[3 * nTriangles];
+            f >> ed;
+            if (ed == "vertex")
+                f >> nVertices;
+            else if (ed == "face")
+                f >> nTriangles;
+        }
 
-		for (int i = 0; i < nVertices; i++)
-        {
-			f >> vertexArray[i][0];
-			f >> vertexArray[i][1];
-			f >> vertexArray[i][2];
-			vertexArray[i] *= 20;
-		}
-        
-		for (int i = 0; i < nTriangles; i++)
-        {
-			f >> ed;
-			f >> vertexIndices[i * 3 + 0];
-			f >> vertexIndices[i * 3 + 1];
-			f >> vertexIndices[i * 3 + 2];
-		}
-	}
+        vertexArray = new Point3f[nVertices];
+        vertexIndices = new int[3 * nTriangles];
 
-	void Release() 
-	{
-		delete[] vertexIndices;
-		delete[] vertexArray;
-	}
+        for (int i = 0; i < nVertices; i++)
+        {
+            f >> vertexArray[i][0];
+            f >> vertexArray[i][1];
+            f >> vertexArray[i][2];
+            vertexArray[i] *= 20;
+        }
+
+        for (int i = 0; i < nTriangles; i++)
+        {
+            f >> ed;
+            f >> vertexIndices[i * 3 + 0];
+            f >> vertexIndices[i * 3 + 1];
+            f >> vertexIndices[i * 3 + 2];
+        }
+    }
+
+    void Release()
+    {
+        delete[] vertexIndices;
+        delete[] vertexArray;
+    }
 };
 
 }
 
 #endif
-
-

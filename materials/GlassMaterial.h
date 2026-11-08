@@ -6,11 +6,11 @@
 // materials/glass.h*
 #include "core/Material.h"
 
-namespace pbr 
+namespace pbr
 {
 
 // GlassMaterial Declarations
-class GlassMaterial : public Material 
+class GlassMaterial : public Material
 {
 public:
     // GlassMaterial Public Methods
@@ -27,7 +27,9 @@ public:
           vRoughness(vRoughness),
           index(index),
           bumpMap(bumpMap),
-          remapRoughness(remapRoughness) {}
+          remapRoughness(remapRoughness)
+    {
+    }
     void ComputeScatteringFunctions(SurfaceInteraction *si, MemoryArena &arena,
                                     TransportMode mode,
                                     bool allowMultipleLobes) const;
@@ -41,6 +43,6 @@ private:
     bool remapRoughness;
 };
 
-}  // namespace pbrt
+} // namespace pbrt
 
-#endif  // PBRT_MATERIALS_GLASS_H
+#endif // PBRT_MATERIALS_GLASS_H

@@ -6,11 +6,11 @@
 // materials/plastic.h*
 #include "core/Material.h"
 
-namespace pbr 
+namespace pbr
 {
 
 // PlasticMaterial Declarations
-class PlasticMaterial : public Material 
+class PlasticMaterial : public Material
 {
 public:
     // PlasticMaterial Public Methods
@@ -23,7 +23,9 @@ public:
           Ks(Ks),
           roughness(roughness),
           bumpMap(bumpMap),
-          remapRoughness(remapRoughness) {}
+          remapRoughness(remapRoughness)
+    {
+    }
     void ComputeScatteringFunctions(SurfaceInteraction *si, MemoryArena &arena,
                                     TransportMode mode,
                                     bool allowMultipleLobes) const;
@@ -35,6 +37,6 @@ private:
     const bool remapRoughness;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_MATERIALS_PLASTIC_INCLUDE_H
+#endif // PBR_MATERIALS_PLASTIC_INCLUDE_H

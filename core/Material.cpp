@@ -11,7 +11,9 @@ namespace pbr
 {
 
 // Material Method Definitions
-Material::~Material() {}
+Material::~Material()
+{
+}
 
 void Material::Bump(const std::shared_ptr<Texture<Float>> &d, SurfaceInteraction *si)
 {
@@ -24,7 +26,8 @@ void Material::Bump(const std::shared_ptr<Texture<Float>> &d, SurfaceInteraction
     // light sources, where no differentials are available. In this case,
     // we try to choose a small enough du so that we still get a decently
     // accurate bump value.
-    if (du == 0) du = .0005f;
+    if (du == 0)
+        du = .0005f;
     siEval.p = si->p + du * si->shading.dpdu;
     siEval.uv = si->uv + Vector2f(du, 0.f);
     siEval.n = Normalize((Normal3f)Cross(si->shading.dpdu, si->shading.dpdv) +
@@ -33,7 +36,8 @@ void Material::Bump(const std::shared_ptr<Texture<Float>> &d, SurfaceInteraction
 
     // Shift _siEval_ _dv_ in the $v$ direction
     Float dv = .5f * (std::abs(si->dvdx) + std::abs(si->dvdy));
-    if (dv == 0) dv = .0005f;
+    if (dv == 0)
+        dv = .0005f;
     siEval.p = si->p + dv * si->shading.dpdv;
     siEval.uv = si->uv + Vector2f(0.f, dv);
     siEval.n = Normalize((Normal3f)Cross(si->shading.dpdu, si->shading.dpdv) +
@@ -51,4 +55,4 @@ void Material::Bump(const std::shared_ptr<Texture<Float>> &d, SurfaceInteraction
     si->SetShadingGeometry(dpdu, dpdv, si->shading.dndu, si->shading.dndv, false);
 }
 
-}  // namespace pbr
+} // namespace pbr

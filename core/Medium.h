@@ -42,7 +42,9 @@ class Medium
 {
 public:
     // Medium Interface
-    virtual ~Medium() {}
+    virtual ~Medium()
+    {
+    }
     virtual Spectrum Tr(const Ray &ray, Sampler &sampler) const = 0;
     virtual Spectrum Sample(const Ray &ray, Sampler &sampler,
                             MemoryArena &arena,
@@ -54,11 +56,15 @@ class HenyeyGreenstein : public PhaseFunction
 {
 public:
     // HenyeyGreenstein Public Methods
-    HenyeyGreenstein(Float g) : g(g) {}
+    HenyeyGreenstein(Float g)
+        : g(g)
+    {
+    }
     Float p(const Vector3f &wo, const Vector3f &wi) const;
     Float Sample_p(const Vector3f &wo, Vector3f *wi,
                    const Point2f &sample) const;
-    std::string ToString() const {
+    std::string ToString() const
+    {
         return StringPrintf("[ HenyeyGreenstein g: %f ]", g);
     }
 
@@ -69,15 +75,26 @@ private:
 // MediumInterface Declarations
 struct MediumInterface
 {
-    MediumInterface() : inside(nullptr), outside(nullptr) {}
+    MediumInterface()
+        : inside(nullptr), outside(nullptr)
+    {
+    }
     // MediumInterface Public Methods
-    MediumInterface(const Medium *medium) : inside(medium), outside(medium) {}
+    MediumInterface(const Medium *medium)
+        : inside(medium), outside(medium)
+    {
+    }
     MediumInterface(const Medium *inside, const Medium *outside)
-        : inside(inside), outside(outside) {}
-    bool IsMediumTransition() const { return inside != outside; }
+        : inside(inside), outside(outside)
+    {
+    }
+    bool IsMediumTransition() const
+    {
+        return inside != outside;
+    }
     const Medium *inside, *outside;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_CORE_MEDIUM_H
+#endif // PBR_CORE_MEDIUM_H

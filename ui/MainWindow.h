@@ -16,28 +16,23 @@ public:
     MainWindow(QWidget *parent = Q_NULLPTR);
 
 public:
+private:
+    QWidget centralWidget;
+    QVBoxLayout MainWindowLayout;
 
+    DisplayWidget m_DisplayWidget;
+
+    InteractionDockWidget m_InteractionDockWidget;
 
 private:
-	QWidget centralWidget;
-	QVBoxLayout MainWindowLayout;
-
-	DisplayWidget m_DisplayWidget;
-
-	InteractionDockWidget m_InteractionDockWidget;
-
-private:
-	void setMenu(void);
-	void setWidget(void);
-	void setDock(void);
-	void closeEvent(QCloseEvent *event);
+    void setMenu(void);
+    void setWidget(void);
+    void setDock(void);
+    void closeEvent(QCloseEvent *event);
 
 private slots:
-	void setRendering();
-
+    void setRendering();
 };
 
 
 #endif
-
-

@@ -11,7 +11,11 @@ namespace pbr
 {
 
 // TransportMode Declarations
-enum class TransportMode { Radiance, Importance };
+enum class TransportMode
+{
+    Radiance,
+    Importance
+};
 
 // Material Declarations
 class Material
@@ -27,6 +31,6 @@ public:
                      SurfaceInteraction *si);
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_CORE_MATERIAL_H
+#endif // PBR_CORE_MATERIAL_H

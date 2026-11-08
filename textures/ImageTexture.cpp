@@ -11,19 +11,23 @@ template <typename Tmemory, typename Treturn>
 std::map<TexInfo, std::unique_ptr<MIPMap<Tmemory>>>
     ImageTexture<Tmemory, Treturn>::textures;
 
-static RGBSpectrum* loadImage(const std::string &filename, Point2i &resolution)
+static RGBSpectrum *loadImage(const std::string &filename, Point2i &resolution)
 {
     float *data;
     RGBSpectrum *data_s;
-    if (filename != "") {
+    if (filename != "")
+    {
         //texels = ReadImage(texmap, &resolution);
         int imageWidth, imageHeight, nrComponents;
         //stbi_set_flip_vertically_on_load(true);
         data = stbi_loadf(filename.c_str(), &imageWidth, &imageHeight, &nrComponents, 0);
-        if (!data)return nullptr;
+        if (!data)
+            return nullptr;
         data_s = new RGBSpectrum[imageWidth * imageHeight];
-        for (int j = 0; j < imageHeight; j++) {
-            for (int i = 0; i < imageWidth; i++) {
+        for (int j = 0; j < imageHeight; j++)
+        {
+            for (int i = 0; i < imageWidth; i++)
+            {
                 RGBSpectrum r;
                 r[0] = data[(i + j * imageWidth) * nrComponents + 0];
                 r[1] = data[(i + j * imageWidth) * nrComponents + 1];
@@ -64,9 +68,10 @@ MIPMap<Tmemory> *ImageTexture<Tmemory, Treturn>::GetTexture(
     //ProfilePhase _(Prof::TextureLoading);
     Point2i resolution;
     std::unique_ptr<RGBSpectrum[]> texels(loadImage(filename, resolution));
-    if (!texels) {
-//        Warning("Creating a constant grey texture to replace \"%s\".",
-//                filename.c_str());
+    if (!texels)
+    {
+        //        Warning("Creating a constant grey texture to replace \"%s\".",
+        //                filename.c_str());
         resolution.x = resolution.y = 1;
         RGBSpectrum *rgb = new RGBSpectrum[1];
         *rgb = RGBSpectrum(0.5f);
@@ -76,14 +81,16 @@ MIPMap<Tmemory> *ImageTexture<Tmemory, Treturn>::GetTexture(
     // Flip image in y; texture coordinate space has (0,0) at the lower
     // left corner.
     for (int y = 0; y < resolution.y / 2; ++y)
-        for (int x = 0; x < resolution.x; ++x) {
+        for (int x = 0; x < resolution.x; ++x)
+        {
             int o1 = y * resolution.x + x;
             int o2 = (resolution.y - 1 - y) * resolution.x + x;
             std::swap(texels[o1], texels[o2]);
         }
 
     MIPMap<Tmemory> *mipmap = nullptr;
-    if (texels) {
+    if (texels)
+    {
         // Convert texels to type _Tmemory_ and create _MIPMap_
         std::unique_ptr<Tmemory[]> convertedTexels(
             new Tmemory[resolution.x * resolution.y]);
@@ -91,7 +98,9 @@ MIPMap<Tmemory> *ImageTexture<Tmemory, Treturn>::GetTexture(
             convertIn(texels[i], &convertedTexels[i], scale, gamma);
         mipmap = new MIPMap<Tmemory>(resolution, convertedTexels.get(),
                                      doTrilinear, maxAniso, wrap);
-    } else {
+    }
+    else
+    {
         // Create one-valued _MIPMap_
         Tmemory oneVal = scale;
         mipmap = new MIPMap<Tmemory>(Point2i(1, 1), &oneVal);
@@ -103,4 +112,4 @@ MIPMap<Tmemory> *ImageTexture<Tmemory, Treturn>::GetTexture(
 template class ImageTexture<Float, Float>;
 template class ImageTexture<RGBSpectrum, Spectrum>;
 
-}  // namespace pbr
+} // namespace pbr

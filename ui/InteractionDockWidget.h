@@ -10,30 +10,28 @@
 
 class InteractionDockWidget : public QDockWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	InteractionDockWidget(QWidget * parent = Q_NULLPTR);
-	~InteractionDockWidget();
+    InteractionDockWidget(QWidget *parent = Q_NULLPTR);
+    ~InteractionDockWidget();
 
 
 private:
-	void setupDock();
+    void setupDock();
 
 private:
-	QVBoxLayout *centerLayout;
-	QFrame *dockCentralWidget;
+    QVBoxLayout *centerLayout;
+    QFrame *dockCentralWidget;
 
 public:
-	QPushButton *renderButton;
-	DataTreeWidget * m_DataTreeWidget;
+    QPushButton *renderButton;
+    DataTreeWidget *m_DataTreeWidget;
 
 protected:
-	void closeEvent(QCloseEvent *event);
-	
-private slots :
-	
-	
+    void closeEvent(QCloseEvent *event);
+
+private slots:
 };
 
 #endif

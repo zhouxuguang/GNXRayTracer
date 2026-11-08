@@ -21,24 +21,23 @@ void AddFloor(std::vector<std::shared_ptr<Primitive>> &prims, std::shared_ptr<Ma
 {
     //地板
     int nTrianglesFloor = 2;
-    int vertexIndicesFloor[6] = { 0 ,1 ,2 ,3 ,4 ,5 };
+    int vertexIndicesFloor[6] = {0, 1, 2, 3, 4, 5};
     int nVerticesFloor = 6;
     const float yPos_Floor = -2.0;
     Point3f P_Floor[6] = {
-        Point3f(-6.0, yPos_Floor, 6.0) ,Point3f(6.0, yPos_Floor, 6.0) , Point3f(-6.0, yPos_Floor, -6.0) ,
-        Point3f(6.0, yPos_Floor, 6.0) ,Point3f(6.0, yPos_Floor, -6.0), Point3f(-6.0, yPos_Floor, -6.0)
-    };
-    
+        Point3f(-6.0, yPos_Floor, 6.0), Point3f(6.0, yPos_Floor, 6.0), Point3f(-6.0, yPos_Floor, -6.0),
+        Point3f(6.0, yPos_Floor, 6.0), Point3f(6.0, yPos_Floor, -6.0), Point3f(-6.0, yPos_Floor, -6.0)};
+
     Transform tri_Object2World2, tri_World2Object2;
     std::shared_ptr<TriangleMesh> meshFloor = std::make_shared<TriangleMesh>(tri_Object2World2, nTrianglesFloor, vertexIndicesFloor,
-    nVerticesFloor, P_Floor, nullptr, nullptr, nullptr, nullptr);
-    
+                                                                             nVerticesFloor, P_Floor, nullptr, nullptr, nullptr, nullptr);
+
     std::vector<std::shared_ptr<Shape>> trisFloor;
     for (int i = 0; i < nTrianglesFloor; ++i)
     {
         trisFloor.push_back(std::make_shared<Triangle>(&tri_Object2World2, &tri_World2Object2, false, meshFloor, i));
     }
-    
+
     //将物体填充到基元
     for (int i = 0; i < nTrianglesFloor; ++i)
     {
@@ -81,27 +80,25 @@ void AddCornell(std::vector<std::shared_ptr<Primitive>> &prims,
     const int nVerticesWall = nTrianglesWall * 3;
     const float length_Wall = 5.0f;
     Point3f P_Wall[nVerticesWall] =
-    {
-        //底座
-        Point3f(0.f,0.f,length_Wall),Point3f(length_Wall,0.f,length_Wall), Point3f(0.f,0.f,0.f),
-        Point3f(length_Wall,0.f,length_Wall),Point3f(length_Wall,0.f,0.f),Point3f(0.f,0.f,0.f),
-        //天花板
-        Point3f(0.f,length_Wall,length_Wall),Point3f(0.f,length_Wall,0.f),Point3f(length_Wall,length_Wall,length_Wall),
-        Point3f(length_Wall,length_Wall,length_Wall),Point3f(0.f,length_Wall,0.f),Point3f(length_Wall,length_Wall,0.f),
-        //后墙
-        Point3f(0.f,0.f,0.f),Point3f(length_Wall,0.f,0.f), Point3f(length_Wall,length_Wall,0.f),
-        Point3f(0.f,0.f,0.f), Point3f(length_Wall,length_Wall,0.f),Point3f(0.f,length_Wall,0.f),
-        //右墙
-        Point3f(0.f,0.f,0.f),Point3f(0.f,length_Wall,length_Wall), Point3f(0.f,0.f,length_Wall),
-        Point3f(0.f,0.f,0.f), Point3f(0.f,length_Wall,0.f),Point3f(0.f,length_Wall,length_Wall),
-        //左墙
-        Point3f(length_Wall,0.f,0.f),Point3f(length_Wall,length_Wall,length_Wall), Point3f(length_Wall,0.f,length_Wall),
-        Point3f(length_Wall,0.f,0.f), Point3f(length_Wall,length_Wall,0.f),Point3f(length_Wall,length_Wall,length_Wall)
-    };
-    Transform tri_ConBox2World = Translate(Vector3f(-0.5*length_Wall,-0.5*length_Wall,-0.5*length_Wall));
+        {
+            //底座
+            Point3f(0.f, 0.f, length_Wall), Point3f(length_Wall, 0.f, length_Wall), Point3f(0.f, 0.f, 0.f),
+            Point3f(length_Wall, 0.f, length_Wall), Point3f(length_Wall, 0.f, 0.f), Point3f(0.f, 0.f, 0.f),
+            //天花板
+            Point3f(0.f, length_Wall, length_Wall), Point3f(0.f, length_Wall, 0.f), Point3f(length_Wall, length_Wall, length_Wall),
+            Point3f(length_Wall, length_Wall, length_Wall), Point3f(0.f, length_Wall, 0.f), Point3f(length_Wall, length_Wall, 0.f),
+            //后墙
+            Point3f(0.f, 0.f, 0.f), Point3f(length_Wall, 0.f, 0.f), Point3f(length_Wall, length_Wall, 0.f),
+            Point3f(0.f, 0.f, 0.f), Point3f(length_Wall, length_Wall, 0.f), Point3f(0.f, length_Wall, 0.f),
+            //右墙
+            Point3f(0.f, 0.f, 0.f), Point3f(0.f, length_Wall, length_Wall), Point3f(0.f, 0.f, length_Wall),
+            Point3f(0.f, 0.f, 0.f), Point3f(0.f, length_Wall, 0.f), Point3f(0.f, length_Wall, length_Wall),
+            //左墙
+            Point3f(length_Wall, 0.f, 0.f), Point3f(length_Wall, length_Wall, length_Wall), Point3f(length_Wall, 0.f, length_Wall),
+            Point3f(length_Wall, 0.f, 0.f), Point3f(length_Wall, length_Wall, 0.f), Point3f(length_Wall, length_Wall, length_Wall)};
+    Transform tri_ConBox2World = Translate(Vector3f(-0.5 * length_Wall, -0.5 * length_Wall, -0.5 * length_Wall));
     Transform tri_World2ConBox = Inverse(tri_ConBox2World);
-    std::shared_ptr<TriangleMesh> meshConBox = std::make_shared<TriangleMesh>
-        (tri_ConBox2World, nTrianglesWall, vertexIndicesWall, nVerticesWall, P_Wall, nullptr, nullptr, nullptr, nullptr);
+    std::shared_ptr<TriangleMesh> meshConBox = std::make_shared<TriangleMesh>(tri_ConBox2World, nTrianglesWall, vertexIndicesWall, nVerticesWall, P_Wall, nullptr, nullptr, nullptr, nullptr);
     std::vector<std::shared_ptr<Shape>> trisConBox;
     for (int i = 0; i < nTrianglesWall; ++i)
         trisConBox.push_back(std::make_shared<Triangle>(&tri_ConBox2World, &tri_World2ConBox, false, meshConBox, i));
@@ -118,22 +115,21 @@ void AddCornell(std::vector<std::shared_ptr<Primitive>> &prims,
     }
 }
 
-void AddAreaLight(std::vector<std::shared_ptr<Primitive>> &prims, std::vector<std::shared_ptr<Light>>& lights,
+void AddAreaLight(std::vector<std::shared_ptr<Primitive>> &prims, std::vector<std::shared_ptr<Light>> &lights,
                   std::shared_ptr<Material> material)
 {
     int nTrianglesAreaLight = 2;
     int vertexIndicesAreaLight[6] = {0, 1, 2, 3, 4, 5};
     int nVerticesAreaLight = 6;
     const float yPos_AreaLight = 0.0;
-    Point3f P_AreaLight[6] = { Point3f(-1.4,0.0,1.4), Point3f(-1.4,0.0,-1.4), Point3f(1.4,0.0,1.4),
-        Point3f(1.4,0.0,1.4), Point3f(-1.4,0.0,-1.4), Point3f(1.4,0.0,-1.4)};
+    Point3f P_AreaLight[6] = {Point3f(-1.4, 0.0, 1.4), Point3f(-1.4, 0.0, -1.4), Point3f(1.4, 0.0, 1.4),
+                              Point3f(1.4, 0.0, 1.4), Point3f(-1.4, 0.0, -1.4), Point3f(1.4, 0.0, -1.4)};
     Transform tri_Object2World_AreaLight = Translate(Vector3f(0.0f, 2.45f, 0.0f));
     Transform tri_World2Object_AreaLight = Inverse(tri_Object2World_AreaLight);
 
-    std::shared_ptr<TriangleMesh> meshAreaLight = std::make_shared<TriangleMesh>
-        (tri_Object2World_AreaLight, nTrianglesAreaLight, vertexIndicesAreaLight, nVerticesAreaLight, P_AreaLight, nullptr, nullptr, nullptr, nullptr);
+    std::shared_ptr<TriangleMesh> meshAreaLight = std::make_shared<TriangleMesh>(tri_Object2World_AreaLight, nTrianglesAreaLight, vertexIndicesAreaLight, nVerticesAreaLight, P_AreaLight, nullptr, nullptr, nullptr, nullptr);
     std::vector<std::shared_ptr<Shape>> trisAreaLight;
-  
+
     for (int i = 0; i < nTrianglesAreaLight; ++i)
         trisAreaLight.push_back(std::make_shared<Triangle>(&tri_Object2World_AreaLight, &tri_World2Object_AreaLight, false, meshAreaLight, i));
     //
@@ -146,21 +142,21 @@ void AddAreaLight(std::vector<std::shared_ptr<Primitive>> &prims, std::vector<st
     }
 }
 
-void AddSpotLight(std::vector<std::shared_ptr<Light>>& lights)
+void AddSpotLight(std::vector<std::shared_ptr<Light>> &lights)
 {
     Transform tri_Object2World_SpotLight = Translate(Vector3f(0.0f, 2.43f, 0.0f)) * Rotate(90, Vector3f(1.0f, 0.0f, 0.0f));
     std::shared_ptr<Light> spotLight = std::make_shared<SpotLight>(tri_Object2World_SpotLight, MediumInterface(), Spectrum(25.0f), 45, 30);
     lights.push_back(spotLight);
 }
 
-void AddDistLight(std::vector<std::shared_ptr<Light>>& lights)
+void AddDistLight(std::vector<std::shared_ptr<Light>> &lights)
 {
     Transform tri_Object2World_DistantLight;
     std::shared_ptr<Light> distantLight = std::make_shared<DistantLight>(tri_Object2World_DistantLight, Spectrum(25.0f), Vector3f(0.0f, 0.0f, 1.0f));
     lights.push_back(distantLight);
 }
 
-void AddSkyLight(std::vector<std::shared_ptr<Light>>& lights)
+void AddSkyLight(std::vector<std::shared_ptr<Light>> &lights)
 {
     Transform SkyBoxToWorld;
     Point3f SkyBoxCenter(0.f, 0.f, 0.f);
@@ -169,7 +165,7 @@ void AddSkyLight(std::vector<std::shared_ptr<Light>>& lights)
     lights.push_back(skyBoxLight);
 }
 
-void AddInfLight(std::vector<std::shared_ptr<Light>>& lights)
+void AddInfLight(std::vector<std::shared_ptr<Light>> &lights)
 {
     Transform InfinityLightToWorld = RotateX(20) * RotateY(-90) * RotateX(-90);
     Spectrum power(1.0f);

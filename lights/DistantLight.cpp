@@ -11,7 +11,9 @@ DistantLight::DistantLight(const Transform &LightToWorld, const Spectrum &L,
                            const Vector3f &wLight)
     : Light((int)LightFlags::DeltaDirection, LightToWorld, MediumInterface()),
       L(L),
-      wLight(Normalize(LightToWorld(wLight))) {}
+      wLight(Normalize(LightToWorld(wLight)))
+{
+}
 
 Spectrum DistantLight::Sample_Li(const Interaction &ref, const Point2f &u,
                                  Vector3f *wi, Float *pdf,
@@ -61,4 +63,4 @@ void DistantLight::Pdf_Le(const Ray &, const Normal3f &, Float *pdfPos, Float *p
     *pdfDir = 0;
 }
 
-}  // namespace pbr
+} // namespace pbr

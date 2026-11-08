@@ -6,9 +6,9 @@
 #include "core/Primitive.h"
 #include <atomic>
 
-namespace pbr 
+namespace pbr
 {
-    
+
 struct BVHBuildNode;
 
 // BVHAccel Forward Declarations
@@ -21,7 +21,13 @@ class BVHAccel : public Aggregate
 {
 public:
     // BVHAccel Public Types
-    enum class SplitMethod { SAH, HLBVH, Middle, EqualCounts };
+    enum class SplitMethod
+    {
+        SAH,
+        HLBVH,
+        Middle,
+        EqualCounts
+    };
 
     // BVHAccel Public Methods
     BVHAccel(std::vector<std::shared_ptr<Primitive>> p,
@@ -35,13 +41,13 @@ public:
 private:
     // BVHAccel Private Methods
     BVHBuildNode *recursiveBuild(MemoryArena &arena,
-        std::vector<BVHPrimitiveInfo> &primitiveInfo,
-        int start, int end, int *totalNodes,
-        std::vector<std::shared_ptr<Primitive>> &orderedPrims);
+                                 std::vector<BVHPrimitiveInfo> &primitiveInfo,
+                                 int start, int end, int *totalNodes,
+                                 std::vector<std::shared_ptr<Primitive>> &orderedPrims);
     BVHBuildNode *HLBVHBuild(MemoryArena &arena,
-        const std::vector<BVHPrimitiveInfo> &primitiveInfo,
-        int *totalNodes,
-        std::vector<std::shared_ptr<Primitive>> &orderedPrims) const;
+                             const std::vector<BVHPrimitiveInfo> &primitiveInfo,
+                             int *totalNodes,
+                             std::vector<std::shared_ptr<Primitive>> &orderedPrims) const;
     BVHBuildNode *emitLBVH(
         BVHBuildNode *&buildNodes,
         const std::vector<BVHPrimitiveInfo> &primitiveInfo,
@@ -59,6 +65,6 @@ private:
     LinearBVHNode *nodes = nullptr;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_ACCELERATORS_BVH_H
+#endif // PBR_ACCELERATORS_BVH_H

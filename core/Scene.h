@@ -19,7 +19,7 @@ public:
     {
         // Scene Constructor Implementation
         worldBound = aggregate->WorldBound();
-        
+
         for (const auto &light : lights)
         {
             light->Preprocess(*this);
@@ -27,8 +27,11 @@ public:
                 infiniteLights.push_back(light);
         }
     }
-    
-    const Bounds3f &WorldBound() const { return worldBound; }
+
+    const Bounds3f &WorldBound() const
+    {
+        return worldBound;
+    }
     bool Intersect(const Ray &ray, SurfaceInteraction *isect) const;
     bool IntersectP(const Ray &ray) const;
     bool IntersectTr(Ray ray, Sampler &sampler, SurfaceInteraction *isect,
@@ -46,6 +49,6 @@ private:
     Bounds3f worldBound;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_CORE_SCENE_H
+#endif // PBR_CORE_SCENE_H

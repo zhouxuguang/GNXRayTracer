@@ -7,12 +7,13 @@
 #include "core/Material.h"
 #include "core/Spectrum.h"
 
-namespace pbr 
+namespace pbr
 {
 
 // MetalMaterial Declarations
-class MetalMaterial : public Material {
-  public:
+class MetalMaterial : public Material
+{
+public:
     // MetalMaterial Public Methods
     MetalMaterial(const std::shared_ptr<Texture<Spectrum>> &eta,
                   const std::shared_ptr<Texture<Spectrum>> &k,
@@ -33,6 +34,6 @@ private:
     bool remapRoughness;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_MATERIALS_METAL_INCLUDE_H
+#endif // PBR_MATERIALS_METAL_INCLUDE_H

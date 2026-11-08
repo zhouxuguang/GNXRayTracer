@@ -17,12 +17,14 @@ public:
         : Filter(radius),
           alpha(alpha),
           expX(std::exp(-alpha * radius.x * radius.x)),
-          expY(std::exp(-alpha * radius.y * radius.y)) {}
+          expY(std::exp(-alpha * radius.y * radius.y))
+    {
+    }
     Float Evaluate(const Point2f &p) const;
 
 private:
     // GaussianFilter Private Data
-    const Float alpha;   //标准差
+    const Float alpha; //标准差
     const Float expX, expY;
 
     // GaussianFilter Utility Functions
@@ -32,6 +34,6 @@ private:
     }
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_FILTERS_GAUSSIAN_H
+#endif // PBR_FILTERS_GAUSSIAN_H

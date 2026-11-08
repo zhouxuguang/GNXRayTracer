@@ -8,44 +8,38 @@
 #include <QMouseEvent>
 
 
-class IMAGraphicsView : public QGraphicsView {
-	Q_OBJECT
+class IMAGraphicsView : public QGraphicsView
+{
+    Q_OBJECT
 
 public:
-	IMAGraphicsView(QGraphicsView * parent = Q_NULLPTR);
-	~IMAGraphicsView();
+    IMAGraphicsView(QGraphicsView *parent = Q_NULLPTR);
+    ~IMAGraphicsView();
+
 public:
-	void getMap(QString mapname);
+    void getMap(QString mapname);
 
 private:
-	int bottom, left, top, right, width, height;
-	float _scale = 1.0f;
+    int bottom, left, top, right, width, height;
+    float _scale = 1.0f;
+
 private:
-	QGraphicsScene scene;
-	QPixmap map;
+    QGraphicsScene scene;
+    QPixmap map;
 
 signals:
-	
+
 
 private slots:
-	void PaintBuffer(unsigned char* buffer, int width, int height, int channals);
+    void PaintBuffer(unsigned char *buffer, int width, int height, int channals);
 
 protected:
-	void mouseMoveEvent(QMouseEvent *event);
-	void wheelEvent(QWheelEvent *event);
-	void mousePressEvent(QMouseEvent *event);
-	void drawBackground(QPainter *painter, const QRectF &rect);
-	void mouseReleaseEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void wheelEvent(QWheelEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void drawBackground(QPainter *painter, const QRectF &rect);
+    void mouseReleaseEvent(QMouseEvent *event);
 };
 
 
-
-
-
 #endif
-
-
-
-
-
-

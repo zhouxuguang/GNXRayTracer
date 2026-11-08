@@ -9,18 +9,18 @@
 #include "core/Scene.h"
 #include "core/MIPMap.h"
 
-namespace pbr 
+namespace pbr
 {
 
 // InfiniteAreaLight Declarations
-class InfiniteAreaLight : public Light 
+class InfiniteAreaLight : public Light
 {
 public:
     // InfiniteAreaLight Public Methods
     InfiniteAreaLight(const Transform &LightToWorld, const Spectrum &power,
                       int nSamples, const std::string &texmap);
 
-    void Preprocess(const Scene &scene) 
+    void Preprocess(const Scene &scene)
     {
         scene.WorldBound().BoundingSphere(&worldCenter, &worldRadius);
     }
@@ -42,6 +42,6 @@ private:
     std::unique_ptr<Distribution2D> distribution;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_LIGHTS_INFINITE_AREA_LIGHT_H
+#endif // PBR_LIGHTS_INFINITE_AREA_LIGHT_H

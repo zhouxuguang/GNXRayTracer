@@ -8,38 +8,40 @@
 static DebugText *dt = NULL;
 
 
-DebugText::DebugText(QWidget * parent) : QWidget(parent) {
+DebugText::DebugText(QWidget *parent)
+    : QWidget(parent)
+{
     setWindowState(Qt::WindowMaximized);
-    
-	qlayout = new QHBoxLayout(this);
-	ShowDebugArea = new QTextEdit(this);
-	ShowDebugArea->setFontPointSize(18);
-	qlayout->setAlignment(Qt::AlignCenter);
-	qlayout->addWidget(ShowDebugArea);
-	show();
+
+    qlayout = new QHBoxLayout(this);
+    ShowDebugArea = new QTextEdit(this);
+    ShowDebugArea->setFontPointSize(18);
+    qlayout->setAlignment(Qt::AlignCenter);
+    qlayout->addWidget(ShowDebugArea);
+    show();
 }
 
-DebugText::~DebugText() {
+DebugText::~DebugText()
+{
 }
 
 static QMutex mutexInDebugText;
-void DebugText::addContents(const QString& s1)
+void DebugText::addContents(const QString &s1)
 {
-	//QMutexLocker locker(&mutexInDebugText);
-	mutexInDebugText.lock();
-	ShowDebugArea->append(s1);
-	show();
-	mutexInDebugText.unlock();
+    //QMutexLocker locker(&mutexInDebugText);
+    mutexInDebugText.lock();
+    ShowDebugArea->append(s1);
+    show();
+    mutexInDebugText.unlock();
 }
 
 static QMutex mutexInStaticDebugText;
-DebugText* DebugText::getDebugText() {
-	//QMutexLocker locker(&mutexInStaticDebugText);
-	mutexInStaticDebugText.lock();
-	if (dt == NULL)
-		dt = new DebugText;
-	mutexInStaticDebugText.unlock();
-	return dt;
+DebugText *DebugText::getDebugText()
+{
+    //QMutexLocker locker(&mutexInStaticDebugText);
+    mutexInStaticDebugText.lock();
+    if (dt == NULL)
+        dt = new DebugText;
+    mutexInStaticDebugText.unlock();
+    return dt;
 }
-
-

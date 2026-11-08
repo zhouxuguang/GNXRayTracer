@@ -16,7 +16,9 @@ public:
     MatteMaterial(const std::shared_ptr<Texture<Spectrum>> &Kd,
                   const std::shared_ptr<Texture<Float>> &sigma,
                   const std::shared_ptr<Texture<Float>> &bumpMap)
-        : Kd(Kd), sigma(sigma), bumpMap(bumpMap) {}
+        : Kd(Kd), sigma(sigma), bumpMap(bumpMap)
+    {
+    }
     void ComputeScatteringFunctions(SurfaceInteraction *si, MemoryArena &arena,
                                     TransportMode mode,
                                     bool allowMultipleLobes) const;
@@ -27,6 +29,6 @@ private:
     std::shared_ptr<Texture<Float>> sigma, bumpMap;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_MATERIALS_MATTE_H
+#endif // PBR_MATERIALS_MATTE_H

@@ -15,7 +15,10 @@
 namespace pbr
 {
 
-inline Float sqr(Float x) { return x * x; }
+inline Float sqr(Float x)
+{
+    return x * x;
+}
 
 // https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/
 //
@@ -43,7 +46,10 @@ inline Spectrum FrSchlick(const Spectrum &R0, Float cosTheta)
 // For a dielectric, R(0) = (eta - 1)^2 / (eta + 1)^2, assuming we're
 // coming from air..
 // 从折射率计算R0，基础反射率
-inline Float SchlickR0FromEta(Float eta) { return sqr(eta - 1) / sqr(eta + 1); }
+inline Float SchlickR0FromEta(Float eta)
+{
+    return sqr(eta - 1) / sqr(eta + 1);
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // 漫反射项
@@ -51,10 +57,18 @@ class DisneyDiffuse : public BxDF
 {
 public:
     DisneyDiffuse(const Spectrum &R)
-        : BxDF(BxDFType(BSDF_REFLECTION | BSDF_DIFFUSE)), R(R) {}
+        : BxDF(BxDFType(BSDF_REFLECTION | BSDF_DIFFUSE)), R(R)
+    {
+    }
     Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
-    Spectrum rho(const Vector3f &, int, const Point2f *) const { return R; }
-    Spectrum rho(int, const Point2f *, const Point2f *) const { return R; }
+    Spectrum rho(const Vector3f &, int, const Point2f *) const
+    {
+        return R;
+    }
+    Spectrum rho(int, const Point2f *, const Point2f *) const
+    {
+        return R;
+    }
     std::string ToString() const;
 
 private:
@@ -91,10 +105,18 @@ public:
     DisneyFakeSS(const Spectrum &R, Float roughness)
         : BxDF(BxDFType(BSDF_REFLECTION | BSDF_DIFFUSE)),
           R(R),
-          roughness(roughness) {}
+          roughness(roughness)
+    {
+    }
     Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
-    Spectrum rho(const Vector3f &, int, const Point2f *) const { return R; }
-    Spectrum rho(int, const Point2f *, const Point2f *) const { return R; }
+    Spectrum rho(const Vector3f &, int, const Point2f *) const
+    {
+        return R;
+    }
+    Spectrum rho(int, const Point2f *, const Point2f *) const
+    {
+        return R;
+    }
     std::string ToString() const;
 
 private:
@@ -105,7 +127,8 @@ private:
 Spectrum DisneyFakeSS::f(const Vector3f &wo, const Vector3f &wi) const
 {
     Vector3f wh = wi + wo;
-    if (wh.x == 0 && wh.y == 0 && wh.z == 0) return Spectrum(0.);
+    if (wh.x == 0 && wh.y == 0 && wh.z == 0)
+        return Spectrum(0.);
     wh = Normalize(wh);
     Float cosThetaD = Dot(wi, wh);
 
@@ -137,10 +160,18 @@ public:
     DisneyRetro(const Spectrum &R, Float roughness)
         : BxDF(BxDFType(BSDF_REFLECTION | BSDF_DIFFUSE)),
           R(R),
-          roughness(roughness) {}
+          roughness(roughness)
+    {
+    }
     Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
-    Spectrum rho(const Vector3f &, int, const Point2f *) const { return R; }
-    Spectrum rho(int, const Point2f *, const Point2f *) const { return R; }
+    Spectrum rho(const Vector3f &, int, const Point2f *) const
+    {
+        return R;
+    }
+    Spectrum rho(int, const Point2f *, const Point2f *) const
+    {
+        return R;
+    }
     std::string ToString() const;
 
 private:
@@ -151,7 +182,8 @@ private:
 Spectrum DisneyRetro::f(const Vector3f &wo, const Vector3f &wi) const
 {
     Vector3f wh = wi + wo;
-    if (wh.x == 0 && wh.y == 0 && wh.z == 0) return Spectrum(0.);
+    if (wh.x == 0 && wh.y == 0 && wh.z == 0)
+        return Spectrum(0.);
     wh = Normalize(wh);
     Float cosThetaD = Dot(wi, wh);
 
@@ -176,10 +208,18 @@ class DisneySheen : public BxDF
 {
 public:
     DisneySheen(const Spectrum &R)
-        : BxDF(BxDFType(BSDF_REFLECTION | BSDF_DIFFUSE)), R(R) {}
+        : BxDF(BxDFType(BSDF_REFLECTION | BSDF_DIFFUSE)), R(R)
+    {
+    }
     Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
-    Spectrum rho(const Vector3f &, int, const Point2f *) const { return R; }
-    Spectrum rho(int, const Point2f *, const Point2f *) const { return R; }
+    Spectrum rho(const Vector3f &, int, const Point2f *) const
+    {
+        return R;
+    }
+    Spectrum rho(int, const Point2f *, const Point2f *) const
+    {
+        return R;
+    }
     std::string ToString() const;
 
 private:
@@ -189,7 +229,8 @@ private:
 Spectrum DisneySheen::f(const Vector3f &wo, const Vector3f &wi) const
 {
     Vector3f wh = wi + wo;
-    if (wh.x == 0 && wh.y == 0 && wh.z == 0) return Spectrum(0.);
+    if (wh.x == 0 && wh.y == 0 && wh.z == 0)
+        return Spectrum(0.);
     wh = Normalize(wh);
     Float cosThetaD = Dot(wi, wh);
 
@@ -210,7 +251,9 @@ public:
     DisneyClearcoat(Float weight, Float gloss)
         : BxDF(BxDFType(BSDF_REFLECTION | BSDF_GLOSSY)),
           weight(weight),
-          gloss(gloss) {}
+          gloss(gloss)
+    {
+    }
     Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
     Spectrum Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u,
                       Float *pdf, BxDFType *sampledType) const;
@@ -239,7 +282,8 @@ inline Float smithG_GGX(Float cosTheta, Float alpha)
 Spectrum DisneyClearcoat::f(const Vector3f &wo, const Vector3f &wi) const
 {
     Vector3f wh = wi + wo;
-    if (wh.x == 0 && wh.y == 0 && wh.z == 0) return Spectrum(0.);
+    if (wh.x == 0 && wh.y == 0 && wh.z == 0)
+        return Spectrum(0.);
     wh = Normalize(wh);
 
     // Clearcoat has ior = 1.5 hardcoded -> F0 = 0.04. It then uses the
@@ -261,7 +305,8 @@ Spectrum DisneyClearcoat::Sample_f(const Vector3f &wo, Vector3f *wi,
     // TODO: double check all this: there still seem to be some very
     // occasional fireflies with clearcoat; presumably there is a bug
     // somewhere.
-    if (wo.z == 0) return 0.;
+    if (wo.z == 0)
+        return 0.;
 
     Float alpha2 = gloss * gloss;
     Float cosTheta = std::sqrt(
@@ -269,10 +314,12 @@ Spectrum DisneyClearcoat::Sample_f(const Vector3f &wo, Vector3f *wi,
     Float sinTheta = std::sqrt(std::max((Float)0, 1 - cosTheta * cosTheta));
     Float phi = 2 * Pi * u[1];
     Vector3f wh = SphericalDirection(sinTheta, cosTheta, phi);
-    if (!SameHemisphere(wo, wh)) wh = -wh;
+    if (!SameHemisphere(wo, wh))
+        wh = -wh;
 
     *wi = Reflect(wo, wh);
-    if (!SameHemisphere(wo, *wi)) return Spectrum(0.f);
+    if (!SameHemisphere(wo, *wi))
+        return Spectrum(0.f);
 
     *pdf = Pdf(wo, *wi);
     return f(wo, *wi);
@@ -280,10 +327,12 @@ Spectrum DisneyClearcoat::Sample_f(const Vector3f &wo, Vector3f *wi,
 
 Float DisneyClearcoat::Pdf(const Vector3f &wo, const Vector3f &wi) const
 {
-    if (!SameHemisphere(wo, wi)) return 0;
+    if (!SameHemisphere(wo, wi))
+        return 0;
 
     Vector3f wh = wi + wo;
-    if (wh.x == 0 && wh.y == 0 && wh.z == 0) return 0;
+    if (wh.x == 0 && wh.y == 0 && wh.z == 0)
+        return 0;
     wh = Normalize(wh);
 
     // The sampling routine samples wh exactly from the GTR1 distribution.
@@ -309,7 +358,9 @@ class DisneyFresnel : public Fresnel
 {
 public:
     DisneyFresnel(const Spectrum &R0, Float metallic, Float eta)
-        : R0(R0), metallic(metallic), eta(eta) {}
+        : R0(R0), metallic(metallic), eta(eta)
+    {
+    }
     Spectrum Evaluate(Float cosI) const
     {
         return Lerp(metallic, Spectrum(FrDielectric(cosI, 1, eta)),
@@ -333,7 +384,9 @@ class DisneyMicrofacetDistribution : public TrowbridgeReitzDistribution
 {
 public:
     DisneyMicrofacetDistribution(Float alphax, Float alphay)
-        : TrowbridgeReitzDistribution(alphax, alphay) {}
+        : TrowbridgeReitzDistribution(alphax, alphay)
+    {
+    }
 
     Float G(const Vector3f &wo, const Vector3f &wi) const
     {
@@ -357,7 +410,9 @@ public:
                  const Material *material, TransportMode mode)
         // 0.2 factor comes from personal communication from Brent Burley
         // and Matt Chiang.
-        : SeparableBSSRDF(po, eta, material, mode), R(R), d(0.2 * d) {}
+        : SeparableBSSRDF(po, eta, material, mode), R(R), d(0.2 * d)
+    {
+    }
 
     Spectrum S(const SurfaceInteraction &pi, const Vector3f &wi);
     Spectrum Sr(Float d) const;
@@ -385,7 +440,8 @@ Spectrum DisneyBSSRDF::S(const SurfaceInteraction &pi, const Vector3f &wi)
     Float fade = 1;
     Vector3f n = Vector3f(po.shading.n);
     Float cosTheta = Dot(a, n);
-    if (cosTheta > 0) {
+    if (cosTheta > 0)
+    {
         // Point on or above surface plane
         Float sinTheta = std::sqrt(std::max(Float(0), 1 - cosTheta * cosTheta));
         Vector3f a2 = n * sinTheta - (a - n * cosTheta) * cosTheta / sinTheta;
@@ -401,7 +457,8 @@ Spectrum DisneyBSSRDF::S(const SurfaceInteraction &pi, const Vector3f &wi)
 Spectrum DisneyBSSRDF::Sr(Float r) const
 {
     //ProfilePhase pp(Prof::BSSRDFEvaluation);
-    if (r < 1e-6f) r = 1e-6f;  // Avoid singularity at r == 0.
+    if (r < 1e-6f)
+        r = 1e-6f; // Avoid singularity at r == 0.
     return R * (Exp(-Spectrum(r) / d) + Exp(-Spectrum(r) / (3 * d))) /
            (8 * Pi * d * r);
 }
@@ -438,20 +495,24 @@ Float DisneyBSSRDF::Sample_Sr(int ch, Float u) const
     // technique.  The second exponential has 3x the contribution to the
     // final value as the first does, so therefore we'll take three samples
     // from that for every one sample we take from the first.
-    if (u < .25f) {
+    if (u < .25f)
+    {
         // Sample the first exponential
-        u = std::min<Float>(u * 4, OneMinusEpsilon);  // renormalize to [0,1)
+        u = std::min<Float>(u * 4, OneMinusEpsilon); // renormalize to [0,1)
         return d[ch] * std::log(1 / (1 - u));
-    } else {
+    }
+    else
+    {
         // Second exponenital
-        u = std::min<Float>((u - .25f) / .75f, OneMinusEpsilon);  // normalize to [0,1)
+        u = std::min<Float>((u - .25f) / .75f, OneMinusEpsilon); // normalize to [0,1)
         return 3 * d[ch] * std::log(1 / (1 - u));
     }
 }
 
 Float DisneyBSSRDF::Pdf_Sr(int ch, Float r) const
 {
-    if (r < 1e-6f) r = 1e-6f;  // Avoid singularity at r == 0.
+    if (r < 1e-6f)
+        r = 1e-6f; // Avoid singularity at r == 0.
 
     // Weight the two individual PDFs as per the sampling frequency in
     // Sample_Sr().
@@ -470,7 +531,8 @@ void DisneyMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
                                                 bool allowMultipleLobes) const
 {
     // Perform bump mapping with _bumpMap_, if present
-    if (bumpMap) Bump(bumpMap, si);
+    if (bumpMap)
+        Bump(bumpMap, si);
 
     // Evaluate textures for _DisneyMaterial_ material and allocate BRDF
     si->bsdf = ARENA_ALLOC(arena, BSDF)(*si);
@@ -482,7 +544,7 @@ void DisneyMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
     Float strans = specTrans->Evaluate(*si);
     Float diffuseWeight = (1 - metallicWeight) * (1 - strans);
     Float dt = diffTrans->Evaluate(*si) /
-               2;  // 0: all diffuse is reflected -> 1, transmitted
+               2; // 0: all diffuse is reflected -> 1, transmitted
     Float rough = roughness->Evaluate(*si);
     Float lum = c.y();
     // normalize lum. to isolate hue+sat
@@ -490,13 +552,16 @@ void DisneyMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
 
     Float sheenWeight = sheen->Evaluate(*si);
     Spectrum Csheen;
-    if (sheenWeight > 0) {
+    if (sheenWeight > 0)
+    {
         Float stint = sheenTint->Evaluate(*si);
         Csheen = Lerp(stint, Spectrum(1.), Ctint);
     }
 
-    if (diffuseWeight > 0) {
-        if (thin) {
+    if (diffuseWeight > 0)
+    {
+        if (thin)
+        {
             Float flat = flatness->Evaluate(*si);
             // Blend between DisneyDiffuse and fake subsurface based on
             // flatness.  Additionally, weight using diffTrans.
@@ -504,14 +569,17 @@ void DisneyMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
                 diffuseWeight * (1 - flat) * (1 - dt) * c));
             si->bsdf->Add(ARENA_ALLOC(arena, DisneyFakeSS)(
                 diffuseWeight * flat * (1 - dt) * c, rough));
-        } else {
+        }
+        else
+        {
             Spectrum sd = scatterDistance->Evaluate(*si);
             if (sd.IsBlack())
                 // No subsurface scattering; use regular (Fresnel modified)
                 // diffuse.
                 si->bsdf->Add(
                     ARENA_ALLOC(arena, DisneyDiffuse)(diffuseWeight * c));
-            else {
+            else
+            {
                 // Use a BSSRDF instead.
                 si->bsdf->Add(ARENA_ALLOC(arena, SpecularTransmission)(
                     1.f, 1.f, e, mode));
@@ -550,18 +618,21 @@ void DisneyMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
 
     // Clearcoat
     Float cc = clearcoat->Evaluate(*si);
-    if (cc > 0) {
+    if (cc > 0)
+    {
         si->bsdf->Add(ARENA_ALLOC(arena, DisneyClearcoat)(
             cc, Lerp(clearcoatGloss->Evaluate(*si), .1, .001)));
     }
 
     // BTDF
-    if (strans > 0) {
+    if (strans > 0)
+    {
         // Walter et al's model, with the provided transmissive term scaled
         // by sqrt(color), so that after two refractions, we're back to the
         // provided color.
         Spectrum T = strans * Sqrt(c);
-        if (thin) {
+        if (thin)
+        {
             // Scale roughness based on IOR (Burley 2015, Figure 15).
             Float rscaled = (0.65f * e - 0.35f) * rough;
             Float ax = std::max(Float(.001), sqr(rscaled) / aspect);
@@ -570,11 +641,13 @@ void DisneyMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
                 ARENA_ALLOC(arena, TrowbridgeReitzDistribution)(ax, ay);
             si->bsdf->Add(ARENA_ALLOC(arena, MicrofacetTransmission)(
                 T, scaledDistrib, 1., e, mode));
-        } else
+        }
+        else
             si->bsdf->Add(ARENA_ALLOC(arena, MicrofacetTransmission)(
                 T, distrib, 1., e, mode));
     }
-    if (thin) {
+    if (thin)
+    {
         // Lambertian, weighted by (1 - diffTrans)
         si->bsdf->Add(ARENA_ALLOC(arena, LambertianTransmission)(dt * c));
     }

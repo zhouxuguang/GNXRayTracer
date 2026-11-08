@@ -2,62 +2,57 @@
 #include "DebugText.h"
 
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
 {
-	//setMinimumSize(800, 800);
+    //setMinimumSize(800, 800);
     setWindowState(Qt::WindowMaximized);
 
-	setCentralWidget(&centralWidget);
+    setCentralWidget(&centralWidget);
 
-	MainWindowLayout.setAlignment(Qt::AlignCenter);
+    MainWindowLayout.setAlignment(Qt::AlignCenter);
 
-	centralWidget.setLayout(&MainWindowLayout);
+    centralWidget.setLayout(&MainWindowLayout);
 
-	setMenu();
+    setMenu();
 
-	setWidget();
+    setWidget();
 
-	setDock();
+    setDock();
 
-	connect(m_InteractionDockWidget.renderButton, SIGNAL(clicked()), this, SLOT(setRendering()));
-
+    connect(m_InteractionDockWidget.renderButton, SIGNAL(clicked()), this, SLOT(setRendering()));
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-	// 关闭渲染线程
-	m_DisplayWidget.killRenderThread();
-
+    // 关闭渲染线程
+    m_DisplayWidget.killRenderThread();
 }
 
 void MainWindow::setMenu(void)
 {
-
-
 }
 
-void MainWindow::setWidget(void) {
-	
-	MainWindowLayout.addWidget(&m_DisplayWidget);
+void MainWindow::setWidget(void)
+{
 
+    MainWindowLayout.addWidget(&m_DisplayWidget);
 }
 
-void MainWindow::setDock(void) {
+void MainWindow::setDock(void)
+{
 
-	addDockWidget(Qt::LeftDockWidgetArea, &m_InteractionDockWidget);
-
+    addDockWidget(Qt::LeftDockWidgetArea, &m_InteractionDockWidget);
 }
 
 void MainWindow::setRendering()
 {
 
-	if (!m_DisplayWidget.renderFlag)
+    if (!m_DisplayWidget.renderFlag)
     {
-		// 
-		m_InteractionDockWidget.renderButton->setText("Rendering");
+        //
+        m_InteractionDockWidget.renderButton->setText("Rendering");
 
-		m_DisplayWidget.startRenderThread();
-	}
-
+        m_DisplayWidget.startRenderThread();
+    }
 }
-

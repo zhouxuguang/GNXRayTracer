@@ -17,7 +17,9 @@ public:
         : sigma_a(sigma_a),
           sigma_s(sigma_s),
           sigma_t(sigma_s + sigma_a),
-          g(g) {}
+          g(g)
+    {
+    }
     Spectrum Tr(const Ray &ray, Sampler &sampler) const;
     Spectrum Sample(const Ray &ray, Sampler &sampler, MemoryArena &arena,
                     MediumInteraction *mi) const;
@@ -28,6 +30,6 @@ private:
     const Float g;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_MEDIA_HOMOGENEOUS_H
+#endif // PBR_MEDIA_HOMOGENEOUS_H

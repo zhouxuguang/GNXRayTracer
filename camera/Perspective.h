@@ -11,19 +11,19 @@ namespace pbr
 // PerspectiveCamera Declarations
 class PerspectiveCamera : public ProjectiveCamera
 {
-  public:
+public:
     // PerspectiveCamera Public Methods
     PerspectiveCamera(const int rasterWidth, const int rasterHeight, const AnimatedTransform &CameraToWorld,
                       const Bounds2f &screenWindow, float lensRadius, float focalDistance, float fov);
-    
+
     Float GenerateRay(const CameraSample &sample, Ray *) const;
-    
+
     Float GenerateRayDifferential(const CameraSample &sample, RayDifferential *ray) const;
-    
+
 private:
     Vector3f dxCamera, dyCamera;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBRT_CAMERAS_PERSPECTIVE_H
+#endif // PBRT_CAMERAS_PERSPECTIVE_H

@@ -7,4 +7,4 @@ namespace pbr
 {
 
 
-}  // namespace pbrt
+} // namespace pbrt

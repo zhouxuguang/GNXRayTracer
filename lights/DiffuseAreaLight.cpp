@@ -17,16 +17,17 @@ DiffuseAreaLight::DiffuseAreaLight(const Transform &LightToWorld, const MediumIn
       Lemit(Lemit),
       shape(shape),
       twoSided(twoSided),
-      area(shape->Area()) {
+      area(shape->Area())
+{
     // Warn if light has transformation with non-uniform scale, though not
     // for Triangles, since this doesn't matter for them.
-//    if (WorldToLight.HasScale() &&
-//        dynamic_cast<const Triangle *>(shape.get()) == nullptr)
-//        Warning(
-//            "Scaling detected in world to light transformation! "
-//            "The system has numerous assumptions, implicit and explicit, "
-//            "that this transform will have no scale factors in it. "
-//            "Proceed at your own risk; your image may have errors.");
+    //    if (WorldToLight.HasScale() &&
+    //        dynamic_cast<const Triangle *>(shape.get()) == nullptr)
+    //        Warning(
+    //            "Scaling detected in world to light transformation! "
+    //            "The system has numerous assumptions, implicit and explicit, "
+    //            "that this transform will have no scale factors in it. "
+    //            "Proceed at your own risk; your image may have errors.");
 }
 
 Spectrum DiffuseAreaLight::Power() const
@@ -41,14 +42,14 @@ Spectrum DiffuseAreaLight::Sample_Li(const Interaction &ref, const Point2f &u,
     //ProfilePhase _(Prof::LightSample);
     Interaction pShape = shape->Sample(ref, u, pdf);
     pShape.mediumInterface = mediumInterface;
-    if (*pdf == 0 || (pShape.p - ref.p).LengthSquared() == 0)   //如果pdf为0或者相交点和光源距离非常近
+    if (*pdf == 0 || (pShape.p - ref.p).LengthSquared() == 0) //如果pdf为0或者相交点和光源距离非常近
     {
         *pdf = 0;
         return 0.f;
     }
-    *wi = Normalize(pShape.p - ref.p);  //从相交点指向光源
-    *vis = VisibilityTester(ref, pShape);   //可见性测试对象
-    return L(pShape, -*wi);    //计算光源发射的光亮度
+    *wi = Normalize(pShape.p - ref.p);    //从相交点指向光源
+    *vis = VisibilityTester(ref, pShape); //可见性测试对象
+    return L(pShape, -*wi);               //计算光源发射的光亮度
 }
 
 Float DiffuseAreaLight::Pdf_Li(const Interaction &ref, const Vector3f &wi) const
@@ -69,20 +70,26 @@ Spectrum DiffuseAreaLight::Sample_Le(const Point2f &u1, const Point2f &u2,
 
     // Sample a cosine-weighted outgoing direction _w_ for area light
     Vector3f w;
-    if (twoSided) {
+    if (twoSided)
+    {
         Point2f u = u2;
         // Choose a side to sample and then remap u[0] to [0,1] before
         // applying cosine-weighted hemisphere sampling for the chosen side.
-        if (u[0] < .5) {
+        if (u[0] < .5)
+        {
             u[0] = std::min(u[0] * 2, OneMinusEpsilon);
             w = CosineSampleHemisphere(u);
-        } else {
+        }
+        else
+        {
             u[0] = std::min((u[0] - .5f) * 2, OneMinusEpsilon);
             w = CosineSampleHemisphere(u);
             w.z *= -1;
         }
         *pdfDir = 0.5f * CosineHemispherePdf(std::abs(w.z));
-    } else {
+    }
+    else
+    {
         w = CosineSampleHemisphere(u2);
         *pdfDir = CosineHemispherePdf(w.z);
     }
@@ -103,4 +110,4 @@ void DiffuseAreaLight::Pdf_Le(const Ray &ray, const Normal3f &n, Float *pdfPos, 
                        : CosineHemispherePdf(Dot(n, ray.d));
 }
 
-}  // namespace pbr
+} // namespace pbr

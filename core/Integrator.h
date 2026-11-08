@@ -16,7 +16,7 @@ namespace pbr
 // Integrator Declarations
 class Integrator
 {
-  public:
+public:
     // Integrator Interface
     virtual ~Integrator();
     virtual void Render(const Scene &scene, double &timeConsume) = 0;
@@ -41,34 +41,37 @@ std::unique_ptr<Distribution1D> ComputeLightPowerDistribution(const Scene &scene
 // SamplerIntegrator Declarations
 class SamplerIntegrator : public Integrator
 {
-  public:
+public:
     // SamplerIntegrator Public Methods
     SamplerIntegrator(std::shared_ptr<const Camera> camera,
                       std::shared_ptr<Sampler> sampler,
-                      const Bounds2i &pixelBounds, FrameBuffer * pFrameBuffer) :
-    camera(camera), sampler(sampler), pixelBounds(pixelBounds), m_FrameBuffer(pFrameBuffer)
-    {}
-    
+                      const Bounds2i &pixelBounds, FrameBuffer *pFrameBuffer)
+        : camera(camera), sampler(sampler), pixelBounds(pixelBounds), m_FrameBuffer(pFrameBuffer)
+    {
+    }
+
     //进度函数
-    virtual void Preprocess(const Scene &scene, Sampler &sampler) {}
-    
+    virtual void Preprocess(const Scene &scene, Sampler &sampler)
+    {
+    }
+
     //渲染函数
     void Render(const Scene &scene, double &timeConsume);
-    
+
     virtual Spectrum Li(const RayDifferential &ray, const Scene &scene,
                         Sampler &sampler, MemoryArena &arena,
                         int depth = 0) const = 0;
-    
+
     Spectrum SpecularReflect(const RayDifferential &ray,
                              const SurfaceInteraction &isect,
                              const Scene &scene, Sampler &sampler,
                              MemoryArena &arena, int depth) const;
-    
+
     Spectrum SpecularTransmit(const RayDifferential &ray,
                               const SurfaceInteraction &isect,
                               const Scene &scene, Sampler &sampler,
                               MemoryArena &arena, int depth) const;
-    
+
 protected:
     // SamplerIntegrator Protected Data
     std::shared_ptr<const Camera> camera;
@@ -77,9 +80,9 @@ private:
     // SamplerIntegrator Private Data
     std::shared_ptr<Sampler> sampler;
     const Bounds2i pixelBounds;
-    FrameBuffer * m_FrameBuffer;
+    FrameBuffer *m_FrameBuffer;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_CORE_INTEGRATOR_H
+#endif // PBR_CORE_INTEGRATOR_H

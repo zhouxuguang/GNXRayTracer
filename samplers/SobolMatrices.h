@@ -16,6 +16,6 @@ extern const uint64_t SobolMatrices64[NumSobolDimensions * SobolMatrixSize];
 extern const uint64_t VdCSobolMatrices[][SobolMatrixSize];
 extern const uint64_t VdCSobolMatricesInv[][SobolMatrixSize];
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_CORE_SOBOLMATRICES_H
+#endif // PBR_CORE_SOBOLMATRICES_H

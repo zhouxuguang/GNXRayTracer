@@ -8,10 +8,16 @@ namespace pbr
 {
 
 // Sampler Method Definitions
-Sampler::~Sampler() {}
+Sampler::~Sampler()
+{
+}
 
-Sampler::Sampler(int64_t samplesPerPixel) : samplesPerPixel(samplesPerPixel) {}
-CameraSample Sampler::GetCameraSample(const Point2i &pRaster) {
+Sampler::Sampler(int64_t samplesPerPixel)
+    : samplesPerPixel(samplesPerPixel)
+{
+}
+CameraSample Sampler::GetCameraSample(const Point2i &pRaster)
+{
     CameraSample cs;
     cs.pFilm = (Point2f)pRaster + Get2D();
     cs.time = Get1D();
@@ -58,7 +64,8 @@ void Sampler::Request2DArray(int n)
 
 const Float *Sampler::Get1DArray(int n)
 {
-    if (array1DOffset == sampleArray1D.size()) return nullptr;
+    if (array1DOffset == sampleArray1D.size())
+        return nullptr;
     CHECK_EQ(samples1DArraySizes[array1DOffset], n);
     CHECK_LT(currentPixelSampleIndex, samplesPerPixel);
     return &sampleArray1D[array1DOffset++][currentPixelSampleIndex * n];
@@ -66,7 +73,8 @@ const Float *Sampler::Get1DArray(int n)
 
 const Point2f *Sampler::Get2DArray(int n)
 {
-    if (array2DOffset == sampleArray2D.size()) return nullptr;
+    if (array2DOffset == sampleArray2D.size())
+        return nullptr;
     CHECK_EQ(samples2DArraySizes[array2DOffset], n);
     CHECK_LT(currentPixelSampleIndex, samplesPerPixel);
     return &sampleArray2D[array2DOffset++][currentPixelSampleIndex * n];
@@ -75,7 +83,8 @@ const Point2f *Sampler::Get2DArray(int n)
 PixelSampler::PixelSampler(int64_t samplesPerPixel, int nSampledDimensions)
     : Sampler(samplesPerPixel)
 {
-    for (int i = 0; i < nSampledDimensions; ++i) {
+    for (int i = 0; i < nSampledDimensions; ++i)
+    {
         samples1D.push_back(std::vector<Float>(samplesPerPixel));
         samples2D.push_back(std::vector<Point2f>(samplesPerPixel));
     }
@@ -123,9 +132,11 @@ void GlobalSampler::StartPixel(const Point2i &p)
     arrayEndDim = arrayStartDim + sampleArray1D.size() + 2 * sampleArray2D.size();
 
     // Compute 1D array samples for _GlobalSampler_
-    for (size_t i = 0; i < samples1DArraySizes.size(); ++i) {
+    for (size_t i = 0; i < samples1DArraySizes.size(); ++i)
+    {
         int nSamples = samples1DArraySizes[i] * samplesPerPixel;
-        for (int j = 0; j < nSamples; ++j) {
+        for (int j = 0; j < nSamples; ++j)
+        {
             int64_t index = GetIndexForSample(j);
             sampleArray1D[i][j] = SampleDimension(index, arrayStartDim + i);
         }
@@ -133,9 +144,11 @@ void GlobalSampler::StartPixel(const Point2i &p)
 
     // Compute 2D array samples for _GlobalSampler_
     int dim = arrayStartDim + samples1DArraySizes.size();
-    for (size_t i = 0; i < samples2DArraySizes.size(); ++i) {
+    for (size_t i = 0; i < samples2DArraySizes.size(); ++i)
+    {
         int nSamples = samples2DArraySizes[i] * samplesPerPixel;
-        for (int j = 0; j < nSamples; ++j) {
+        for (int j = 0; j < nSamples; ++j)
+        {
             int64_t idx = GetIndexForSample(j);
             sampleArray2D[i][j].x = SampleDimension(idx, dim);
             sampleArray2D[i][j].y = SampleDimension(idx, dim + 1);
@@ -178,4 +191,4 @@ Point2f GlobalSampler::Get2D()
     return p;
 }
 
-}  // namespace pbrt
+} // namespace pbrt

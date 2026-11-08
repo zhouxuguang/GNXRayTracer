@@ -13,7 +13,7 @@ namespace pbr
 {
 
 // Texture Declarations
-class TextureMapping2D 
+class TextureMapping2D
 {
 public:
     // TextureMapping2D Interface
@@ -39,7 +39,9 @@ class SphericalMapping2D : public TextureMapping2D
 public:
     // SphericalMapping2D Public Methods
     SphericalMapping2D(const Transform &WorldToTexture)
-        : WorldToTexture(WorldToTexture) {}
+        : WorldToTexture(WorldToTexture)
+    {
+    }
     Point2f Map(const SurfaceInteraction &si, Vector2f *dstdx,
                 Vector2f *dstdy) const;
 
@@ -53,13 +55,16 @@ class CylindricalMapping2D : public TextureMapping2D
 public:
     // CylindricalMapping2D Public Methods
     CylindricalMapping2D(const Transform &WorldToTexture)
-        : WorldToTexture(WorldToTexture) {}
+        : WorldToTexture(WorldToTexture)
+    {
+    }
     Point2f Map(const SurfaceInteraction &si, Vector2f *dstdx,
                 Vector2f *dstdy) const;
 
 private:
     // CylindricalMapping2D Private Methods
-    Point2f cylinder(const Point3f &p) const {
+    Point2f cylinder(const Point3f &p) const
+    {
         Vector3f vec = Normalize(WorldToTexture(p) - Point3f(0, 0, 0));
         return Point2f((Pi + std::atan2(vec.y, vec.x)) * Inv2Pi, vec.z);
     }
@@ -74,7 +79,9 @@ public:
                 Vector2f *dstdy) const;
     PlanarMapping2D(const Vector3f &vs, const Vector3f &vt, Float ds = 0,
                     Float dt = 0)
-        : vs(vs), vt(vt), ds(ds), dt(dt) {}
+        : vs(vs), vt(vt), ds(ds), dt(dt)
+    {
+    }
 
 private:
     const Vector3f vs, vt;
@@ -90,11 +97,14 @@ public:
                         Vector3f *dpdy) const = 0;
 };
 
-class IdentityMapping3D : public TextureMapping3D {
+class IdentityMapping3D : public TextureMapping3D
+{
 public:
     // IdentityMapping3D Public Methods
     IdentityMapping3D(const Transform &WorldToTexture)
-        : WorldToTexture(WorldToTexture) {}
+        : WorldToTexture(WorldToTexture)
+    {
+    }
     Point3f Map(const SurfaceInteraction &si, Vector3f *dpdx,
                 Vector3f *dpdy) const;
 
@@ -103,12 +113,14 @@ private:
 };
 
 template <typename T>
-class Texture 
+class Texture
 {
 public:
     // Texture Interface
     virtual T Evaluate(const SurfaceInteraction &) const = 0;
-    virtual ~Texture() {}
+    virtual ~Texture()
+    {
+    }
 };
 
 Float Lanczos(Float, Float tau = 2);
@@ -119,6 +131,6 @@ Float FBm(const Point3f &p, const Vector3f &dpdx, const Vector3f &dpdy,
 Float Turbulence(const Point3f &p, const Vector3f &dpdx, const Vector3f &dpdy,
                  Float omega, int octaves);
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_CORE_TEXTURE_H
+#endif // PBR_CORE_TEXTURE_H

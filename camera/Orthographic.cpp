@@ -16,7 +16,8 @@ Float OrthographicCamera::GenerateRay(const CameraSample &sample, Ray *ray) cons
     Point3f pCamera = RasterToCamera(pFilm);
     *ray = Ray(pCamera, Vector3f(0, 0, 1));
     // Modify ray for depth of field
-    if (lensRadius > 0) {
+    if (lensRadius > 0)
+    {
         // Sample point on lens
         Point2f pLens = lensRadius * ConcentricSampleDisk(sample.pLens);
 
@@ -75,7 +76,9 @@ Float OrthographicCamera::GenerateRayDifferential(const CameraSample &sample, Ra
         pFocus = pCamera + dyCamera + (ft * Vector3f(0, 0, 1));
         ray->ryOrigin = Point3f(pLens.x, pLens.y, 0);
         ray->ryDirection = Normalize(pFocus - ray->ryOrigin);
-    } else {
+    }
+    else
+    {
         ray->rxOrigin = ray->o + dxCamera;
         ray->ryOrigin = ray->o + dyCamera;
         ray->rxDirection = ray->ryDirection = ray->d;
@@ -91,13 +94,15 @@ OrthographicCamera *CreateOrthographicCamera(const int RasterWidth, const int Ra
 {
     float frame = (float)RasterWidth / (float)RasterHeight;
     Bounds2f screen;
-    if (frame > 1.f) {
+    if (frame > 1.f)
+    {
         screen.pMin.x = -frame;
         screen.pMax.x = frame;
         screen.pMin.y = -1.f;
         screen.pMax.y = 1.f;
     }
-    else {
+    else
+    {
         screen.pMin.x = -1.f;
         screen.pMax.x = 1.f;
         screen.pMin.y = -1.f / frame;
@@ -112,11 +117,11 @@ OrthographicCamera *CreateOrthographicCamera(const int RasterWidth, const int Ra
         screen.pMin.y *= ScreenScale;
         screen.pMax.y *= ScreenScale;
     }
-    
+
 
     float lensradius = 0.0f;
     float focaldistance = 0.0f;
     return new OrthographicCamera(RasterWidth, RasterHeight, cam2world, screen, lensradius, focaldistance);
 }
 
-}  // namespace pbr
+} // namespace pbr

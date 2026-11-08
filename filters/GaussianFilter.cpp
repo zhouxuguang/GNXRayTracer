@@ -11,4 +11,4 @@ Float GaussianFilter::Evaluate(const Point2f &p) const
 }
 
 
-}  // namespace pbr
+} // namespace pbr

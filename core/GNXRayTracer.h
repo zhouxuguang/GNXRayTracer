@@ -22,31 +22,32 @@
 
 
 // debug-only checking.  not executed in NDEBUG mode.
-#define DCHECK(condition) 
-#define DCHECK_EQ(val1, val2) 
-#define DCHECK_NE(val1, val2) 
-#define DCHECK_LE(val1, val2) 
-#define DCHECK_LT(val1, val2) 
-#define DCHECK_GE(val1, val2) 
-#define DCHECK_GT(val1, val2) 
-#define DCHECK_NOTNULL(val) 
-#define DCHECK_STREQ(str1, str2) 
-#define DCHECK_STRCASEEQ(str1, str2) 
-#define DCHECK_STRNE(str1, str2) 
-#define DCHECK_STRCASENE(str1, str2) 
+#define DCHECK(condition)
+#define DCHECK_EQ(val1, val2)
+#define DCHECK_NE(val1, val2)
+#define DCHECK_LE(val1, val2)
+#define DCHECK_LT(val1, val2)
+#define DCHECK_GE(val1, val2)
+#define DCHECK_GT(val1, val2)
+#define DCHECK_NOTNULL(val)
+#define DCHECK_STREQ(str1, str2)
+#define DCHECK_STRCASEEQ(str1, str2)
+#define DCHECK_STRNE(str1, str2)
+#define DCHECK_STRCASENE(str1, str2)
 
-#define CHECK(condition) 
-#define CHECK_EQ(val1, val2) 
-#define CHECK_NE(val1, val2) 
-#define CHECK_LE(val1, val2) 
-#define CHECK_LT(val1, val2) 
-#define CHECK_GE(val1, val2) 
-#define CHECK_GT(val1, val2) 
+#define CHECK(condition)
+#define CHECK_EQ(val1, val2)
+#define CHECK_NE(val1, val2)
+#define CHECK_LE(val1, val2)
+#define CHECK_LT(val1, val2)
+#define CHECK_GE(val1, val2)
+#define CHECK_GT(val1, val2)
 
 // Global Macros
-#define ALLOCA(TYPE, COUNT) (TYPE *) alloca((COUNT) * sizeof(TYPE))
+#define ALLOCA(TYPE, COUNT) (TYPE *)alloca((COUNT) * sizeof(TYPE))
 
-namespace pbr {
+namespace pbr
+{
 
 // Global Forward Declarations
 class Scene;
@@ -80,9 +81,9 @@ class CoefficientSpectrum;
 class RGBSpectrum;
 class SampledSpectrum;
 #ifdef PBR_SAMPLED_SPECTRUM
-  typedef SampledSpectrum Spectrum;
+typedef SampledSpectrum Spectrum;
 #else
-  typedef RGBSpectrum Spectrum;
+typedef RGBSpectrum Spectrum;
 #endif
 class Camera;
 struct CameraSample;
@@ -111,10 +112,10 @@ class AreaLight;
 struct Distribution1D;
 class Distribution2D;
 #ifdef FLOAT_AS_DOUBLE
-  typedef double Float;
+typedef double Float;
 #else
-  typedef float Float;
-#endif  // FLOAT_AS_DOUBLE
+typedef float Float;
+#endif // FLOAT_AS_DOUBLE
 class RNG;
 class ProgressReporter;
 
@@ -122,13 +123,13 @@ template <typename T, int logBlockSize = 2>
 class BlockedArray;
 
 #ifndef PBR_L1_CACHE_LINE_SIZE
-  #define PBR_L1_CACHE_LINE_SIZE 64
+#define PBR_L1_CACHE_LINE_SIZE 64
 #endif
 
 #ifdef _WIN32
-    #define PBR_HAVE__ALIGNED_MALLOC
+#define PBR_HAVE__ALIGNED_MALLOC
 #else
-    #define PBR_HAVE_POSIX_MEMALIGN
+#define PBR_HAVE_POSIX_MEMALIGN
 #endif
 
 
@@ -179,8 +180,10 @@ inline double BitsToFloat(uint64_t ui)
 inline float NextFloatUp(float v)
 {
     // Handle infinity and negative zero for _NextFloatUp()_
-    if (std::isinf(v) && v > 0.) return v;
-    if (v == -0.f) v = 0.f;
+    if (std::isinf(v) && v > 0.)
+        return v;
+    if (v == -0.f)
+        v = 0.f;
 
     // Advance _v_ to next higher float
     uint32_t ui = FloatToBits(v);
@@ -194,8 +197,10 @@ inline float NextFloatUp(float v)
 inline float NextFloatDown(float v)
 {
     // Handle infinity and positive zero for _NextFloatDown()_
-    if (std::isinf(v) && v < 0.) return v;
-    if (v == 0.f) v = -0.f;
+    if (std::isinf(v) && v < 0.)
+        return v;
+    if (v == 0.f)
+        v = -0.f;
     uint32_t ui = FloatToBits(v);
     if (v > 0)
         --ui;
@@ -206,8 +211,10 @@ inline float NextFloatDown(float v)
 
 inline double NextFloatUp(double v, int delta = 1)
 {
-    if (std::isinf(v) && v > 0.) return v;
-    if (v == -0.f) v = 0.f;
+    if (std::isinf(v) && v > 0.)
+        return v;
+    if (v == -0.f)
+        v = 0.f;
     uint64_t ui = FloatToBits(v);
     if (v >= 0.)
         ui += delta;
@@ -218,8 +225,10 @@ inline double NextFloatUp(double v, int delta = 1)
 
 inline double NextFloatDown(double v, int delta = 1)
 {
-    if (std::isinf(v) && v < 0.) return v;
-    if (v == 0.f) v = -0.f;
+    if (std::isinf(v) && v < 0.)
+        return v;
+    if (v == 0.f)
+        v = -0.f;
     uint64_t ui = FloatToBits(v);
     if (v > 0.)
         ui -= delta;
@@ -252,29 +261,40 @@ inline Float Mod(Float a, Float b)
     return std::fmod(a, b);
 }
 
-inline Float Radians(Float deg) { return (Pi / 180) * deg; }
+inline Float Radians(Float deg)
+{
+    return (Pi / 180) * deg;
+}
 
-inline Float Degrees(Float rad) { return (180 / Pi) * rad; }
+inline Float Degrees(Float rad)
+{
+    return (180 / Pi) * rad;
+}
 
-inline Float Log2(Float x) {
+inline Float Log2(Float x)
+{
     const Float invLog2 = 1.442695040888963387004650940071;
     return std::log(x) * invLog2;
 }
 
-inline int Log2Int(uint32_t v) 
+inline int Log2Int(uint32_t v)
 {
 #if defined(_MSC_VER)
     unsigned long lz = 0;
-    if (_BitScanReverse(&lz, v)) return lz;
+    if (_BitScanReverse(&lz, v))
+        return lz;
     return 0;
 #else
     return 31 - __builtin_clz(v);
 #endif
 }
 
-inline int Log2Int(int32_t v) { return Log2Int((uint32_t)v); }
+inline int Log2Int(int32_t v)
+{
+    return Log2Int((uint32_t)v);
+}
 
-inline int Log2Int(uint64_t v) 
+inline int Log2Int(uint64_t v)
 {
 #if defined(_MSC_VER)
     unsigned long lz = 0;
@@ -287,19 +307,24 @@ inline int Log2Int(uint64_t v)
         _BitScanReverse(&lz, v & 0xffffffff);
 #endif // _WIN64
     return lz;
-#else  // _MSC_VER
+#else // _MSC_VER
     return 63 - __builtin_clzll(v);
 #endif
 }
 
-inline int Log2Int(int64_t v) { return Log2Int((uint64_t)v); }
+inline int Log2Int(int64_t v)
+{
+    return Log2Int((uint64_t)v);
+}
 
 template <typename T>
-inline constexpr bool IsPowerOf2(T v) {
+inline constexpr bool IsPowerOf2(T v)
+{
     return v && !(v & (v - 1));
 }
 
-inline int32_t RoundUpPow2(int32_t v) {
+inline int32_t RoundUpPow2(int32_t v)
+{
     v--;
     v |= v >> 1;
     v |= v >> 2;
@@ -309,7 +334,8 @@ inline int32_t RoundUpPow2(int32_t v) {
     return v + 1;
 }
 
-inline int64_t RoundUpPow2(int64_t v) {
+inline int64_t RoundUpPow2(int64_t v)
+{
     v--;
     v |= v >> 1;
     v |= v >> 2;
@@ -334,22 +360,29 @@ inline int CountTrailingZeros(uint32_t v)
 }
 
 template <typename Predicate>
-int FindInterval(int size, const Predicate &pred) {
+int FindInterval(int size, const Predicate &pred)
+{
     int first = 0, len = size;
-    while (len > 0) {
+    while (len > 0)
+    {
         int half = len >> 1, middle = first + half;
         // Bisect range based on value of _pred_ at _middle_
-        if (pred(middle)) {
+        if (pred(middle))
+        {
             first = middle + 1;
             len -= half + 1;
-        } else
+        }
+        else
             len = half;
     }
     return Clamp(first - 1, 0, size - 2);
 }
 
 //线性插值
-inline Float Lerp(Float t, Float v1, Float v2) { return (1 - t) * v1 + t * v2; }
+inline Float Lerp(Float t, Float v1, Float v2)
+{
+    return (1 - t) * v1 + t * v2;
+}
 
 inline Float gamma(int n)
 {
@@ -359,18 +392,20 @@ inline Float gamma(int n)
 //伽马矫正
 inline Float GammaCorrect(Float value)
 {
-    if (value <= 0.0031308f) return 12.92f * value;
+    if (value <= 0.0031308f)
+        return 12.92f * value;
     return 1.055f * std::pow(value, (Float)(1.f / 2.4f)) - 0.055f;
 }
 
 //伽马反矫正
 inline Float InverseGammaCorrect(Float value)
 {
-    if (value <= 0.04045f) return value * 1.f / 12.92f;
+    if (value <= 0.04045f)
+        return value * 1.f / 12.92f;
     return std::pow((value + 0.055f) * 1.f / 1.055f, (Float)2.4f);
 }
 
-inline Float Erf(Float x) 
+inline Float Erf(Float x)
 {
     // constants
     Float a1 = 0.254829592f;
@@ -382,7 +417,8 @@ inline Float Erf(Float x)
 
     // Save the sign of x
     int sign = 1;
-    if (x < 0) sign = -1;
+    if (x < 0)
+        sign = -1;
     x = std::abs(x);
 
     // A&S formula 7.1.26
@@ -394,12 +430,13 @@ inline Float Erf(Float x)
     return sign * y;
 }
 
-inline Float ErfInv(Float x) 
+inline Float ErfInv(Float x)
 {
     Float w, p;
     x = Clamp(x, -.99999f, .99999f);
     w = -std::log((1 - x) * (1 + x));
-    if (w < 5) {
+    if (w < 5)
+    {
         w = w - 2.5f;
         p = 2.81022636e-08f;
         p = 3.43273939e-07f + p * w;
@@ -411,7 +448,8 @@ inline Float ErfInv(Float x)
         p = 0.246640727f + p * w;
         p = 1.50140941f + p * w;
     }
-    else {
+    else
+    {
         w = std::sqrt(w) - 3;
         p = -0.000200214257f;
         p = 0.000100950558f + p * w;
@@ -426,6 +464,6 @@ inline Float ErfInv(Float x)
     return p * x;
 }
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  //
+#endif //

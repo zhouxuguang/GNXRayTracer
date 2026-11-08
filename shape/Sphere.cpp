@@ -10,18 +10,10 @@ Bounds3f Sphere::ObjectBound() const
                     Point3f(radius, radius, radius));
 }
 
-float Sphere::Area() const { return 4 * Pi * radius * radius; }
-
-
-
+float Sphere::Area() const
+{
+    return 4 * Pi * radius * radius;
 }
 
 
-
-
-
-
-
-
-
-
+}

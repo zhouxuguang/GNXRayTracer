@@ -5,7 +5,7 @@
 #include "core/Sampling.h"
 #include "3rd/stb_image.h"
 
-namespace pbr 
+namespace pbr
 {
 
 // InfiniteAreaLight Method Definitions
@@ -17,10 +17,11 @@ InfiniteAreaLight::InfiniteAreaLight(const Transform &LightToWorld,
     // Read texel data from _texmap_ and initialize _Lmap_
     Point2i resolution;
 
-    float* data = nullptr;
-    RGBSpectrum* data_s = nullptr;
+    float *data = nullptr;
+    RGBSpectrum *data_s = nullptr;
 
-    if (texmap != "") {
+    if (texmap != "")
+    {
         //texels = ReadImage(texmap, &resolution);
         /*if (texels)
             for (int i = 0; i < resolution.x * resolution.y; ++i)
@@ -29,15 +30,17 @@ InfiniteAreaLight::InfiniteAreaLight(const Transform &LightToWorld,
         int imageWidth, imageHeight, nrComponents;
         data = stbi_loadf(texmap.c_str(), &imageWidth, &imageHeight, &nrComponents, 0);
         data_s = new RGBSpectrum[imageWidth * imageHeight];
-        for (int j = 0; j < imageHeight; j++) {
-            for (int i = 0; i < imageWidth; i++) {
+        for (int j = 0; j < imageHeight; j++)
+        {
+            for (int i = 0; i < imageWidth; i++)
+            {
                 RGBSpectrum r;
                 r[0] = data[(i + j * imageWidth) * nrComponents + 0];
-                r[0] = L[0] * r[0];// *r[0];
+                r[0] = L[0] * r[0]; // *r[0];
                 r[1] = data[(i + j * imageWidth) * nrComponents + 1];
-                r[1] = L[1] * r[1];// *r[1];
+                r[1] = L[1] * r[1]; // *r[1];
                 r[2] = data[(i + j * imageWidth) * nrComponents + 2];
-                r[2] = L[2] * r[2];// *r[2];
+                r[2] = L[2] * r[2]; // *r[2];
                 data_s[i + j * imageWidth] = r * Sqrt(r);
             }
         }
@@ -49,10 +52,11 @@ InfiniteAreaLight::InfiniteAreaLight(const Transform &LightToWorld,
     {
         free(data);
     }
-    
+
     std::unique_ptr<RGBSpectrum[]> texels(data_s);
 
-    if (!texels) {
+    if (!texels)
+    {
         resolution.x = resolution.y = 1;
         texels = std::unique_ptr<RGBSpectrum[]>(new RGBSpectrum[1]);
         texels[0] = L.ToRGBSpectrum();
@@ -69,7 +73,7 @@ InfiniteAreaLight::InfiniteAreaLight(const Transform &LightToWorld,
     {
         Float vp = (v + .5f) / (Float)height;
         Float sinTheta = std::sin(Pi * (v + .5f) / height);
-        for (int u = 0; u < width; ++u) 
+        for (int u = 0; u < width; ++u)
         {
             Float up = (u + .5f) / (Float)width;
             img[u + v * width] = Lmap->Lookup(Point2f(up, vp), fwidth).y();
@@ -81,14 +85,14 @@ InfiniteAreaLight::InfiniteAreaLight(const Transform &LightToWorld,
     distribution.reset(new Distribution2D(img.get(), width, height));
 }
 
-Spectrum InfiniteAreaLight::Power() const 
+Spectrum InfiniteAreaLight::Power() const
 {
     return Pi * worldRadius * worldRadius *
            Spectrum(Lmap->Lookup(Point2f(.5f, .5f), .5f),
                     SpectrumType::Illuminant);
 }
 
-Spectrum InfiniteAreaLight::Le(const RayDifferential &ray) const 
+Spectrum InfiniteAreaLight::Le(const RayDifferential &ray) const
 {
     Vector3f w = Normalize(WorldToLight(ray.d));
     Point2f st(SphericalPhi(w) * Inv2Pi, SphericalTheta(w) * InvPi);
@@ -97,13 +101,14 @@ Spectrum InfiniteAreaLight::Le(const RayDifferential &ray) const
 
 Spectrum InfiniteAreaLight::Sample_Li(const Interaction &ref, const Point2f &u,
                                       Vector3f *wi, Float *pdf,
-                                      VisibilityTester *vis) const 
+                                      VisibilityTester *vis) const
 {
     //ProfilePhase _(Prof::LightSample);
     // Find $(u,v)$ sample coordinates in infinite light texture
     Float mapPdf;
     Point2f uv = distribution->SampleContinuous(u, &mapPdf);
-    if (mapPdf == 0) return Spectrum(0.f);
+    if (mapPdf == 0)
+        return Spectrum(0.f);
 
     // Convert infinite light sample point to direction
     Float theta = uv[1] * Pi, phi = uv[0] * 2 * Pi;
@@ -113,27 +118,29 @@ Spectrum InfiniteAreaLight::Sample_Li(const Interaction &ref, const Point2f &u,
 
     // Compute PDF for sampled infinite light direction
     *pdf = mapPdf / (2 * Pi * Pi * sinTheta);
-    if (sinTheta == 0) *pdf = 0;
+    if (sinTheta == 0)
+        *pdf = 0;
 
     // Return radiance value for infinite light direction
     *vis = VisibilityTester(ref, Interaction(ref.p + *wi * (2 * worldRadius), ref.time, mediumInterface));
     return Spectrum(Lmap->Lookup(uv), SpectrumType::Illuminant);
 }
 
-Float InfiniteAreaLight::Pdf_Li(const Interaction &, const Vector3f &w) const 
+Float InfiniteAreaLight::Pdf_Li(const Interaction &, const Vector3f &w) const
 {
     //ProfilePhase _(Prof::LightPdf);
     Vector3f wi = WorldToLight(w);
     Float theta = SphericalTheta(wi), phi = SphericalPhi(wi);
     Float sinTheta = std::sin(theta);
-    if (sinTheta == 0) return 0;
+    if (sinTheta == 0)
+        return 0;
     return distribution->Pdf(Point2f(phi * Inv2Pi, theta * InvPi)) /
            (2 * Pi * Pi * sinTheta);
 }
 
 Spectrum InfiniteAreaLight::Sample_Le(const Point2f &u1, const Point2f &u2,
                                       Float time, Ray *ray, Normal3f *nLight,
-                                      Float *pdfPos, Float *pdfDir) const 
+                                      Float *pdfPos, Float *pdfDir) const
 {
     //ProfilePhase _(Prof::LightSample);
     // Compute direction for infinite light sample ray
@@ -142,7 +149,8 @@ Spectrum InfiniteAreaLight::Sample_Le(const Point2f &u1, const Point2f &u2,
     // Find $(u,v)$ sample coordinates in infinite light texture
     Float mapPdf;
     Point2f uv = distribution->SampleContinuous(u, &mapPdf);
-    if (mapPdf == 0) return Spectrum(0.f);
+    if (mapPdf == 0)
+        return Spectrum(0.f);
     Float theta = uv[1] * Pi, phi = uv[0] * 2.f * Pi;
     Float cosTheta = std::cos(theta), sinTheta = std::sin(theta);
     Float sinPhi = std::sin(phi), cosPhi = std::cos(phi);
@@ -163,7 +171,7 @@ Spectrum InfiniteAreaLight::Sample_Le(const Point2f &u1, const Point2f &u2,
 }
 
 void InfiniteAreaLight::Pdf_Le(const Ray &ray, const Normal3f &, Float *pdfPos,
-                               Float *pdfDir) const 
+                               Float *pdfDir) const
 {
     //ProfilePhase _(Prof::LightPdf);
     Vector3f d = -WorldToLight(ray.d);
@@ -174,4 +182,4 @@ void InfiniteAreaLight::Pdf_Le(const Ray &ray, const Normal3f &, Float *pdfPos,
     *pdfPos = 1 / (Pi * worldRadius * worldRadius);
 }
 
-}  // namespace pbr
+} // namespace pbr

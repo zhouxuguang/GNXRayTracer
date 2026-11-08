@@ -34,7 +34,8 @@ Quaternion::Quaternion(const Transform &t)
 {
     const Matrix4x4 &m = t.m;
     Float trace = m.m[0][0] + m.m[1][1] + m.m[2][2];
-    if (trace > 0.f) {
+    if (trace > 0.f)
+    {
         // Compute w from matrix trace, then xyz
         // 4w^2 = m[0][0] + m[1][1] + m[2][2] + m[3][3] (but m[3][3] == 1)
         Float s = std::sqrt(trace + 1.0f);
@@ -43,18 +44,23 @@ Quaternion::Quaternion(const Transform &t)
         v.x = (m.m[2][1] - m.m[1][2]) * s;
         v.y = (m.m[0][2] - m.m[2][0]) * s;
         v.z = (m.m[1][0] - m.m[0][1]) * s;
-    } else {
+    }
+    else
+    {
         // Compute largest of $x$, $y$, or $z$, then remaining components
         const int nxt[3] = {1, 2, 0};
         Float q[3];
         int i = 0;
-        if (m.m[1][1] > m.m[0][0]) i = 1;
-        if (m.m[2][2] > m.m[i][i]) i = 2;
+        if (m.m[1][1] > m.m[0][0])
+            i = 1;
+        if (m.m[2][2] > m.m[i][i])
+            i = 2;
         int j = nxt[i];
         int k = nxt[j];
         Float s = std::sqrt((m.m[i][i] - (m.m[j][j] + m.m[k][k])) + 1.0f);
         q[i] = s * 0.5f;
-        if (s != 0.f) s = 0.5f / s;
+        if (s != 0.f)
+            s = 0.5f / s;
         w = (m.m[k][j] - m.m[j][k]) * s;
         q[j] = (m.m[j][i] + m.m[i][j]) * s;
         q[k] = (m.m[k][i] + m.m[i][k]) * s;
@@ -69,7 +75,8 @@ Quaternion Slerp(Float t, const Quaternion &q1, const Quaternion &q2)
     Float cosTheta = Dot(q1, q2);
     if (cosTheta > .9995f)
         return Normalize((1 - t) * q1 + t * q2);
-    else {
+    else
+    {
         Float theta = std::acos(Clamp(cosTheta, -1, 1));
         Float thetap = theta * t;
         Quaternion qperp = Normalize(q2 - q1 * cosTheta);
@@ -77,4 +84,4 @@ Quaternion Slerp(Float t, const Quaternion &q1, const Quaternion &q2)
     }
 }
 
-}  // namespace pbr
+} // namespace pbr

@@ -15,13 +15,15 @@ public:
     // Filter Interface
     virtual ~Filter();
     Filter(const Vector2f &radius)
-        : radius(radius), invRadius(Vector2f(1 / radius.x, 1 / radius.y)) {}
+        : radius(radius), invRadius(Vector2f(1 / radius.x, 1 / radius.y))
+    {
+    }
     virtual Float Evaluate(const Point2f &p) const = 0;
 
     // Filter Public Data
     const Vector2f radius, invRadius;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_CORE_FILTER_H
+#endif // PBR_CORE_FILTER_H

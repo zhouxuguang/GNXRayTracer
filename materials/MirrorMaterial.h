@@ -19,7 +19,7 @@ public:
         Kr = r;
         bumpMap = bump;
     }
-    
+
     void ComputeScatteringFunctions(SurfaceInteraction *si, MemoryArena &arena,
                                     TransportMode mode,
                                     bool allowMultipleLobes) const;
@@ -30,6 +30,6 @@ private:
     std::shared_ptr<Texture<Float>> bumpMap;
 };
 
-}  // namespace pbrt
+} // namespace pbrt
 
-#endif  // PBRT_MATERIALS_MIRROR_H
+#endif // PBRT_MATERIALS_MIRROR_H

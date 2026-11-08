@@ -18,7 +18,9 @@ public:
     PointLight(const Transform &LightToWorld, const MediumInterface &mediumInterface, const Spectrum &I)
         : Light((int)LightFlags::DeltaPosition, LightToWorld, mediumInterface),
           pLight(LightToWorld(Point3f(0, 0, 0))),
-          I(I) {}
+          I(I)
+    {
+    }
     Spectrum Sample_Li(const Interaction &ref, const Point2f &u, Vector3f *wi,
                        Float *pdf, VisibilityTester *vis) const;
     Spectrum Power() const;
@@ -35,6 +37,6 @@ private:
     const Spectrum I;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_LIGHTS_POINT_H
+#endif // PBR_LIGHTS_POINT_H

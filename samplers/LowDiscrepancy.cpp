@@ -356,11 +356,13 @@ uint32_t CMaxMinDist[17][32] = {
 
 // Low Discrepancy Static Functions
 template <int base>
-inline static Float RadicalInverseSpecialized(uint64_t a) {
+inline static Float RadicalInverseSpecialized(uint64_t a)
+{
     const Float invBase = (Float)1 / (Float)base;
     uint64_t reversedDigits = 0;
     Float invBaseN = 1;
-    while (a) {
+    while (a)
+    {
         uint64_t next = a / base;
         uint64_t digit = a - next * base;
         reversedDigits = reversedDigits * base + digit;
@@ -373,11 +375,13 @@ inline static Float RadicalInverseSpecialized(uint64_t a) {
 
 template <int base>
 inline static Float
-ScrambledRadicalInverseSpecialized(const uint16_t *perm, uint64_t a) {
+ScrambledRadicalInverseSpecialized(const uint16_t *perm, uint64_t a)
+{
     const Float invBase = (Float)1 / (Float)base;
     uint64_t reversedDigits = 0;
     Float invBaseN = 1;
-    while (a) {
+    while (a)
+    {
         uint64_t next = a / base;
         uint64_t digit = a - next * base;
         CHECK_LT(perm[digit], base);
@@ -393,8 +397,10 @@ ScrambledRadicalInverseSpecialized(const uint16_t *perm, uint64_t a) {
 }
 
 // Low Discrepancy Function Definitions
-Float RadicalInverse(int baseIndex, uint64_t a) {
-    switch (baseIndex) {
+Float RadicalInverse(int baseIndex, uint64_t a)
+{
+    switch (baseIndex)
+    {
     case 0:
     // Compute base-2 radical inverse
 #ifndef PBR_HAVE_HEX_FP_CONSTANTS
@@ -2456,14 +2462,16 @@ Float RadicalInverse(int baseIndex, uint64_t a) {
     }
 }
 
-std::vector<uint16_t> ComputeRadicalInversePermutations(RNG &rng) {
+std::vector<uint16_t> ComputeRadicalInversePermutations(RNG &rng)
+{
     std::vector<uint16_t> perms;
     // Allocate space in _perms_ for radical inverse permutations
     int permArraySize = 0;
     for (int i = 0; i < PrimeTableSize; ++i) permArraySize += Primes[i];
     perms.resize(permArraySize);
     uint16_t *p = &perms[0];
-    for (int i = 0; i < PrimeTableSize; ++i) {
+    for (int i = 0; i < PrimeTableSize; ++i)
+    {
         // Generate random permutation for $i$th prime base
         for (int j = 0; j < Primes[i]; ++j) p[j] = j;
         Shuffle(p, Primes[i], 1, rng);
@@ -2472,8 +2480,10 @@ std::vector<uint16_t> ComputeRadicalInversePermutations(RNG &rng) {
     return perms;
 }
 
-Float ScrambledRadicalInverse(int baseIndex, uint64_t a, const uint16_t *perm) {
-    switch (baseIndex) {
+Float ScrambledRadicalInverse(int baseIndex, uint64_t a, const uint16_t *perm)
+{
+    switch (baseIndex)
+    {
     case 0:
         return ScrambledRadicalInverseSpecialized<2>(perm, a);
     case 1:

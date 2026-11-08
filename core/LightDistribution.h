@@ -89,7 +89,8 @@ private:
     // constructor). During rendering, the table is allocated without
     // locks, using atomic operations. (See the Lookup() method
     // implementation for details.)
-    struct HashEntry {
+    struct HashEntry
+    {
         std::atomic<uint64_t> packedPos;
         std::atomic<Distribution1D *> distribution;
     };
@@ -97,6 +98,6 @@ private:
     size_t hashTableSize;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
-#endif  // PBR_CORE_LIGHTDISTRIBUTION_H
+#endif // PBR_CORE_LIGHTDISTRIBUTION_H

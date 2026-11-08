@@ -7,85 +7,85 @@
 #include "camera/Perspective.h"
 
 Renderer::Renderer(int w, int h)
-	: mViewportWidth(w), 
-	mViewportHeight(h)
+    : mViewportWidth(w),
+      mViewportHeight(h)
 {
-	mCurrentPixelIndex = 0;
+    mCurrentPixelIndex = 0;
 
-	// 相机位于原点、朝 +Z 观察，与课程第3讲一致
-	pbr::Vector3f up(0.f, 1.f, 0.f);
-	pbr::Point3f eye(0.f, 0.f, 0.f), look(0.f, 0.f, 1.f);
-	// Inverse 是 Transform 的友元函数，只能通过 ADL 找到
-	pbr::Transform worldToCamera = pbr::LookAt(eye, look, up);
-	mCameraToWorld = Inverse(worldToCamera);
-	pbr::AnimatedTransform cameraMotion(&mCameraToWorld, 0.f, &mCameraToWorld, 1.f);
-	mCamera = std::shared_ptr<const pbr::Camera>(
-		pbr::CreatePerspectiveCamera(mViewportWidth, mViewportHeight, cameraMotion));
+    // 相机位于原点、朝 +Z 观察，与课程第3讲一致
+    pbr::Vector3f up(0.f, 1.f, 0.f);
+    pbr::Point3f eye(0.f, 0.f, 0.f), look(0.f, 0.f, 1.f);
+    // Inverse 是 Transform 的友元函数，只能通过 ADL 找到
+    pbr::Transform worldToCamera = pbr::LookAt(eye, look, up);
+    mCameraToWorld = Inverse(worldToCamera);
+    pbr::AnimatedTransform cameraMotion(&mCameraToWorld, 0.f, &mCameraToWorld, 1.f);
+    mCamera = std::shared_ptr<const pbr::Camera>(
+        pbr::CreatePerspectiveCamera(mViewportWidth, mViewportHeight, cameraMotion));
 }
 
 void Renderer::Run()
 {
-	struct mfb_window* window = mfb_open_ex("GNXRaytracer", mViewportWidth, mViewportHeight, MFB_WF_RESIZABLE);
-	if (window == NULL)
-		return;
+    struct mfb_window *window = mfb_open_ex("GNXRaytracer", mViewportWidth, mViewportHeight, MFB_WF_RESIZABLE);
+    if (window == NULL)
+        return;
 
-	// 屏幕/窗口/视口上每个像素点的颜色，以32位整数表示，格式为0xAARRGGBB（Alpha, Red, Green, Blue）
-	mBuffer = (uint32_t*)malloc(mViewportWidth * mViewportHeight * 4);
+    // 屏幕/窗口/视口上每个像素点的颜色，以32位整数表示，格式为0xAARRGGBB（Alpha, Red, Green, Blue）
+    mBuffer = (uint32_t *)malloc(mViewportWidth * mViewportHeight * 4);
 
-	int numThreads = std::thread::hardware_concurrency();
-	std::vector<std::thread> renderThreads(numThreads);
-	for (int i = 0; i < numThreads; i++) 
-	{
-		renderThreads[i] = std::thread(&Renderer::RunRenderThread, this);
-		renderThreads[i].detach();
-	}
-
-	// Present：
-	mfb_update_state state;
-	do 
+    int numThreads = std::thread::hardware_concurrency();
+    std::vector<std::thread> renderThreads(numThreads);
+    for (int i = 0; i < numThreads; i++)
     {
-		state = mfb_update_ex(window, mBuffer, mViewportWidth, mViewportHeight);
+        renderThreads[i] = std::thread(&Renderer::RunRenderThread, this);
+        renderThreads[i].detach();
+    }
 
-		if (state != MFB_STATE_OK)
-			break;
+    // Present：
+    mfb_update_state state;
+    do
+    {
+        state = mfb_update_ex(window, mBuffer, mViewportWidth, mViewportHeight);
 
-	} while (mfb_wait_sync(window));
+        if (state != MFB_STATE_OK)
+            break;
 
-	free(mBuffer);
-	mBuffer = NULL;
-	window = NULL;
+    } while (mfb_wait_sync(window));
+
+    free(mBuffer);
+    mBuffer = NULL;
+    window = NULL;
 }
 
 pbr::Spectrum Renderer::RenderPixel(int x, int y)
 {
-	pbr::Spectrum color(0.f);
-	if (!mCamera)
-		return color;
+    pbr::Spectrum color(0.f);
+    if (!mCamera)
+        return color;
 
-	// 工程相机使用连续胶片坐标，取像素中心；pLens / time 预留给景深与快门
-	pbr::CameraSample sample;
-	sample.pFilm = pbr::Point2f(x + 0.5f, y + 0.5f);
-	sample.pLens = pbr::Point2f(0.f, 0.f);
-	sample.time = 0.f;
+    // 工程相机使用连续胶片坐标，取像素中心；pLens / time 预留给景深与快门
+    pbr::CameraSample sample;
+    sample.pFilm = pbr::Point2f(x + 0.5f, y + 0.5f);
+    sample.pLens = pbr::Point2f(0.f, 0.f);
+    sample.time = 0.f;
 
-	pbr::Ray ray;
-	mCamera->GenerateRay(sample, &ray);
+    pbr::Ray ray;
+    mCamera->GenerateRay(sample, &ray);
 
-	// 把 ray.d 从 [-1, 1] 映射到 [0, 1] 显示（课程第3讲的方向可视化）
-	color[0] = ray.d.x * 0.5f + 0.5f;
-	color[1] = ray.d.y * 0.5f + 0.5f;
-	color[2] = ray.d.z * 0.5f + 0.5f;
+    // 把 ray.d 从 [-1, 1] 映射到 [0, 1] 显示（课程第3讲的方向可视化）
+    color[0] = ray.d.x * 0.5f + 0.5f;
+    color[1] = ray.d.y * 0.5f + 0.5f;
+    color[2] = ray.d.z * 0.5f + 0.5f;
 
-	//std::this_thread::sleep_for(std::chrono::milliseconds(1)); // 模拟渲染每个像素点需要的时间
+    //std::this_thread::sleep_for(std::chrono::milliseconds(1)); // 模拟渲染每个像素点需要的时间
 
-	return color;
+    return color;
 }
 
 // 渲染线程的入口函数，负责执行渲染循环
 void Renderer::RunRenderThread()
 {
-	while (true)
-	{
+    while (true)
+    {
         // 读取当前屏幕的下一个像素
         int pixelIndex = mCurrentPixelIndex.fetch_add(1);
         if (pixelIndex >= mViewportWidth * mViewportHeight)
@@ -99,5 +99,5 @@ void Renderer::RunRenderThread()
         uint32_t g = std::round(color[1] * 255.0f);
         uint32_t b = std::round(color[2] * 255.0f);
         mBuffer[y * mViewportWidth + x] = (r << 16) | (g << 8) | (b);
-	}
+    }
 }

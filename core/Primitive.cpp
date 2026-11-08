@@ -3,11 +3,13 @@
 #include "Interaction.h"
 
 
-namespace pbr 
+namespace pbr
 {
 static long long primitiveMemory = 0;
 
-Primitive::~Primitive() {}
+Primitive::~Primitive()
+{
+}
 
 // GeometricPrimitive Method Definitions
 GeometricPrimitive::GeometricPrimitive(const std::shared_ptr<Shape> &shape,
@@ -15,14 +17,17 @@ GeometricPrimitive::GeometricPrimitive(const std::shared_ptr<Shape> &shape,
                                        const std::shared_ptr<AreaLight> &areaLight,
                                        const MediumInterface &mediumInterface)
     : shape(shape),
-    material(material),
-    areaLight(areaLight),
-    mediumInterface(mediumInterface)
+      material(material),
+      areaLight(areaLight),
+      mediumInterface(mediumInterface)
 {
     primitiveMemory += sizeof(*this);
 }
 
-Bounds3f GeometricPrimitive::WorldBound() const { return shape->WorldBound(); }
+Bounds3f GeometricPrimitive::WorldBound() const
+{
+    return shape->WorldBound();
+}
 
 bool GeometricPrimitive::IntersectP(const Ray &r) const
 {
@@ -32,7 +37,8 @@ bool GeometricPrimitive::IntersectP(const Ray &r) const
 bool GeometricPrimitive::Intersect(const Ray &r, SurfaceInteraction *isect) const
 {
     Float tHit;
-    if (!shape->Intersect(r, &tHit, isect)) return false;
+    if (!shape->Intersect(r, &tHit, isect))
+        return false;
     r.tMax = tHit;
     isect->primitive = this;
     CHECK_GE(Dot(isect->n, isect->shading.n), 0.);
@@ -56,10 +62,10 @@ const Material *GeometricPrimitive::GetMaterial() const
 }
 
 void GeometricPrimitive::ComputeScatteringFunctions(
-                                                    SurfaceInteraction *isect,
-                                                    MemoryArena &arena,
-                                                    TransportMode mode,
-                                                    bool allowMultipleLobes) const
+    SurfaceInteraction *isect,
+    MemoryArena &arena,
+    TransportMode mode,
+    bool allowMultipleLobes) const
 {
     //ProfilePhase p(Prof::ComputeScatteringFuncs);
     if (material)
@@ -83,7 +89,8 @@ bool TransformedPrimitive::Intersect(const Ray &r, SurfaceInteraction *isect) co
     Transform InterpolatedPrimToWorld;
     PrimitiveToWorld.Interpolate(r.time, &InterpolatedPrimToWorld);
     Ray ray = Inverse(InterpolatedPrimToWorld)(r);
-    if (!primitive->Intersect(ray, isect)) return false;
+    if (!primitive->Intersect(ray, isect))
+        return false;
     r.tMax = ray.tMax;
     // Transform instance's intersection data to world space
     if (!InterpolatedPrimToWorld.IsIdentity())
@@ -107,9 +114,9 @@ const AreaLight *Aggregate::GetAreaLight() const
 
 const Material *Aggregate::GetMaterial() const
 {
-//    LOG(FATAL) <<
-//        "Aggregate::GetMaterial() method"
-//        "called; should have gone to GeometricPrimitive";
+    //    LOG(FATAL) <<
+    //        "Aggregate::GetMaterial() method"
+    //        "called; should have gone to GeometricPrimitive";
     return nullptr;
 }
 
@@ -119,9 +126,9 @@ void Aggregate::ComputeScatteringFunctions(SurfaceInteraction *isect,
                                            bool allowMultipleLobes) const
 {
     //Aggregate类无需实现具体的计算散射的函数，因为只是个加速结构
-//    LOG(FATAL) <<
-//        "Aggregate::ComputeScatteringFunctions() method"
-//        "called; should have gone to GeometricPrimitive";
+    //    LOG(FATAL) <<
+    //        "Aggregate::ComputeScatteringFunctions() method"
+    //        "called; should have gone to GeometricPrimitive";
 }
 
 }

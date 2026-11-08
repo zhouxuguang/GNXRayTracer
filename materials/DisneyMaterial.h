@@ -49,7 +49,9 @@ public:
           thin(thin),
           flatness(flatness),
           diffTrans(diffTrans),
-          bumpMap(bumpMap) {}
+          bumpMap(bumpMap)
+    {
+    }
     void ComputeScatteringFunctions(SurfaceInteraction *si, MemoryArena &arena,
                                     TransportMode mode,
                                     bool allowMultipleLobes) const;
@@ -66,6 +68,6 @@ private:
     std::shared_ptr<Texture<Float>> flatness, diffTrans, bumpMap;
 };
 
-}  // namespace pbr
+} // namespace pbr
 
 #endif /* PBR_DISNEY_MATERIAL_INCLUDE_H */
