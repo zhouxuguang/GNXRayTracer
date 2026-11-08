@@ -200,6 +200,8 @@ ui/DisplayWidget.h
 ui/DisplayWidget.cpp
 ui/RenderThread.h
 ui/RenderThread.cpp
+ui/Renderer.h
+ui/Renderer.cpp
 ui/InteractionDockWidget.h
 ui/InteractionDockWidget.cpp
 ui/MainWindow.h
