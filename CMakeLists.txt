@@ -26,6 +26,10 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 
+set(MINIFB_BUILD_EXAMPLES OFF CACHE BOOL "Build minifb example programs" FORCE)
+set(MINIFB_BUILD_VERSION_INFO OFF CACHE BOOL "Build version info utility" FORCE)
+add_subdirectory(thirdparty/minifb)
+
 set(CORE_FILES
 core/GNXRayTracer.h
 core/Camera.h 
@@ -233,6 +237,7 @@ add_executable(GNXRayTracer
 
 #target_link_libraries(GNXRayTracer PRIVATE "-framework CoreVideo" "-framework QuartzCore")
 target_link_libraries(GNXRayTracer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(GNXRayTracer PRIVATE minifb)
 
 set_target_properties(GNXRayTracer PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
