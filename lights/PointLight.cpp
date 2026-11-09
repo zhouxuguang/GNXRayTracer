@@ -17,7 +17,7 @@ Spectrum PointLight::Sample_Li(const Interaction &ref, const Point2f &u,
     *wi = Normalize(mPosition - ref.p);
     *pdf = 1.f;
     *vis = VisibilityTester(ref, Interaction(mPosition, ref.time, mediumInterface));
-    return mIntensity / DistanceSquared(mPosition, ref.p);
+    return mIntensity * DistanceAttenuation(DistanceSquared(mPosition, ref.p), mAttenuations);
 }
 
 Spectrum PointLight::Power() const

@@ -5,12 +5,24 @@
 #include "Scene.h"
 #include "Sampling.h"
 #include "Spectrum.h"
+#include <algorithm>
+#include <cmath>
 
 namespace pbr
 {
 
 static int numLights = 0;
 static int numAreaLights = 0;
+
+Float DistanceAttenuation(Float distanceSquared, const Vector3f &attenuations)
+{
+    Float distance = std::sqrt(std::max((Float)0, distanceSquared));
+    Float denominator = attenuations.z + attenuations.y * distance +
+                        attenuations.x * distanceSquared;
+    if (denominator <= 0)
+        return 0;
+    return 1 / denominator;
+}
 
 // Light Method Definitions
 Light::Light(int flags, const Transform &LightToWorld,

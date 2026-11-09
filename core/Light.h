@@ -26,6 +26,10 @@ inline bool IsDeltaLight(int flags)
            flags & (int)LightFlags::DeltaDirection;
 }
 
+// 三参数距离衰减 f(d) = 1 / (C + B*d + A*d^2)
+// attenuations.x = A(二次项), .y = B(一次项), .z = C(常数项)。
+Float DistanceAttenuation(Float distanceSquared, const Vector3f& attenuations);
+
 // Light Declarations
 class Light
 {

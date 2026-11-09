@@ -9,12 +9,14 @@ namespace pbr
 
 SpotLight::SpotLight(const Transform &LightToWorld,
                      const MediumInterface &mediumInterface, const Spectrum &intensity,
-                     Float totalWidth, Float falloffStart)
+                     Float totalWidth, Float falloffStart,
+                     const Vector3f &attenuations)
     : Light((int)LightFlags::DeltaPosition, LightToWorld, mediumInterface),
       mPosition(LightToWorld(Point3f(0, 0, 0))),
       mIntensity(intensity),
-      cosTotalWidth(std::cos(Radians(totalWidth))),
-      cosFalloffStart(std::cos(Radians(falloffStart)))
+      mCosTotalWidth(std::cos(Radians(totalWidth))),
+      mCosFalloffStart(std::cos(Radians(falloffStart))),
+      mAttenuations(attenuations)
 {
 }
 
@@ -25,25 +27,26 @@ Spectrum SpotLight::Sample_Li(const Interaction &ref, const Point2f &u,
     *wi = Normalize(mPosition - ref.p);
     *pdf = 1.f;
     *vis = VisibilityTester(ref, Interaction(mPosition, ref.time, mediumInterface));
-    return mIntensity * Falloff(-*wi) / DistanceSquared(mPosition, ref.p); //计算最终的光强
+    return mIntensity * Falloff(-*wi) *
+           DistanceAttenuation(DistanceSquared(mPosition, ref.p), mAttenuations); //计算最终的光强
 }
 
 Float SpotLight::Falloff(const Vector3f &w) const
 {
     Vector3f wl = Normalize(WorldToLight(w));
     Float cosTheta = wl.z;
-    if (cosTheta < cosTotalWidth)
+    if (cosTheta < mCosTotalWidth)
         return 0;
-    if (cosTheta >= cosFalloffStart)
+    if (cosTheta >= mCosFalloffStart)
         return 1;
     // Compute falloff inside spotlight cone
-    Float delta = (cosTheta - cosTotalWidth) / (cosFalloffStart - cosTotalWidth); //当前角度对比整个变化角度的比例
+    Float delta = (cosTheta - mCosTotalWidth) / (mCosFalloffStart - mCosTotalWidth); //当前角度对比整个变化角度的比例
     return (delta * delta) * (delta * delta);
 }
 
 Spectrum SpotLight::Power() const
 {
-    return mIntensity * 2 * Pi * (1 - .5f * (cosFalloffStart + cosTotalWidth));
+    return mIntensity * 2 * Pi * (1 - .5f * (mCosFalloffStart + mCosTotalWidth));
 }
 
 Float SpotLight::Pdf_Li(const Interaction &, const Vector3f &) const
@@ -55,19 +58,19 @@ Spectrum SpotLight::Sample_Le(const Point2f &u1, const Point2f &u2, Float time,
                               Ray *ray, Normal3f *nLight, Float *pdfPos,
                               Float *pdfDir) const
 {
-    Vector3f w = UniformSampleCone(u1, cosTotalWidth);
+    Vector3f w = UniformSampleCone(u1, mCosTotalWidth);
     *ray = Ray(mPosition, LightToWorld(w), Infinity, time, mediumInterface.inside);
     *nLight = (Normal3f)ray->d;
     *pdfPos = 1;
-    *pdfDir = UniformConePdf(cosTotalWidth);
+    *pdfDir = UniformConePdf(mCosTotalWidth);
     return mIntensity * Falloff(ray->d);
 }
 
 void SpotLight::Pdf_Le(const Ray &ray, const Normal3f &, Float *pdfPos, Float *pdfDir) const
 {
     *pdfPos = 0;
-    *pdfDir = (CosTheta(WorldToLight(ray.d)) >= cosTotalWidth)
-                  ? UniformConePdf(cosTotalWidth)
+    *pdfDir = (CosTheta(WorldToLight(ray.d)) >= mCosTotalWidth)
+                  ? UniformConePdf(mCosTotalWidth)
                   : 0;
 }
 
