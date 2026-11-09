@@ -6,8 +6,6 @@
 //
 
 #include "ModelList.h"
-#include "DebugText.h"
-#include "FrameBuffer.h"
 #include "shape/plyRead.h"
 #include "MaterialList.h"
 #include "lights/DiffuseAreaLight.h"

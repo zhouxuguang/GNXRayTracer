@@ -22,8 +22,6 @@ link_directories(thirdparty/libomp/lib/mac)
 
 set (CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -g")
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 
 set(MINIFB_BUILD_EXAMPLES OFF CACHE BOOL "Build minifb example programs" FORCE)
@@ -185,33 +183,15 @@ media/GridDensityMedium.cpp
 )
 source_group("media" FILES ${MEDIA_FILES})
 
-set(UI_FILES 
+set(UI_FILES
 ui/FrameBuffer.h
 ui/FrameBuffer.cpp
-ui/DebugText.h
-ui/DebugText.cpp
-ui/DataTreeWidget.h
-ui/DataTreeWidget.cpp
-ui/RenderStatus.h
-ui/RenderStatus.cpp
-ui/IMAGraphicsView.h
-ui/IMAGraphicsView.cpp
-ui/DisplayWidget.h
-ui/DisplayWidget.cpp
-ui/RenderThread.h
-ui/RenderThread.cpp
 ui/Renderer.h
 ui/Renderer.cpp
-ui/InteractionDockWidget.h
-ui/InteractionDockWidget.cpp
-ui/MainWindow.h
-ui/MainWindow.cpp
 ui/MaterialList.h
 ui/MaterialList.cpp
 ui/ModelList.h
 ui/ModelList.cpp
-ui/Utils.h
-ui/Utils.cpp
 ui/main.cpp
 )
 source_group("ui" FILES ${UI_FILES})
@@ -238,7 +218,6 @@ add_executable(GNXRayTracer
         )
 
 #target_link_libraries(GNXRayTracer PRIVATE "-framework CoreVideo" "-framework QuartzCore")
-target_link_libraries(GNXRayTracer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(GNXRayTracer PRIVATE minifb)
 
 set_target_properties(GNXRayTracer PROPERTIES
@@ -248,9 +227,10 @@ set_target_properties(GNXRayTracer PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
-set_target_properties(GNXRayTracer PROPERTIES AUTOUIC ON)
-set_target_properties(GNXRayTracer PROPERTIES AUTOMOC ON)
-set_target_properties(GNXRayTracer PROPERTIES AUTORCC ON)
+# ui/main.cpp uses standard main(); without Qt there is no qtmain.lib to supply WinMain.
+if(MSVC)
+    set_property(TARGET GNXRayTracer APPEND_STRING PROPERTY LINK_FLAGS " /ENTRY:mainCRTStartup")
+endif()
 
 if (APPLE)
 
@@ -271,9 +251,6 @@ elseif(WIN32)
     endif()
 endif (APPLE)
 
-file(GLOB Icons ${CMAKE_CURRENT_SOURCE_DIR}/Icons/*.png)
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${Icons} DESTINATION ${EXECUTABLE_OUTPUT_PATH}/Icons/)
 
 install(TARGETS GNXRayTracer
     BUNDLE DESTINATION .
