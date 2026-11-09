@@ -2,7 +2,7 @@
 
 // textures/imagemap.cpp*
 #include "ImageTexture.h"
-#include "3rd/stb_image.h"
+#include "thirdparty/stb/stb_image.h"
 
 namespace pbr
 {

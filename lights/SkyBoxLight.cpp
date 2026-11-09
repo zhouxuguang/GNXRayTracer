@@ -2,7 +2,7 @@
 #include <cmath>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "3rd/stb_image.h"
+#include "thirdparty/stb/stb_image.h"
 
 namespace pbr
 {

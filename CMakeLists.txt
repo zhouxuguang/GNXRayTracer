@@ -196,10 +196,11 @@ ui/main.cpp
 )
 source_group("ui" FILES ${UI_FILES})
 
-set(3RD_FILES 
-3rd/stb_image.h
+set(STB_FILES 
+thirdparty/stb/stb_image.h
+thirdparty/stb/stb_image_write.h
 )
-source_group("3rd" FILES ${3RD_FILES})
+source_group("stb" FILES ${STB_FILES})
 
 add_executable(GNXRayTracer
              ${CORE_FILES}
@@ -214,7 +215,7 @@ add_executable(GNXRayTracer
              ${INTEGRATORS_FILES}
              ${MEDIA_FILES}
              ${UI_FILES}
-             ${3RD_FILES}
+             ${STB_FILES}
         )
 
 #target_link_libraries(GNXRayTracer PRIVATE "-framework CoreVideo" "-framework QuartzCore")
