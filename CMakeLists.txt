@@ -188,10 +188,6 @@ source_group("media" FILES ${MEDIA_FILES})
 set(UI_FILES
 ui/Renderer.h
 ui/Renderer.cpp
-ui/MaterialList.h
-ui/MaterialList.cpp
-ui/ModelList.h
-ui/ModelList.cpp
 ui/main.cpp
 )
 source_group("ui" FILES ${UI_FILES})
@@ -225,7 +221,6 @@ add_executable(GNXRayTracer
              ${TINYXML2_FILES}
         )
 
-#target_link_libraries(GNXRayTracer PRIVATE "-framework CoreVideo" "-framework QuartzCore")
 target_link_libraries(GNXRayTracer PRIVATE minifb)
 
 set_target_properties(GNXRayTracer PROPERTIES
@@ -246,12 +241,7 @@ if (APPLE)
     set_xcode_property(GNXRayTracer CLANG_CXX_LIBRARY "libc++")
     set_xcode_property(GNXRayTracer GCC_ENABLE_CPP_EXCEPTIONS NO)
     set_xcode_property(GNXRayTracer GCC_ENABLE_CPP_RTTI NO)
-
-    set (CMAKE_C_FLAGS "-Xclang -fopenmp")
-    set (CMAKE_CXX_FLAGS "-Xclang -fopenmp")
-    target_link_libraries(GNXRayTracer PRIVATE omp)
 elseif(WIN32)
-    target_link_libraries(GNXRayTracer PRIVATE OpenMP::OpenMP_CXX)
     if(MSVC AND MSVC_VERSION GREATER_EQUAL 1913)
         #target_compile_options(GNXRayTracer ${visibility} "-Zc:__cplusplus" "-permissive-")
         #target_compile_options(GNXRayTracer ${visibility} "/utf-8 /Zc:__cplusplus")
