@@ -10,15 +10,14 @@
 namespace pbr
 {
 
-// PointLight Declarations
+// 点光源
 class PointLight : public Light
 {
 public:
-    // PointLight Public Methods
-    PointLight(const Transform &LightToWorld, const MediumInterface &mediumInterface, const Spectrum &I)
+    PointLight(const Transform &LightToWorld, const MediumInterface &mediumInterface, const Spectrum &intensity)
         : Light((int)LightFlags::DeltaPosition, LightToWorld, mediumInterface),
-          pLight(LightToWorld(Point3f(0, 0, 0))),
-          I(I)
+          mPosition(LightToWorld(Point3f(0, 0, 0))),
+          mIntensity(intensity)
     {
     }
     Spectrum Sample_Li(const Interaction &ref, const Point2f &u, Vector3f *wi,
@@ -28,13 +27,11 @@ public:
     Spectrum Sample_Le(const Point2f &u1, const Point2f &u2, Float time,
                        Ray *ray, Normal3f *nLight, Float *pdfPos,
                        Float *pdfDir) const;
-    void Pdf_Le(const Ray &, const Normal3f &, Float *pdfPos,
-                Float *pdfDir) const;
+    void Pdf_Le(const Ray &, const Normal3f &, Float *pdfPos, Float *pdfDir) const;
 
 private:
-    // PointLight Private Data
-    const Point3f pLight;
-    const Spectrum I;
+    const Point3f mPosition;      //光源位置
+    const Spectrum mIntensity;    //光源强度
 };
 
 } // namespace pbr

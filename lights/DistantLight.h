@@ -10,12 +10,11 @@
 namespace pbr
 {
 
-// DistantLight Declarations
+// 平行光（无限远光源）
 class DistantLight : public Light
 {
 public:
-    // DistantLight Public Methods
-    DistantLight(const Transform &LightToWorld, const Spectrum &L, const Vector3f &w);
+    DistantLight(const Transform &LightToWorld, const Spectrum &intensity, const Vector3f &direction);
 
     void Preprocess(const Scene &scene)
     {
@@ -28,13 +27,11 @@ public:
     Spectrum Sample_Le(const Point2f &u1, const Point2f &u2, Float time,
                        Ray *ray, Normal3f *nLight, Float *pdfPos,
                        Float *pdfDir) const;
-    void Pdf_Le(const Ray &, const Normal3f &, Float *pdfPos,
-                Float *pdfDir) const;
+    void Pdf_Le(const Ray &, const Normal3f &, Float *pdfPos, Float *pdfDir) const;
 
 private:
-    // DistantLight Private Data
-    const Spectrum L;
-    const Vector3f wLight;
+    const Spectrum mIntensity;
+    const Vector3f mDirection; // 光线方向，单位向量
     Point3f worldCenter;
     Float worldRadius;
 };
