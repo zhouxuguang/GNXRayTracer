@@ -186,8 +186,6 @@ media/GridDensityMedium.cpp
 source_group("media" FILES ${MEDIA_FILES})
 
 set(UI_FILES
-ui/FrameBuffer.h
-ui/FrameBuffer.cpp
 ui/Renderer.h
 ui/Renderer.cpp
 ui/MaterialList.h

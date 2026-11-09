@@ -24,9 +24,8 @@ public:
     DirectLightingIntegrator(LightStrategy strategy, int maxDepth,
                              std::shared_ptr<const Camera> camera,
                              std::shared_ptr<Sampler> sampler,
-                             const Bounds2i &pixelBounds,
-                             FrameBuffer *pFrameBuffer)
-        : SamplerIntegrator(camera, sampler, pixelBounds, pFrameBuffer),
+                             const Bounds2i &pixelBounds)
+        : SamplerIntegrator(camera, sampler, pixelBounds),
           strategy(strategy),
           maxDepth(maxDepth)
     {

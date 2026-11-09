@@ -23,9 +23,9 @@ std::string ResolveScenePath(int argc, char *argv[])
     }
 
     const char *candidates[] = {
-        "Resources/scenes/scene05_1.xml",
-        "../Resources/scenes/scene05_1.xml",
-        "../../Resources/scenes/scene05_1.xml",
+        "Resources/scenes/scene05_2.xml",
+        "../Resources/scenes/scene05_2.xml",
+        "../../Resources/scenes/scene05_2.xml",
     };
     for (const char *candidate : candidates)
     {

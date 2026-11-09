@@ -10,7 +10,6 @@
 #include "Reflection.h"
 #include "Light.h"
 #include "MIPMap.h"
-#include "ui/FrameBuffer.h"
 #include <omp.h>
 
 namespace pbr
@@ -255,12 +254,11 @@ std::unique_ptr<Distribution1D> ComputeLightPowerDistribution(const Scene &scene
 //#define TEST_MIPMAP
 
 // SamplerIntegrator Method Definitions
-void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
+void SamplerIntegrator::Render(const Scene &scene, double &timeConsume,
+                               const PixelResultCallback &onPixel)
 {
     Preprocess(scene, *sampler);
     double start = omp_get_wtime(); //渲染开始时间
-
-    m_FrameBuffer->renderCountIncrease();
 
     std::shared_ptr<MIPMap<Spectrum>> mp = nullptr;
 
@@ -337,14 +335,11 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume)
                 }
             }
 
-            m_FrameBuffer->update_f_u_c(i, j, 0, colObj[0]);
-            m_FrameBuffer->update_f_u_c(i, j, 1, colObj[1]);
-            m_FrameBuffer->update_f_u_c(i, j, 2, colObj[2]);
-            m_FrameBuffer->set_uc(i, j, 3, 255);
+            // 积分器不持有帧缓冲，像素结果交给调用方处理
+            if (onPixel)
+                onPixel(i, j, colObj);
         }
     }
-
-    //m_FrameBuffer->saveToFile("/Users/zhouxuguang/work/source/GNXRayTracer/test.png");
 
     // 结束时间
     double end = omp_get_wtime();

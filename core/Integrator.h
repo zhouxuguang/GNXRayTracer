@@ -8,10 +8,13 @@
 //#include "light.h"
 //#include "reflection.h"
 #include "Sampler.h"
-#include "ui/FrameBuffer.h"
+#include <functional>
 
 namespace pbr
 {
+
+// 积分器只计算辐射亮度，像素结果通过回调交给调用方决定如何输出
+using PixelResultCallback = std::function<void(int x, int y, const Spectrum &L)>;
 
 // Integrator Declarations
 class Integrator
@@ -19,7 +22,8 @@ class Integrator
 public:
     // Integrator Interface
     virtual ~Integrator();
-    virtual void Render(const Scene &scene, double &timeConsume) = 0;
+    virtual void Render(const Scene &scene, double &timeConsume,
+                        const PixelResultCallback &onPixel = nullptr) = 0;
 };
 
 Spectrum UniformSampleAllLights(const Interaction &it, const Scene &scene,
@@ -45,8 +49,8 @@ public:
     // SamplerIntegrator Public Methods
     SamplerIntegrator(std::shared_ptr<const Camera> camera,
                       std::shared_ptr<Sampler> sampler,
-                      const Bounds2i &pixelBounds, FrameBuffer *pFrameBuffer)
-        : camera(camera), sampler(sampler), pixelBounds(pixelBounds), m_FrameBuffer(pFrameBuffer)
+                      const Bounds2i &pixelBounds)
+        : camera(camera), sampler(sampler), pixelBounds(pixelBounds)
     {
     }
 
@@ -56,7 +60,8 @@ public:
     }
 
     //渲染函数
-    void Render(const Scene &scene, double &timeConsume);
+    void Render(const Scene &scene, double &timeConsume,
+                const PixelResultCallback &onPixel = nullptr) override;
 
     virtual Spectrum Li(const RayDifferential &ray, const Scene &scene,
                         Sampler &sampler, MemoryArena &arena,
@@ -80,7 +85,6 @@ private:
     // SamplerIntegrator Private Data
     std::shared_ptr<Sampler> sampler;
     const Bounds2i pixelBounds;
-    FrameBuffer *m_FrameBuffer;
 };
 
 } // namespace pbr

@@ -21,9 +21,9 @@ static int pathLength = 0;
 PathIntegrator::PathIntegrator(int maxDepth,
                                std::shared_ptr<const Camera> camera,
                                std::shared_ptr<Sampler> sampler,
-                               const Bounds2i &pixelBounds, FrameBuffer *pFrameBuffer, Float rrThreshold,
+                               const Bounds2i &pixelBounds, Float rrThreshold,
                                const std::string &lightSampleStrategy)
-    : SamplerIntegrator(camera, sampler, pixelBounds, pFrameBuffer),
+    : SamplerIntegrator(camera, sampler, pixelBounds),
       maxDepth(maxDepth),
       rrThreshold(rrThreshold),
       lightSampleStrategy(lightSampleStrategy)

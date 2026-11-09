@@ -16,7 +16,7 @@ public:
     // PathIntegrator Public Methods
     PathIntegrator(int maxDepth, std::shared_ptr<const Camera> camera,
                    std::shared_ptr<Sampler> sampler,
-                   const Bounds2i &pixelBounds, FrameBuffer *pFrameBuffer, Float rrThreshold = 1,
+                   const Bounds2i &pixelBounds, Float rrThreshold = 1,
                    const std::string &lightSampleStrategy = "spatial");
 
     void Preprocess(const Scene &scene, Sampler &sampler);
