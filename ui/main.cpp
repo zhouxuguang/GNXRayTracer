@@ -5,6 +5,36 @@
 
 namespace
 {
+bool FileExists(const char *path)
+{
+    FILE *f = std::fopen(path, "r");
+    if (!f)
+        return false;
+    std::fclose(f);
+    return true;
+}
+
+std::string ResolveScenePath(int argc, char *argv[])
+{
+    for (int i = 1; i + 1 < argc; ++i)
+    {
+        if (std::string(argv[i]) == "--scene")
+            return argv[i + 1];
+    }
+
+    const char *candidates[] = {
+        "Resources/scenes/scene05_1.xml",
+        "../Resources/scenes/scene05_1.xml",
+        "../../Resources/scenes/scene05_1.xml",
+    };
+    for (const char *candidate : candidates)
+    {
+        if (FileExists(candidate))
+            return candidate;
+    }
+    return candidates[0];
+}
+
 int CheckScene(const char *scenePath, const char *reportPath)
 {
     FILE *report = reportPath ? std::fopen(reportPath, "w") : stderr;
@@ -47,6 +77,15 @@ int CheckScene(const char *scenePath, const char *reportPath)
         pbr::SurfaceInteraction unused;
         std::fprintf(report, "backward ray hit: %d\n",
                      loaded.scene->Intersect(backward, &unused) ? 1 : 0);
+
+        // 验证 RenderPixel 的法线着色输出（构造 Renderer 不会打开窗口）
+        Renderer probe(800, 600, scenePath);
+        pbr::Spectrum center = probe.RenderPixel(400, 300);
+        pbr::Spectrum corner = probe.RenderPixel(5, 5);
+        std::fprintf(report, "center pixel normal rgb: (%.3f, %.3f, %.3f)\n",
+                     center[0], center[1], center[2]);
+        std::fprintf(report, "corner pixel rgb: (%.3f, %.3f, %.3f)\n",
+                     corner[0], corner[1], corner[2]);
     }
 
     if (reportPath)
@@ -64,7 +103,8 @@ int main(int argc, char *argv[])
         return CheckScene(scenePath, reportPath);
     }
 
-    Renderer renderer(800, 600);
+    std::string scenePath = ResolveScenePath(argc, argv);
+    Renderer renderer(800, 600, scenePath.c_str());
     renderer.Run();
 
     return 0;

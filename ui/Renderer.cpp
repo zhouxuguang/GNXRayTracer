@@ -1,26 +1,36 @@
 #include "Renderer.h"
 #include <MiniFB.h>
 #include <cmath>
+#include <cstdio>
 #include <thread>
 #include <vector>
 
 #include "camera/Perspective.h"
+#include "core/SceneLoader.h"
 
-Renderer::Renderer(int w, int h)
+Renderer::Renderer(int w, int h, const char *filePath)
     : mViewportWidth(w),
       mViewportHeight(h)
 {
     mCurrentPixelIndex = 0;
 
-    // 相机位于原点、朝 +Z 观察，与课程第3讲一致
-    pbr::Vector3f up(0.f, 1.f, 0.f);
-    pbr::Point3f eye(0.f, 0.f, 0.f), look(0.f, 0.f, 1.f);
-    // Inverse 是 Transform 的友元函数，只能通过 ADL 找到
-    pbr::Transform worldToCamera = pbr::LookAt(eye, look, up);
+    pbr::LoadedScene loaded;
+    std::string error;
+    const char *path = filePath ? filePath : "";
+    if (!pbr::LoadSceneFromXml(path, loaded, &error) || !loaded.scene)
+    {
+        std::fprintf(stderr, "Failed to load scene '%s': %s\n", path, error.c_str());
+    }
+    mScene = loaded.scene;
+
+    // 使用 XML 中描述的相机：位置、朝向、视场角
+    const pbr::SceneCameraDesc &cam = loaded.camera;
+    pbr::Transform worldToCamera = pbr::LookAt(cam.position, cam.target, cam.up);
     mCameraToWorld = Inverse(worldToCamera);
     pbr::AnimatedTransform cameraMotion(&mCameraToWorld, 0.f, &mCameraToWorld, 1.f);
+
     mCamera = std::shared_ptr<const pbr::Camera>(
-        pbr::CreatePerspectiveCamera(mViewportWidth, mViewportHeight, cameraMotion));
+        pbr::CreatePerspectiveCamera(mViewportWidth, mViewportHeight, cameraMotion, cam.fov));
 }
 
 void Renderer::Run()
@@ -71,13 +81,23 @@ pbr::Spectrum Renderer::RenderPixel(int x, int y)
     pbr::Ray ray;
     mCamera->GenerateRay(sample, &ray);
 
-    // 把 ray.d 从 [-1, 1] 映射到 [0, 1] 显示（课程第3讲的方向可视化）
-    color[0] = ray.d.x * 0.5f + 0.5f;
-    color[1] = ray.d.y * 0.5f + 0.5f;
-    color[2] = ray.d.z * 0.5f + 0.5f;
+    // 场景未加载时回退到相机射线方向可视化，避免黑屏与空指针崩溃
+    if (!mScene)
+    {
+        color[0] = pbr::Clamp(ray.d.x * 0.5f + 0.5f, 0.f, 1.f);
+        color[1] = pbr::Clamp(ray.d.y * 0.5f + 0.5f, 0.f, 1.f);
+        color[2] = pbr::Clamp(ray.d.z * 0.5f + 0.5f, 0.f, 1.f);
+        return color;
+    }
 
-    //std::this_thread::sleep_for(std::chrono::milliseconds(1)); // 模拟渲染每个像素点需要的时间
+    pbr::SurfaceInteraction isect;
+    if (!mScene->Intersect(ray, &isect))
+        return color;
 
+    // 世界空间法线从 [-1, 1] 映射到 [0, 1] 显示；未命中保持黑色背景
+    color[0] = pbr::Clamp(isect.n.x * 0.5f + 0.5f, 0.f, 1.f);
+    color[1] = pbr::Clamp(isect.n.y * 0.5f + 0.5f, 0.f, 1.f);
+    color[2] = pbr::Clamp(isect.n.z * 0.5f + 0.5f, 0.f, 1.f);
     return color;
 }
 

@@ -109,7 +109,7 @@ Float PerspectiveCamera::GenerateRayDifferential(const CameraSample &sample, Ray
     return 1;
 }
 
-PerspectiveCamera *CreatePerspectiveCamera(const int RasterWidth, const int RasterHeight, const AnimatedTransform &cam2world)
+PerspectiveCamera *CreatePerspectiveCamera(const int RasterWidth, const int RasterHeight, const AnimatedTransform &cam2world, float fov)
 {
     float lensradius = 0.0f;
     float focaldistance = 3.0f;
@@ -129,8 +129,6 @@ PerspectiveCamera *CreatePerspectiveCamera(const int RasterWidth, const int Rast
         screen.pMin.y = -1.f / frame;
         screen.pMax.y = 1.f / frame;
     }
-    float fov = 90.0f;
-    float halffov = 45.0f;
     return new PerspectiveCamera(RasterWidth, RasterHeight, cam2world, screen, lensradius, focaldistance, fov);
 }
 

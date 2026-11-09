@@ -84,7 +84,7 @@ protected:
 class PerspectiveCamera;
 class OrthographicCamera;
 
-PerspectiveCamera *CreatePerspectiveCamera(const int RasterWidth, const int RasterHeight, const AnimatedTransform &cam2world);
+PerspectiveCamera *CreatePerspectiveCamera(const int RasterWidth, const int RasterHeight, const AnimatedTransform &cam2world, float fov = 90.0f);
 OrthographicCamera *CreateOrthographicCamera(const int RasterWidth, const int RasterHeight, const AnimatedTransform &cam2world);
 
 } // namespace pbr
