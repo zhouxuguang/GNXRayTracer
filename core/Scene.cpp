@@ -13,14 +13,14 @@ bool Scene::Intersect(const Ray &ray, SurfaceInteraction *isect) const
 {
     ++nIntersectionTests;
     DCHECK_NE(ray.d, Vector3f(0, 0, 0));
-    return aggregate->Intersect(ray, isect);
+    return mAggregate->Intersect(ray, isect);
 }
 
 bool Scene::IntersectP(const Ray &ray) const
 {
     ++nShadowTests;
     DCHECK_NE(ray.d, Vector3f(0, 0, 0));
-    return aggregate->IntersectP(ray);
+    return mAggregate->IntersectP(ray);
 }
 
 bool Scene::IntersectTr(Ray ray, Sampler &sampler, SurfaceInteraction *isect, Spectrum *Tr) const

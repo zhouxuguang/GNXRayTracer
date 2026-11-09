@@ -15,10 +15,10 @@ class Scene
 public:
     // Scene Public Methods
     Scene(std::shared_ptr<Primitive> aggregate, const std::vector<std::shared_ptr<Light>> &lights)
-        : aggregate(aggregate), lights(lights)
+        : mAggregate(aggregate), lights(lights)
     {
         // Scene Constructor Implementation
-        worldBound = aggregate->WorldBound();
+        mWorldBound = aggregate->WorldBound();
 
         for (const auto &light : lights)
         {
@@ -30,7 +30,7 @@ public:
 
     const Bounds3f &WorldBound() const
     {
-        return worldBound;
+        return mWorldBound;
     }
     bool Intersect(const Ray &ray, SurfaceInteraction *isect) const;
     bool IntersectP(const Ray &ray) const;
@@ -45,8 +45,8 @@ public:
 
 private:
     // Scene Private Data
-    std::shared_ptr<Primitive> aggregate;
-    Bounds3f worldBound;
+    std::shared_ptr<Primitive> mAggregate;   // 聚合结构，目前也就是BVH加速结构
+    Bounds3f mWorldBound;                    //世界范围
 };
 
 } // namespace pbr

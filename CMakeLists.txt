@@ -82,6 +82,8 @@ core/Transform.h
 core/Transform.cpp 
 core/UnitTest.h
 core/UnitTest.cpp
+core/SceneLoader.h
+core/SceneLoader.cpp
 )
 source_group("core" FILES ${CORE_FILES})
 
@@ -202,6 +204,12 @@ thirdparty/stb/stb_image_write.h
 )
 source_group("stb" FILES ${STB_FILES})
 
+set(TINYXML2_FILES
+thirdparty/tinyxml2/tinyxml2.h
+thirdparty/tinyxml2/tinyxml2.cpp
+)
+source_group("tinyxml2" FILES ${TINYXML2_FILES})
+
 add_executable(GNXRayTracer
              ${CORE_FILES}
              ${CAMERA_FILES}
@@ -216,6 +224,7 @@ add_executable(GNXRayTracer
              ${MEDIA_FILES}
              ${UI_FILES}
              ${STB_FILES}
+             ${TINYXML2_FILES}
         )
 
 #target_link_libraries(GNXRayTracer PRIVATE "-framework CoreVideo" "-framework QuartzCore")

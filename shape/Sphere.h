@@ -1,63 +1,31 @@
-#ifndef __PBR_SPHEREH__
-#define __PBR_SPHEREH__
+#ifndef PBR_SHAPES_SPHERE_H
+#define PBR_SHAPES_SPHERE_H
 
 #include "core/Shape.h"
 
 namespace pbr
 {
 
-// 球体定义
+// 球体（世界空间）
+// XML 场景加载器把 <Transform> 烘焙进 center 与 radius，
+// 因此这里不依赖外部的 ObjectToWorld / WorldToObject 变换。
 class Sphere : public Shape
 {
 public:
-    // Sphere Public Methods
-    Sphere(const Transform *ObjectToWorld, const Transform *WorldToObject,
-           bool reverseOrientation, float radius)
-        : Shape(ObjectToWorld, WorldToObject, reverseOrientation),
-          radius(radius)
-    {
-    }
-    Bounds3f ObjectBound() const;
-    bool Intersect(const Ray &ray, float *tHit, SurfaceInteraction *isect,
-                   bool testAlphaTexture) const;
-    bool IntersectP(const Ray &ray, bool testAlphaTexture) const;
-    float Area() const;
+    Sphere(Float radius, const Point3f &center = Point3f(0.f, 0.f, 0.f));
+
+    Bounds3f ObjectBound() const override;
+    bool Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
+                   bool testAlphaTexture = true) const override;
+    bool IntersectP(const Ray &ray, bool testAlphaTexture = true) const override;
+    Float Area() const override;
+    Interaction Sample(const Point2f &u, Float *pdf) const override;
 
 private:
-    // Sphere Private Data
-    const float radius;
+    Float radius;
+    Point3f center;
 };
 
-bool Sphere::Intersect(const Ray &r, float *tHit, SurfaceInteraction *isect, bool testAlphaTexture) const
-{
-    Point3f pHit;
-    // Transform _Ray_ to object space
-    Ray ray = (*WorldToObject)(r);
+} // namespace pbr
 
-    Vector3f oc = ray.o - Point3f(0.0f, 0.0f, 0.0f);
-    float a = Dot(ray.d, ray.d);
-    float b = 2.0 * Dot(oc, ray.d);
-    float c = Dot(oc, oc) - radius * radius;
-    float discriminant = b * b - 4 * a * c;
-
-    return (discriminant > 0);
-}
-
-bool Sphere::IntersectP(const Ray &r, bool testAlphaTexture) const
-{
-    Point3f pHit;
-    // Transform _Ray_ to object space
-    Ray ray = (*WorldToObject)(r);
-
-    Vector3f oc = ray.o - Point3f(0.0f, 0.0f, 0.0f);
-    float a = Dot(ray.d, ray.d);
-    float b = 2.0 * Dot(oc, ray.d);
-    float c = Dot(oc, oc) - radius * radius;
-    float discriminant = b * b - 4 * a * c;
-
-    return (discriminant > 0);
-}
-
-}
-
-#endif
+#endif // PBR_SHAPES_SPHERE_H
