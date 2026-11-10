@@ -9,11 +9,10 @@
 namespace pbr
 {
 
+// 相交结构体
 struct Interaction
 {
-    // Interaction Public Methods
-    Interaction()
-        : time(0)
+    Interaction() : time(0)
     {
     }
 
@@ -38,12 +37,14 @@ struct Interaction
     {
     }
 
+    // 产生新的ray，d是产生ray的方向
     Ray SpawnRay(const Vector3f &d) const
     {
         Point3f o = OffsetRayOrigin(p, pError, n, d);
         return Ray(o, d, Infinity, time, GetMedium(d));
     }
 
+    // 产生阴影ray，p2是光源上的采样点
     Ray SpawnRayTo(const Point3f &p2) const
     {
         Point3f origin = OffsetRayOrigin(p, pError, n, p2 - p);
@@ -51,6 +52,7 @@ struct Interaction
         return Ray(origin, d, 1 - ShadowEpsilon, time, GetMedium(d));
     }
 
+    // 从表面交点产生新的ray
     Ray SpawnRayTo(const Interaction &it) const
     {
         // 计算交点和光源点之间的射线，用于阴影检测
@@ -165,6 +167,5 @@ public:
 };
 
 }
-
 
 #endif // PBR_INTERACTION_CINDSFMG_H
