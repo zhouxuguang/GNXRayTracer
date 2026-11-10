@@ -26,6 +26,7 @@ struct LoadedScene
     SceneCameraDesc camera;
     std::size_t objectCount = 0;
     std::size_t primitiveCount = 0;
+    std::size_t lightCount = 0;
 };
 
 // 从 XML 文件构建 Scene：SceneObject -> Primitive -> BVHAccel -> Scene。

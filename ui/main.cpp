@@ -23,9 +23,9 @@ std::string ResolveScenePath(int argc, char *argv[])
     }
 
     const char *candidates[] = {
-        "Resources/scenes/scene05_2.xml",
-        "../Resources/scenes/scene05_2.xml",
-        "../../Resources/scenes/scene05_2.xml",
+        "Resources/scenes/scene07.xml",
+        "../Resources/scenes/scene07.xml",
+        "../../Resources/scenes/scene07.xml",
     };
     for (const char *candidate : candidates)
     {
@@ -56,6 +56,7 @@ int CheckScene(const char *scenePath, const char *reportPath)
         const pbr::Bounds3f &b = loaded.scene->WorldBound();
         std::fprintf(report, "objects: %zu\n", loaded.objectCount);
         std::fprintf(report, "primitives: %zu\n", loaded.primitiveCount);
+        std::fprintf(report, "lights: %zu\n", loaded.lightCount);
         std::fprintf(report, "bounds: (%.3f, %.3f, %.3f) .. (%.3f, %.3f, %.3f)\n",
                      b.pMin.x, b.pMin.y, b.pMin.z, b.pMax.x, b.pMax.y, b.pMax.z);
         std::fprintf(report, "camera fov: %.1f near: %.2f far: %.2f\n",
@@ -63,6 +64,21 @@ int CheckScene(const char *scenePath, const char *reportPath)
         std::fprintf(report, "camera pos: (%.3f, %.3f, %.3f) target: (%.3f, %.3f, %.3f)\n",
                      loaded.camera.position.x, loaded.camera.position.y, loaded.camera.position.z,
                      loaded.camera.target.x, loaded.camera.target.y, loaded.camera.target.z);
+
+        // 逐个调用 Sample_Li，验证灯光确实进入 Scene 且可用
+        pbr::Interaction ref;
+        ref.p = pbr::Point3f(0.f, 0.75f, 0.f);
+        for (std::size_t i = 0; i < loaded.scene->lights.size(); ++i)
+        {
+            pbr::Vector3f wi;
+            pbr::Float pdf = 0.f;
+            pbr::VisibilityTester vis;
+            pbr::Spectrum radiance = loaded.scene->lights[i]->Sample_Li(
+                ref, pbr::Point2f(0.f, 0.f), &wi, &pdf, &vis);
+            std::fprintf(report, "light[%zu] flags=%d L=(%.4f, %.4f, %.4f)\n",
+                         i, loaded.scene->lights[i]->flags,
+                         radiance[0], radiance[1], radiance[2]);
+        }
 
         pbr::Vector3f dir = pbr::Normalize(loaded.camera.target - loaded.camera.position);
         pbr::Ray primary(loaded.camera.position, dir);
@@ -98,7 +114,7 @@ int main(int argc, char *argv[])
 {
     if (argc >= 2 && std::string(argv[1]) == "--check-scene")
     {
-        const char *scenePath = argc >= 3 ? argv[2] : "Resources/scenes/scene05_1.xml";
+        const char *scenePath = argc >= 3 ? argv[2] : "Resources/scenes/scene07.xml";
         const char *reportPath = argc >= 4 ? argv[3] : nullptr;
         return CheckScene(scenePath, reportPath);
     }

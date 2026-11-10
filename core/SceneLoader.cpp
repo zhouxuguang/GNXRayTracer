@@ -1,10 +1,14 @@
 #include "SceneLoader.h"
 #include "thirdparty/tinyxml2/tinyxml2.h"
 #include "accelerator/BVHAccel.h"
+#include "lights/DistantLight.h"
+#include "lights/PointLight.h"
+#include "lights/SpotLight.h"
 #include "materials/MatteMaterial.h"
 #include "shape/Sphere.h"
 #include "shape/Triangle.h"
 #include "textures/ConstantTexture.h"
+#include <cmath>
 #include <cstdlib>
 #include <vector>
 
@@ -88,6 +92,65 @@ bool ReadScalar(const XMLElement *parent, const char *name, Float &out,
         return false;
     }
     out = values[0];
+    return true;
+}
+
+bool ReadRgb(const XMLElement *parent, const char *name, Spectrum &out,
+             std::string &error, bool required = true)
+{
+    const char *text = ChildText(parent, name);
+    if (!text)
+    {
+        if (required)
+            error = std::string("missing <") + name + ">";
+        return !required;
+    }
+    std::vector<Float> values;
+    if (!ParseNumbers(text, values) || values.size() < 3)
+    {
+        error = std::string("invalid <") + name + ">: " + text;
+        return false;
+    }
+    out = Spectrum(values[0]);
+    out[0] = values[0];
+    out[1] = values[1];
+    out[2] = values[2];
+    return true;
+}
+
+// <Attenuations> 的三个数按 (A 二次项, B 一次项, C 常数项) 读取，
+// 与 DistanceAttenuation 的 1/(C + B*d + A*d^2) 约定一致；缺省为 (1,0,0)。
+bool ReadAttenuations(const XMLElement *parent, Vector3f &out, std::string &error)
+{
+    out = Vector3f(1.f, 0.f, 0.f);
+    const char *text = ChildText(parent, "Attenuations");
+    if (!text)
+        return true;
+    std::vector<Float> values;
+    if (!ParseNumbers(text, values) || values.size() < 3)
+    {
+        error = std::string("invalid <Attenuations>: ") + text;
+        return false;
+    }
+    out = Vector3f(values[0], values[1], values[2]);
+    return true;
+}
+
+// 聚光灯在局部空间的 +Z 是光锥主轴；LookAt 返回 world->light，取逆后
+// 正好把局部 +Z 映射到 <Direction>，同时把原点平移到 <Position>。
+bool MakeSpotTransform(const Point3f &position, const Vector3f &direction,
+                       Transform &out, std::string &error)
+{
+    if (direction.LengthSquared() <= 0)
+    {
+        error = "<Direction> must be non-zero";
+        return false;
+    }
+    Vector3f dir = Normalize(direction);
+    Vector3f up(0.f, 1.f, 0.f);
+    if (std::abs(dir.y) > 0.999f)
+        up = Vector3f(1.f, 0.f, 0.f);
+    out = Inverse(LookAt(position, position + dir, up));
     return true;
 }
 
@@ -220,6 +283,85 @@ bool AppendObject(XMLElement *object, const std::shared_ptr<Material> &material,
     }
     return true;
 }
+
+bool AppendLights(XMLElement *lightNodes, std::vector<std::shared_ptr<Light>> &lights,
+                  std::string &error)
+{
+    for (XMLElement *node = lightNodes->FirstChildElement("PointLight"); node;
+         node = node->NextSiblingElement("PointLight"))
+    {
+        Vector3f position(0.f, 0.f, 0.f);
+        Vector3f attenuation(1.f, 0.f, 0.f);
+        Spectrum intensity;
+        if (!ReadTriple(node, "Position", position, error))
+            return false;
+        if (!ReadRgb(node, "Intensity", intensity, error))
+            return false;
+        if (!ReadAttenuations(node, attenuation, error))
+            return false;
+
+        Transform lightToWorld = Translate(position);
+        lights.push_back(std::make_shared<PointLight>(
+            lightToWorld, MediumInterface(), intensity, attenuation));
+    }
+
+    for (XMLElement *node = lightNodes->FirstChildElement("SpotLight"); node;
+         node = node->NextSiblingElement("SpotLight"))
+    {
+        Vector3f position(0.f, 0.f, 0.f);
+        Vector3f direction(0.f, 0.f, 1.f);
+        Vector3f attenuation(1.f, 0.f, 0.f);
+        Spectrum intensity;
+        Float innerAngle = 10.f;
+        Float outerAngle = 45.f;
+        if (!ReadTriple(node, "Position", position, error))
+            return false;
+        if (!ReadTriple(node, "Direction", direction, error))
+            return false;
+        if (!ReadRgb(node, "Intensity", intensity, error))
+            return false;
+        if (!ReadScalar(node, "InnerAngle", innerAngle, error, false))
+            return false;
+        if (!ReadScalar(node, "OuterAngle", outerAngle, error, false))
+            return false;
+        if (!ReadAttenuations(node, attenuation, error))
+            return false;
+        if (innerAngle <= 0 || outerAngle <= innerAngle || outerAngle >= 180)
+        {
+            error = "<SpotLight> requires 0 < InnerAngle < OuterAngle < 180";
+            return false;
+        }
+
+        Transform lightToWorld;
+        if (!MakeSpotTransform(Point3f(position.x, position.y, position.z),
+                               direction, lightToWorld, error))
+            return false;
+        // SpotLight 的 totalWidth 是光锥外角，falloffStart 是开始衰减的内角
+        lights.push_back(std::make_shared<SpotLight>(
+            lightToWorld, MediumInterface(), intensity, outerAngle, innerAngle,
+            attenuation));
+    }
+
+    for (XMLElement *node = lightNodes->FirstChildElement("DirectionalLight"); node;
+         node = node->NextSiblingElement("DirectionalLight"))
+    {
+        Vector3f direction(0.f, 0.f, 1.f);
+        Spectrum radiance;
+        if (!ReadTriple(node, "Direction", direction, error))
+            return false;
+        if (!ReadRgb(node, "Radiance", radiance, error))
+            return false;
+        if (direction.LengthSquared() <= 0)
+        {
+            error = "<DirectionalLight> direction must be non-zero";
+            return false;
+        }
+        // XML 的 <Direction> 是光线传播方向；Sample_Li 的 wi 指向光源，故取负
+        Vector3f toLight = -Normalize(direction);
+        lights.push_back(std::make_shared<DistantLight>(Identity(), radiance, toLight));
+    }
+    return true;
+}
 } // namespace
 
 bool LoadSceneFromXml(const std::string &filePath, LoadedScene &out, std::string *error)
@@ -283,10 +425,15 @@ bool LoadSceneFromXml(const std::string &filePath, LoadedScene &out, std::string
         return fail("scene contains no primitives: " + filePath);
 
     std::vector<std::shared_ptr<Light>> lights;
+    XMLElement *lightNodes = root->FirstChildElement("Lights");
+    if (lightNodes && !AppendLights(lightNodes, lights, detail))
+        return fail("<Lights>: " + detail);
+
     auto aggregate = std::make_shared<BVHAccel>(prims, 1, BVHAccel::SplitMethod::SAH);
     out.scene = std::make_shared<Scene>(aggregate, lights);
     out.objectCount = objectCount;
     out.primitiveCount = prims.size();
+    out.lightCount = lights.size();
     return true;
 }
 
