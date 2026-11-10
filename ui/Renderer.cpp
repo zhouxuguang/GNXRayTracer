@@ -119,9 +119,9 @@ void Renderer::RunRenderThread()
         int y = pixelIndex / mViewportWidth;
 
         pbr::Spectrum color = RenderPixel(x, y);
-        uint32_t r = std::round(color[0] * 255.0f);
-        uint32_t g = std::round(color[1] * 255.0f);
-        uint32_t b = std::round(color[2] * 255.0f);
+        uint32_t r = (uint32_t)pbr::Clamp(std::round(color[0] * 255.0f), 0.f, 255.f);
+        uint32_t g = (uint32_t)pbr::Clamp(std::round(color[1] * 255.0f), 0.f, 255.f);
+        uint32_t b = (uint32_t)pbr::Clamp(std::round(color[2] * 255.0f), 0.f, 255.f);
         mBuffer[y * mViewportWidth + x] = (r << 16) | (g << 8) | (b);
     }
 }
