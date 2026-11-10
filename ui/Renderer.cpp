@@ -81,6 +81,10 @@ pbr::Spectrum Renderer::RenderPixel(int x, int y)
     pbr::Ray ray;
     mCamera->GenerateRay(sample, &ray);
 
+    color = GetIrradiance(ray);
+
+    return color;
+
     // 场景未加载时回退到相机射线方向可视化，避免黑屏与空指针崩溃
     if (!mScene)
     {
@@ -120,4 +124,36 @@ void Renderer::RunRenderThread()
         uint32_t b = std::round(color[2] * 255.0f);
         mBuffer[y * mViewportWidth + x] = (r << 16) | (g << 8) | (b);
     }
+}
+
+pbr::Spectrum Renderer::GetIrradiance(const pbr::Ray& ray)
+{
+    pbr::Spectrum E = pbr::Spectrum(0.f);
+
+    pbr::SurfaceInteraction isect;
+    if (!mScene->Intersect(ray, &isect))
+    {
+        return E;
+    }
+
+    // 遍历各个光源，计算L
+    for (auto light : mScene->lights)
+    {
+        pbr::Point2f u;
+        pbr::Vector3f wi;
+        pbr::Float pdf;
+        pbr::VisibilityTester visibility;
+        pbr::Spectrum L = light->Sample_Li(isect, u, &wi, &pdf, &visibility);
+
+        // 生成阴影射线，判断当前着色点是否在阴影中
+        if (!visibility.Unoccluded(*mScene))
+        {
+            continue;
+        }
+
+        pbr::Float cosTheta = pbr::Dot(isect.shading.n, wi);
+
+        E += L * std::max(cosTheta, 0.0f);
+    }
+    return E;
 }

@@ -20,6 +20,8 @@ public:
 private:
     void RunRenderThread();
 
+    pbr::Spectrum GetIrradiance(const pbr::Ray& ray);
+
     int mViewportWidth = 800;
     int mViewportHeight = 600;
     uint32_t *mBuffer = nullptr;
