@@ -10,6 +10,7 @@
 #include "textures/ConstantTexture.h"
 #include <cmath>
 #include <cstdlib>
+#include <map>
 #include <vector>
 
 using namespace tinyxml2;
@@ -193,6 +194,21 @@ bool ReadTransform(const XMLElement *node, Transform &out, std::string &error)
     return true;
 }
 
+std::string TrimText(const char *text)
+{
+    if (!text)
+        return std::string();
+    std::string value(text);
+    const char *whitespace = " \t\r\n";
+    std::size_t begin = value.find_first_not_of(whitespace);
+    if (begin == std::string::npos)
+        return std::string();
+    std::size_t end = value.find_last_not_of(whitespace);
+    return value.substr(begin, end - begin + 1);
+}
+
+using MaterialMap = std::map<std::string, std::shared_ptr<Material>>;
+
 std::shared_ptr<Material> MakeDefaultMaterial()
 {
     auto kd = std::make_shared<ConstantTexture<Spectrum>>(Spectrum(0.8f));
@@ -201,9 +217,76 @@ std::shared_ptr<Material> MakeDefaultMaterial()
     return std::make_shared<MatteMaterial>(kd, sigma, bumpMap);
 }
 
-bool AppendObject(XMLElement *object, const std::shared_ptr<Material> &material,
+// 解析 <Materials> 下的具名材质，供 <SceneObject> 的 <Material> 按名称引用。
+bool AppendMaterials(XMLElement *materialNodes, MaterialMap &materials, std::string &error)
+{
+    for (XMLElement *node = materialNodes->FirstChildElement("Material"); node;
+         node = node->NextSiblingElement("Material"))
+    {
+        const std::string name = TrimText(ChildText(node, "Name"));
+        if (name.empty())
+        {
+            error = "<Material> requires a non-empty <Name>";
+            return false;
+        }
+        if (materials.find(name) != materials.end())
+        {
+            error = "duplicate material name: " + name;
+            return false;
+        }
+
+        const std::string type = TrimText(ChildText(node, "Type"));
+        if (type.empty())
+        {
+            error = "material '" + name + "' requires a <Type>";
+            return false;
+        }
+
+        if (type == "Lambert")
+        {
+            Spectrum albedo;
+            if (!ReadRgb(node, "Albedo", albedo, error))
+            {
+                error = "material '" + name + "': " + error;
+                return false;
+            }
+            materials[name] = std::make_shared<MatteMaterial>(
+                std::make_shared<ConstantTexture<Spectrum>>(albedo),
+                std::make_shared<ConstantTexture<Float>>(0.f),
+                std::make_shared<ConstantTexture<Float>>(0.f));
+        }
+        else
+        {
+            error = "material '" + name + "' has unsupported <Type>: " + type;
+            return false;
+        }
+    }
+    return true;
+}
+
+bool AppendObject(XMLElement *object, const MaterialMap &materials,
+                  const std::shared_ptr<Material> &defaultMaterial,
                   std::vector<std::shared_ptr<Primitive>> &prims, std::string &error)
 {
+    std::shared_ptr<Material> material = defaultMaterial;
+    const char *materialText = ChildText(object, "Material");
+    if (materialText)
+    {
+        const std::string materialName = TrimText(materialText);
+        if (materialName.empty())
+        {
+            error = "<Material> name is empty";
+            return false;
+        }
+        auto it = materials.find(materialName);
+        if (it == materials.end())
+        {
+            error = "material '" + materialName + "' is not defined in <Materials>";
+            return false;
+        }
+        material = it->second;
+    }
+
     Transform objectToWorld;
     if (!ReadTransform(object->FirstChildElement("Transform"), objectToWorld, error))
         return false;
@@ -410,13 +493,18 @@ bool LoadSceneFromXml(const std::string &filePath, LoadedScene &out, std::string
     if (!objects)
         return fail("<SceneObjects> not found in " + filePath);
 
-    auto material = MakeDefaultMaterial();
+    std::shared_ptr<Material> defaultMaterial = MakeDefaultMaterial();
+    MaterialMap materials;
+    XMLElement *materialNodes = root->FirstChildElement("Materials");
+    if (materialNodes && !AppendMaterials(materialNodes, materials, detail))
+        return fail("<Materials>: " + detail);
+
     std::vector<std::shared_ptr<Primitive>> prims;
     std::size_t objectCount = 0;
     for (XMLElement *object = objects->FirstChildElement("SceneObject"); object;
          object = object->NextSiblingElement("SceneObject"))
     {
-        if (!AppendObject(object, material, prims, detail))
+        if (!AppendObject(object, materials, defaultMaterial, prims, detail))
             return fail("<SceneObject> #" + std::to_string(objectCount + 1) + ": " + detail);
         ++objectCount;
     }
