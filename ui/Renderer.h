@@ -17,12 +17,13 @@ public:
     }
     void Run();
 
+    // arena 由调用方提供并复用（每个渲染线程一个，避免重复分配内存块）
+    pbr::Spectrum RenderPixel(int x, int y, pbr::MemoryArena &arena);
+    // 便捷重载：内部使用临时 arena，适合单次调用（如 --check-scene）
     pbr::Spectrum RenderPixel(int x, int y);
 
 private:
     void RunRenderThread();
-
-    pbr::Spectrum GetIrradiance(const pbr::Ray& ray);
 
     int mViewportWidth = 800;
     int mViewportHeight = 600;
@@ -35,7 +36,7 @@ private:
     std::shared_ptr<const pbr::Camera> mCamera;
 
     std::shared_ptr<pbr::Scene> mScene = nullptr;
-    std::shared_ptr<pbr::Sampler> mSampler;
+    std::shared_ptr<pbr::Sampler> mSampler = nullptr;
     std::shared_ptr<pbr::Integrator> mIntegrator = nullptr;
 };
 

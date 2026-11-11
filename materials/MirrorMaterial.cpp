@@ -24,4 +24,4 @@ void MirrorMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
         si->bsdf->Add(ARENA_ALLOC(arena, SpecularReflection)(R, ARENA_ALLOC(arena, FresnelNoOp)()));
 }
 
-} // namespace pbrt
+} // namespace pbr

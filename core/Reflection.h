@@ -185,7 +185,6 @@ private:
     int nBxDFs = 0;
     static constexpr int MaxBxDFs = 8;
     BxDF *bxdfs[MaxBxDFs];
-    friend class MixMaterial;
 };
 
 inline std::ostream &operator<<(std::ostream &os, const BSDF &bsdf)

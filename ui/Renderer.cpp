@@ -39,7 +39,7 @@ Renderer::Renderer(int w, int h, const char *filePath)
     const pbr::Bounds2i sampleBounds(
         pbr::Point2i(0, 0), pbr::Point2i(mViewportWidth, mViewportHeight));
     mSampler = std::shared_ptr<pbr::Sampler>(
-        new pbr::HaltonSampler(1, sampleBounds, true));
+        new pbr::HaltonSampler(100, sampleBounds, true));
 
     // 直接光照积分器：相机与像素坐标在调用 Render 时传入，积分器只持有采样器
     mIntegrator = std::make_shared<pbr::DirectLightingIntegrator>(
@@ -84,7 +84,7 @@ void Renderer::Run()
     window = NULL;
 }
 
-pbr::Spectrum Renderer::RenderPixel(int x, int y)
+pbr::Spectrum Renderer::RenderPixel(int x, int y, pbr::MemoryArena &arena)
 {
     pbr::Spectrum color(0.f);
     if (!mIntegrator || !mScene || !mCamera)
@@ -92,7 +92,7 @@ pbr::Spectrum Renderer::RenderPixel(int x, int y)
 
     // 主光线生成、spp 循环与采样器管理都交给积分器，结果通过回调拿回
     double timeConsume = 0.0;
-    mIntegrator->Render(*mScene, *mCamera, x, y, timeConsume,
+    mIntegrator->Render(*mScene, *mCamera, x, y, arena, timeConsume,
                         [&color](int, int, const pbr::Spectrum &L)
                         {
                             color = L;
@@ -101,9 +101,18 @@ pbr::Spectrum Renderer::RenderPixel(int x, int y)
     return color;
 }
 
+pbr::Spectrum Renderer::RenderPixel(int x, int y)
+{
+    pbr::MemoryArena arena;
+    return RenderPixel(x, y, arena);
+}
+
 // 渲染线程的入口函数，负责执行渲染循环
 void Renderer::RunRenderThread()
 {
+    // 每个线程一个内存池，跨像素复用；MemoryArena 非线程安全，不能共享
+    pbr::MemoryArena arena;
+
     while (true)
     {
         // 读取当前屏幕的下一个像素
@@ -114,42 +123,10 @@ void Renderer::RunRenderThread()
         int x = pixelIndex % mViewportWidth;
         int y = pixelIndex / mViewportWidth;
 
-        pbr::Spectrum color = RenderPixel(x, y);
+        pbr::Spectrum color = RenderPixel(x, y, arena);
         uint32_t r = (uint32_t)pbr::Clamp(std::round(color[0] * 255.0f), 0.f, 255.f);
         uint32_t g = (uint32_t)pbr::Clamp(std::round(color[1] * 255.0f), 0.f, 255.f);
         uint32_t b = (uint32_t)pbr::Clamp(std::round(color[2] * 255.0f), 0.f, 255.f);
         mBuffer[y * mViewportWidth + x] = (r << 16) | (g << 8) | (b);
     }
-}
-
-pbr::Spectrum Renderer::GetIrradiance(const pbr::Ray& ray)
-{
-    pbr::Spectrum E = pbr::Spectrum(0.f);
-
-    pbr::SurfaceInteraction isect;
-    if (!mScene->Intersect(ray, &isect))
-    {
-        return E;
-    }
-
-    // 遍历各个光源，计算L
-    for (auto light : mScene->lights)
-    {
-        pbr::Point2f u;
-        pbr::Vector3f wi;
-        pbr::Float pdf;
-        pbr::VisibilityTester visibility;
-        pbr::Spectrum L = light->Sample_Li(isect, u, &wi, &pdf, &visibility);
-
-        // 生成阴影射线，判断当前着色点是否在阴影中
-        if (!visibility.Unoccluded(*mScene))
-        {
-            continue;
-        }
-
-        pbr::Float cosTheta = pbr::Dot(isect.shading.n, wi);
-
-        E += L * std::max(cosTheta, 0.0f);
-    }
-    return E;
 }

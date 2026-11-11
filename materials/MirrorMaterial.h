@@ -30,6 +30,6 @@ private:
     std::shared_ptr<Texture<Float>> bumpMap;
 };
 
-} // namespace pbrt
+} // namespace pbr
 
-#endif // PBRT_MATERIALS_MIRROR_H
+#endif // PBR_MATERIALS_MIRROR_H

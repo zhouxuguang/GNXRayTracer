@@ -250,10 +250,13 @@ std::unique_ptr<Distribution1D> ComputeLightPowerDistribution(const Scene &scene
 
 // SamplerIntegrator Method Definitions
 void SamplerIntegrator::Render(const Scene &scene, const Camera &camera, int x,
-                               int y, double &timeConsume,
+                               int y, MemoryArena &arena, double &timeConsume,
                                const PixelResultCallback &onPixel)
 {
     auto start = std::chrono::steady_clock::now(); //渲染开始时间
+
+    // 内存池由调用方复用：先回收上一个像素占用的块，再开始本像素的分配
+    arena.Reset();
 
     Spectrum colObj(0.f);
 
@@ -263,8 +266,6 @@ void SamplerIntegrator::Render(const Scene &scene, const Camera &camera, int x,
 	int seed = (y << 16) ^ x;
 	std::unique_ptr<Sampler> pixel_sampler = mSampler->Clone(seed);
 	pixel_sampler->StartPixel(pixel);
-
-	MemoryArena arena;
 
 	do
 	{

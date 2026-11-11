@@ -22,9 +22,9 @@ class Integrator
 public:
     // Integrator Interface
     virtual ~Integrator();
-    // 渲染像素 (x, y)：相机与像素坐标都从外部传入，积分器本身无渲染状态
+    // 渲染像素 (x, y)：相机、像素坐标与内存池都由外部传入，积分器本身无渲染状态
     virtual void Render(const Scene &scene, const Camera &camera, int x, int y,
-                        double &timeConsume,
+                        MemoryArena &arena, double &timeConsume,
                         const PixelResultCallback &onPixel = nullptr) = 0;
 
 	//进度函数
@@ -61,7 +61,7 @@ public:
 
     //渲染函数
     void Render(const Scene &scene, const Camera &camera, int x, int y,
-                double &timeConsume,
+                MemoryArena &arena, double &timeConsume,
                 const PixelResultCallback &onPixel = nullptr) override;
 
     virtual Spectrum Li(const RayDifferential &ray, const Scene &scene,
