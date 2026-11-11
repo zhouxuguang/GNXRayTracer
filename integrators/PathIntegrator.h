@@ -14,9 +14,8 @@ class PathIntegrator : public SamplerIntegrator
 {
 public:
     // PathIntegrator Public Methods
-    PathIntegrator(int maxDepth, std::shared_ptr<const Camera> camera,
-                   std::shared_ptr<Sampler> sampler,
-                   uint32_t width, uint32_t height, Float rrThreshold = 1,
+    PathIntegrator(int maxDepth, std::shared_ptr<Sampler> sampler,
+                   Float rrThreshold = 1,
                    const std::string &lightSampleStrategy = "spatial");
 
     void Preprocess(const Scene &scene) override;

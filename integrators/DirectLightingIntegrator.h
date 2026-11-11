@@ -22,10 +22,8 @@ class DirectLightingIntegrator : public SamplerIntegrator
 public:
     // DirectLightingIntegrator Public Methods
     DirectLightingIntegrator(LightStrategy strategy, int maxDepth,
-                             std::shared_ptr<const Camera> camera,
-                             std::shared_ptr<Sampler> sampler,
-                             uint32_t width, uint32_t height)
-        : SamplerIntegrator(camera, sampler, width, height),
+                             std::shared_ptr<Sampler> sampler)
+        : SamplerIntegrator(sampler),
           strategy(strategy),
           maxDepth(maxDepth)
     {

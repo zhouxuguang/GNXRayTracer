@@ -249,19 +249,19 @@ std::unique_ptr<Distribution1D> ComputeLightPowerDistribution(const Scene &scene
 }
 
 // SamplerIntegrator Method Definitions
-void SamplerIntegrator::Render(const Scene &scene, int x, int y,
-                               double &timeConsume,
+void SamplerIntegrator::Render(const Scene &scene, const Camera &camera, int x,
+                               int y, double &timeConsume,
                                const PixelResultCallback &onPixel)
 {
     auto start = std::chrono::steady_clock::now(); //渲染开始时间
 
     Spectrum colObj(0.f);
-    
+
 	const Point2i pixel(x, y);
 
-	// 每个像素一个独立采样器，种子取一维像素编号，保证可复现
-	std::unique_ptr<Sampler> pixel_sampler =
-		mSampler->Clone(y * mWidth + x);
+	// 每个像素一个独立采样器；种子由像素坐标拼成，不依赖图像宽度
+	int seed = (y << 16) ^ x;
+	std::unique_ptr<Sampler> pixel_sampler = mSampler->Clone(seed);
 	pixel_sampler->StartPixel(pixel);
 
 	MemoryArena arena;
@@ -270,7 +270,7 @@ void SamplerIntegrator::Render(const Scene &scene, int x, int y,
 	{
 		CameraSample cs = pixel_sampler->GetCameraSample(pixel);
 		RayDifferential ray;
-		if (mCamera->GenerateRayDifferential(cs, &ray) == 0.f)
+		if (camera.GenerateRayDifferential(cs, &ray) == 0.f)
 			continue;
 		ray.ScaleDifferentials(
 			1 / std::sqrt((Float)pixel_sampler->samplesPerPixel));

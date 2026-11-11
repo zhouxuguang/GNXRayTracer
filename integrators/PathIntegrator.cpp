@@ -19,11 +19,10 @@ static int pathLength = 0;
 
 // PathIntegrator Method Definitions
 PathIntegrator::PathIntegrator(int maxDepth,
-                               std::shared_ptr<const Camera> camera,
                                std::shared_ptr<Sampler> sampler,
-                               uint32_t width, uint32_t height, Float rrThreshold,
+                               Float rrThreshold,
                                const std::string &lightSampleStrategy)
-    : SamplerIntegrator(camera, sampler, width, height),
+    : SamplerIntegrator(sampler),
       maxDepth(maxDepth),
       rrThreshold(rrThreshold),
       lightSampleStrategy(lightSampleStrategy)

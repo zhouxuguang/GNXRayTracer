@@ -14,11 +14,10 @@ class VolPathIntegrator : public SamplerIntegrator
 {
 public:
     // VolPathIntegrator Public Methods
-    VolPathIntegrator(int maxDepth, std::shared_ptr<const Camera> camera,
-                      std::shared_ptr<Sampler> sampler,
-                      uint32_t width, uint32_t height, Float rrThreshold = 1,
+    VolPathIntegrator(int maxDepth, std::shared_ptr<Sampler> sampler,
+                      Float rrThreshold = 1,
                       const std::string &lightSampleStrategy = "spatial")
-        : SamplerIntegrator(camera, sampler, width, height),
+        : SamplerIntegrator(sampler),
           maxDepth(maxDepth),
           rrThreshold(rrThreshold),
           lightSampleStrategy(lightSampleStrategy)

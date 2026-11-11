@@ -13,10 +13,8 @@ class WhittedIntegrator : public SamplerIntegrator
 {
 public:
     // WhittedIntegrator Public Methods
-    WhittedIntegrator(int maxDepth, std::shared_ptr<const Camera> camera,
-                      std::shared_ptr<Sampler> sampler,
-                      uint32_t width, uint32_t height)
-        : SamplerIntegrator(camera, sampler, width, height), maxDepth(maxDepth)
+    WhittedIntegrator(int maxDepth, std::shared_ptr<Sampler> sampler)
+        : SamplerIntegrator(sampler), maxDepth(maxDepth)
     {
     }
 

@@ -22,8 +22,9 @@ class Integrator
 public:
     // Integrator Interface
     virtual ~Integrator();
-    // 渲染像素 (x, y)：整数像素坐标，结果通过 onPixel 交给调用方
-    virtual void Render(const Scene &scene, int x, int y, double &timeConsume,
+    // 渲染像素 (x, y)：相机与像素坐标都从外部传入，积分器本身无渲染状态
+    virtual void Render(const Scene &scene, const Camera &camera, int x, int y,
+                        double &timeConsume,
                         const PixelResultCallback &onPixel = nullptr) = 0;
 
 	//进度函数
@@ -53,15 +54,14 @@ class SamplerIntegrator : public Integrator
 {
 public:
     // SamplerIntegrator Public Methods
-    SamplerIntegrator(std::shared_ptr<const Camera> camera,
-                      std::shared_ptr<Sampler> sampler,
-        uint32_t width, uint32_t height)
-        : mCamera(camera), mSampler(sampler), mWidth(width), mHeight(height)
+    SamplerIntegrator(std::shared_ptr<Sampler> sampler)
+        : mSampler(sampler)
     {
     }
 
     //渲染函数
-    void Render(const Scene &scene, int x, int y, double &timeConsume,
+    void Render(const Scene &scene, const Camera &camera, int x, int y,
+                double &timeConsume,
                 const PixelResultCallback &onPixel = nullptr) override;
 
     virtual Spectrum Li(const RayDifferential &ray, const Scene &scene,
@@ -80,13 +80,9 @@ public:
 
 protected:
     // SamplerIntegrator Protected Data
-    std::shared_ptr<const Camera> mCamera;
-    // 子类 Preprocess 可能需要访问采样器（如 UniformSampleAll 预留样本维度）
+    // 只保留采样器：相机与像素尺寸都由调用方（Renderer）在 Render 时传入
+    // 子类 Preprocess 也需要它（如 UniformSampleAll 预留样本维度）
     std::shared_ptr<Sampler> mSampler;
-
-private:
-    // SamplerIntegrator Private Data
-    const uint32_t mWidth, mHeight;
 };
 
 } // namespace pbr
