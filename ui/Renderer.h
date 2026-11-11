@@ -11,10 +11,12 @@ class Renderer
 {
 public:
     Renderer(int w, int h, const char* filePath);
+
     virtual ~Renderer()
     {
     }
     void Run();
+
     pbr::Spectrum RenderPixel(int x, int y);
 
 private:
@@ -33,6 +35,8 @@ private:
     std::shared_ptr<const pbr::Camera> mCamera;
 
     std::shared_ptr<pbr::Scene> mScene = nullptr;
+    std::shared_ptr<pbr::Sampler> mSampler;
+    std::shared_ptr<pbr::Integrator> mIntegrator = nullptr;
 };
 
 #endif // GNXRAYTRACER_RENDERER_H

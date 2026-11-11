@@ -7,6 +7,9 @@
 
 #include "camera/Perspective.h"
 #include "core/SceneLoader.h"
+#include "core/Integrator.h"
+#include "integrators/DirectLightingIntegrator.h"
+#include "samplers/HaltonSampler.h"
 
 Renderer::Renderer(int w, int h, const char *filePath)
     : mViewportWidth(w),
@@ -31,6 +34,16 @@ Renderer::Renderer(int w, int h, const char *filePath)
 
     mCamera = std::shared_ptr<const pbr::Camera>(
         pbr::CreatePerspectiveCamera(mViewportWidth, mViewportHeight, cameraMotion, cam.fov));
+
+    // 确定性采样器：每像素 1 个样本，且固定只采像素中心 (x + 0.5, y + 0.5)
+    const pbr::Bounds2i sampleBounds(
+        pbr::Point2i(0, 0), pbr::Point2i(mViewportWidth, mViewportHeight));
+    mSampler = std::shared_ptr<pbr::Sampler>(
+        new pbr::HaltonSampler(1, sampleBounds, true));
+
+    // 直接光照积分器：相机与像素坐标在调用 Render 时传入，积分器只持有采样器
+    mIntegrator = std::make_shared<pbr::DirectLightingIntegrator>(
+        pbr::LightStrategy::UniformSampleOne, /*maxDepth*/ 5, mSampler);
 }
 
 void Renderer::Run()
@@ -48,6 +61,11 @@ void Renderer::Run()
     {
         renderThreads[i] = std::thread(&Renderer::RunRenderThread, this);
         renderThreads[i].detach();
+    }
+
+    if (mIntegrator)
+    {
+        mIntegrator->Preprocess(*mScene);
     }
 
     // Present：
@@ -69,39 +87,17 @@ void Renderer::Run()
 pbr::Spectrum Renderer::RenderPixel(int x, int y)
 {
     pbr::Spectrum color(0.f);
-    if (!mCamera)
+    if (!mIntegrator || !mScene || !mCamera)
         return color;
 
-    // 工程相机使用连续胶片坐标，取像素中心；pLens / time 预留给景深与快门
-    pbr::CameraSample sample;
-    sample.pFilm = pbr::Point2f(x + 0.5f, y + 0.5f);
-    sample.pLens = pbr::Point2f(0.f, 0.f);
-    sample.time = 0.f;
+    // 主光线生成、spp 循环与采样器管理都交给积分器，结果通过回调拿回
+    double timeConsume = 0.0;
+    mIntegrator->Render(*mScene, *mCamera, x, y, timeConsume,
+                        [&color](int, int, const pbr::Spectrum &L)
+                        {
+                            color = L;
+                        });
 
-    pbr::Ray ray;
-    mCamera->GenerateRay(sample, &ray);
-
-    color = GetIrradiance(ray);
-
-    return color;
-
-    // 场景未加载时回退到相机射线方向可视化，避免黑屏与空指针崩溃
-    if (!mScene)
-    {
-        color[0] = pbr::Clamp(ray.d.x * 0.5f + 0.5f, 0.f, 1.f);
-        color[1] = pbr::Clamp(ray.d.y * 0.5f + 0.5f, 0.f, 1.f);
-        color[2] = pbr::Clamp(ray.d.z * 0.5f + 0.5f, 0.f, 1.f);
-        return color;
-    }
-
-    pbr::SurfaceInteraction isect;
-    if (!mScene->Intersect(ray, &isect))
-        return color;
-
-    // 世界空间法线从 [-1, 1] 映射到 [0, 1] 显示；未命中保持黑色背景
-    color[0] = pbr::Clamp(isect.n.x * 0.5f + 0.5f, 0.f, 1.f);
-    color[1] = pbr::Clamp(isect.n.y * 0.5f + 0.5f, 0.f, 1.f);
-    color[2] = pbr::Clamp(isect.n.z * 0.5f + 0.5f, 0.f, 1.f);
     return color;
 }
 

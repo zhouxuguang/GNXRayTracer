@@ -33,6 +33,8 @@ void DirectLightingIntegrator::Preprocess(const Scene &scene)
     }
 }
 
+#if 0
+
 Spectrum DirectLightingIntegrator::Li(const RayDifferential &ray,
                                       const Scene &scene, Sampler &sampler,
                                       MemoryArena &arena, int depth) const
@@ -71,5 +73,43 @@ Spectrum DirectLightingIntegrator::Li(const RayDifferential &ray,
     }
     return L;
 }
+
+#else
+
+Spectrum DirectLightingIntegrator::Li(const RayDifferential& ray,
+    const Scene& scene, Sampler& sampler,
+    MemoryArena& arena, int depth) const
+{
+    Spectrum E(0.f);
+
+	pbr::SurfaceInteraction isect;
+	if (!scene.Intersect(ray, &isect))
+	{
+		return E;
+	}
+
+	// 遍历各个光源，计算L
+	for (auto light : scene.lights)
+	{
+		pbr::Point2f u;
+		pbr::Vector3f wi;
+		pbr::Float pdf;
+		pbr::VisibilityTester visibility;
+		pbr::Spectrum L = light->Sample_Li(isect, u, &wi, &pdf, &visibility);
+
+		// 生成阴影射线，判断当前着色点是否在阴影中
+		if (!visibility.Unoccluded(scene))
+		{
+			continue;
+		}
+
+		pbr::Float cosTheta = pbr::Dot(isect.shading.n, wi);
+
+		E += L * std::max(cosTheta, 0.0f);
+	}
+	return E;
+}
+
+#endif
 
 } // namespace pbr
