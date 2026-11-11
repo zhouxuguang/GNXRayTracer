@@ -16,7 +16,7 @@ static uint64_t volumeInteractions = 0;
 static uint64_t surfaceInteractions = 0;
 
 // VolPathIntegrator Method Definitions
-void VolPathIntegrator::Preprocess(const Scene &scene, Sampler &sampler)
+void VolPathIntegrator::Preprocess(const Scene &scene)
 {
     lightDistribution = CreateLightSampleDistribution(lightSampleStrategy, scene);
 }

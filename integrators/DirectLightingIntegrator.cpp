@@ -10,21 +10,24 @@ namespace pbr
 {
 
 // DirectLightingIntegrator Method Definitions
-void DirectLightingIntegrator::Preprocess(const Scene &scene, Sampler &sampler)
+void DirectLightingIntegrator::Preprocess(const Scene &scene)
 {
     if (strategy == LightStrategy::UniformSampleAll)
     {
+        // 每次 Preprocess 都重新统计，避免重复调用时样本数累加
+        nLightSamples.clear();
+
         // Compute number of samples to use for each light
         for (const auto &light : scene.lights)
-            nLightSamples.push_back(sampler.RoundCount(light->nSamples));
+            nLightSamples.push_back(mSampler->RoundCount(light->nSamples));
 
         // Request samples for sampling all lights
         for (int i = 0; i < maxDepth; ++i)
         {
             for (size_t j = 0; j < scene.lights.size(); ++j)
             {
-                sampler.Request2DArray(nLightSamples[j]);
-                sampler.Request2DArray(nLightSamples[j]);
+                mSampler->Request2DArray(nLightSamples[j]);
+                mSampler->Request2DArray(nLightSamples[j]);
             }
         }
     }
@@ -34,7 +37,6 @@ Spectrum DirectLightingIntegrator::Li(const RayDifferential &ray,
                                       const Scene &scene, Sampler &sampler,
                                       MemoryArena &arena, int depth) const
 {
-    //ProfilePhase p(Prof::SamplerIntegratorLi);
     Spectrum L(0.f);
     // Find closest ray intersection or return background radiance
     SurfaceInteraction isect;

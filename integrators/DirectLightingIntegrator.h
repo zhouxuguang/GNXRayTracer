@@ -24,15 +24,15 @@ public:
     DirectLightingIntegrator(LightStrategy strategy, int maxDepth,
                              std::shared_ptr<const Camera> camera,
                              std::shared_ptr<Sampler> sampler,
-                             const Bounds2i &pixelBounds)
-        : SamplerIntegrator(camera, sampler, pixelBounds),
+                             uint32_t width, uint32_t height)
+        : SamplerIntegrator(camera, sampler, width, height),
           strategy(strategy),
           maxDepth(maxDepth)
     {
     }
     Spectrum Li(const RayDifferential &ray, const Scene &scene,
                 Sampler &sampler, MemoryArena &arena, int depth) const;
-    void Preprocess(const Scene &scene, Sampler &sampler);
+    void Preprocess(const Scene &scene) override;
 
 private:
     // DirectLightingIntegrator Private Data

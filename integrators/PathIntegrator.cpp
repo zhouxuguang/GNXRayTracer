@@ -21,16 +21,16 @@ static int pathLength = 0;
 PathIntegrator::PathIntegrator(int maxDepth,
                                std::shared_ptr<const Camera> camera,
                                std::shared_ptr<Sampler> sampler,
-                               const Bounds2i &pixelBounds, Float rrThreshold,
+                               uint32_t width, uint32_t height, Float rrThreshold,
                                const std::string &lightSampleStrategy)
-    : SamplerIntegrator(camera, sampler, pixelBounds),
+    : SamplerIntegrator(camera, sampler, width, height),
       maxDepth(maxDepth),
       rrThreshold(rrThreshold),
       lightSampleStrategy(lightSampleStrategy)
 {
 }
 
-void PathIntegrator::Preprocess(const Scene &scene, Sampler &sampler)
+void PathIntegrator::Preprocess(const Scene &scene)
 {
     lightDistribution = CreateLightSampleDistribution(lightSampleStrategy, scene);
 }

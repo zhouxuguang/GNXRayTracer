@@ -15,8 +15,8 @@ public:
     // WhittedIntegrator Public Methods
     WhittedIntegrator(int maxDepth, std::shared_ptr<const Camera> camera,
                       std::shared_ptr<Sampler> sampler,
-                      const Bounds2i &pixelBounds)
-        : SamplerIntegrator(camera, sampler, pixelBounds), maxDepth(maxDepth)
+                      uint32_t width, uint32_t height)
+        : SamplerIntegrator(camera, sampler, width, height), maxDepth(maxDepth)
     {
     }
 

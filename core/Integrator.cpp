@@ -158,9 +158,6 @@ Spectrum EstimateDirect(const Interaction &it, const Point2f &uScattering,
                     //VLOG(2) << "  shadow ray blocked";
                     Li = Spectrum(0.f);
                 }
-                else
-                    //VLOG(2) << "  shadow ray unoccluded";
-                    printf("  shadow ray unoccluded");
             }
 
             // Add light's contribution to reflected radiance
@@ -251,94 +248,43 @@ std::unique_ptr<Distribution1D> ComputeLightPowerDistribution(const Scene &scene
         new Distribution1D(&lightPower[0], lightPower.size()));
 }
 
-//#define TEST_MIPMAP
-
 // SamplerIntegrator Method Definitions
-void SamplerIntegrator::Render(const Scene &scene, double &timeConsume,
+void SamplerIntegrator::Render(const Scene &scene, int x, int y,
+                               double &timeConsume,
                                const PixelResultCallback &onPixel)
 {
-    Preprocess(scene, *sampler);
     auto start = std::chrono::steady_clock::now(); //渲染开始时间
 
-    std::shared_ptr<MIPMap<Spectrum>> mp = nullptr;
+    Spectrum colObj(0.f);
+    
+	const Point2i pixel(x, y);
 
-#ifdef TEST_MIPMAP
+	// 每个像素一个独立采样器，种子取一维像素编号，保证可复现
+	std::unique_ptr<Sampler> pixel_sampler =
+		mSampler->Clone(y * mWidth + x);
+	pixel_sampler->StartPixel(pixel);
 
-    int mW = 400, mH = 235;
-    Spectrum *mpdata = new Spectrum[mW * mH];
-    for (int j = 0; j < mH; j++)
-    {
-        for (int i = 0; i < mW; i++)
-        {
-            int offset = i + j * mW;
-            Spectrum s;
-            s[0] = i / (Float)pixelBounds.pMax.x;
-            s[1] = j / (Float)pixelBounds.pMax.y;
-            s[2] = 0.4f;
-            mpdata[offset] = s;
-        }
-    }
+	MemoryArena arena;
 
-    mp = std::make_shared<MIPMap<Spectrum>>(Point2i(mW, mH), mpdata, true);
-    delete[] mpdata;
+	do
+	{
+		CameraSample cs = pixel_sampler->GetCameraSample(pixel);
+		RayDifferential ray;
+		if (mCamera->GenerateRayDifferential(cs, &ray) == 0.f)
+			continue;
+		ray.ScaleDifferentials(
+			1 / std::sqrt((Float)pixel_sampler->samplesPerPixel));
 
-#endif
+		colObj += Li(ray, scene, *pixel_sampler, arena, 0);
+		// BSDF/BxDF 只活一次采样，及时回收避免 arena 无限增长
+		arena.Reset();
+	} while (pixel_sampler->StartNextSample());
 
-    for (int i = 0; i < pixelBounds.pMax.x; i++)
-    {
-        for (int j = 0; j < pixelBounds.pMax.y; j++)
-        {
+	colObj = colObj / pixel_sampler->samplesPerPixel;
 
-            float u = float(i + getClockRandom()) / float(pixelBounds.pMax.x);
-            float v = float(j + getClockRandom()) / float(pixelBounds.pMax.y);
-            int offset = (pixelBounds.pMax.x * j + i);
-
-            MemoryArena arena;
-
-            std::unique_ptr<Sampler> pixel_sampler = sampler->Clone(offset);
-            Point2i pixel(i, j);
-            pixel_sampler->StartPixel(pixel);
-
-            Spectrum colObj(.0f);
-
-            do
-            {
-                CameraSample cs;
-                cs = pixel_sampler->GetCameraSample(pixel);
-                //                Ray ray;
-                //                camera->GenerateRay(cs, &r);
-
-                RayDifferential ray;
-                float rayWeight = camera->GenerateRayDifferential(cs, &ray);
-                ray.ScaleDifferentials(1 / std::sqrt((Float)pixel_sampler->samplesPerPixel));
-
-#ifndef TEST_MIPMAP
-                colObj += Li(ray, scene, *pixel_sampler, arena, 0);
-
-#else
-                // 这里可以测试一些东西
-#endif
-            } while (pixel_sampler->StartNextSample());
-
-            colObj = colObj / pixel_sampler->samplesPerPixel;
-
-            if (mp)
-            {
-                if (i < mp->Width() - 1 && j < mp->Height() - 1)
-                {
-                    colObj = mp->Lookup(Point2f((i + 1) / (Float)pixelBounds.pMax.x, (j + 1) / (Float)pixelBounds.pMax.y), 0.0f);
-                }
-                else
-                {
-                    colObj = Spectrum(0.0f);
-                }
-            }
-
-            // 积分器不持有帧缓冲，像素结果交给调用方处理
-            if (onPixel)
-                onPixel(i, j, colObj);
-        }
-    }
+    // 积分器不持有帧缓冲，像素结果交给调用方处理
+    if (onPixel)
+        onPixel(x, y, colObj);
 
     // 结束时间
     auto end = std::chrono::steady_clock::now();
