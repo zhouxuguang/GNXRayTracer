@@ -10,7 +10,7 @@
 #include "Reflection.h"
 #include "Light.h"
 #include "MIPMap.h"
-#include <omp.h>
+#include <chrono>
 
 namespace pbr
 {
@@ -258,7 +258,7 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume,
                                const PixelResultCallback &onPixel)
 {
     Preprocess(scene, *sampler);
-    double start = omp_get_wtime(); //渲染开始时间
+    auto start = std::chrono::steady_clock::now(); //渲染开始时间
 
     std::shared_ptr<MIPMap<Spectrum>> mp = nullptr;
 
@@ -284,7 +284,6 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume,
 
 #endif
 
-#pragma omp parallel for
     for (int i = 0; i < pixelBounds.pMax.x; i++)
     {
         for (int j = 0; j < pixelBounds.pMax.y; j++)
@@ -342,8 +341,8 @@ void SamplerIntegrator::Render(const Scene &scene, double &timeConsume,
     }
 
     // 结束时间
-    double end = omp_get_wtime();
-    timeConsume = end - start;
+    auto end = std::chrono::steady_clock::now();
+    timeConsume = std::chrono::duration<double>(end - start).count();
 }
 
 Spectrum SamplerIntegrator::SpecularReflect(

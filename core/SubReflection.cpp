@@ -125,8 +125,7 @@ void ComputeBeamDiffusionBSSRDF(Float g, Float eta, BSSRDFTable *t)
     for (int i = 2; i < t->nRadiusSamples; ++i)
         t->radiusSamples[i] = t->radiusSamples[i - 1] * 1.2f;
 
-// Choose albedo values of the diffusion profile discretization
-#pragma omp parallel for
+    // Choose albedo values of the diffusion profile discretization
     for (int i = 0; i < t->nRhoSamples; ++i)
     {
         t->rhoSamples[i] =
