@@ -230,29 +230,27 @@ inline std::ostream &operator<<(std::ostream &os, const BxDF &bxdf)
     return os;
 }
 
-
+// lambert反射模型
 class LambertianReflection : public BxDF
 {
 public:
-    // LambertianReflection Public Methods
-    LambertianReflection(const Spectrum &R)
-        : BxDF(BxDFType(BSDF_REFLECTION | BSDF_DIFFUSE)), R(R)
+    LambertianReflection(const Spectrum & albedo)
+        : BxDF(BxDFType(BSDF_REFLECTION | BSDF_DIFFUSE)), mAlbedo(albedo)
     {
     }
     Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
     Spectrum rho(const Vector3f &, int, const Point2f *) const
     {
-        return R;
+        return mAlbedo;
     }
     Spectrum rho(int, const Point2f *, const Point2f *) const
     {
-        return R;
+        return mAlbedo;
     }
     std::string ToString() const;
 
 private:
-    // LambertianReflection Private Data
-    const Spectrum R;
+    const Spectrum mAlbedo;    //反照率系数
 };
 
 class LambertianTransmission : public BxDF

@@ -139,12 +139,12 @@ std::string SpecularTransmission::ToString() const
 
 Spectrum LambertianReflection::f(const Vector3f &wo, const Vector3f &wi) const
 {
-    return R * InvPi;
+    return mAlbedo * InvPi;
 }
 
 std::string LambertianReflection::ToString() const
 {
-    return std::string("[ LambertianReflection R: ") + R.ToString() +
+    return std::string("[ LambertianReflection R: ") + mAlbedo.ToString() +
            std::string(" ]");
 }
 

@@ -67,7 +67,6 @@ void GeometricPrimitive::ComputeScatteringFunctions(
     TransportMode mode,
     bool allowMultipleLobes) const
 {
-    //ProfilePhase p(Prof::ComputeScatteringFuncs);
     if (material)
         material->ComputeScatteringFunctions(isect, arena, mode,
                                              allowMultipleLobes);
@@ -126,9 +125,6 @@ void Aggregate::ComputeScatteringFunctions(SurfaceInteraction *isect,
                                            bool allowMultipleLobes) const
 {
     //Aggregate类无需实现具体的计算散射的函数，因为只是个加速结构
-    //    LOG(FATAL) <<
-    //        "Aggregate::ComputeScatteringFunctions() method"
-    //        "called; should have gone to GeometricPrimitive";
 }
 
 }
