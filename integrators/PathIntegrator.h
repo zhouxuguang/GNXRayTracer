@@ -9,7 +9,7 @@
 namespace pbr
 {
 
-// PathIntegrator Declarations
+// 路径追踪积分器
 class PathIntegrator : public SamplerIntegrator
 {
 public:
@@ -21,14 +21,14 @@ public:
     void Preprocess(const Scene &scene) override;
 
     Spectrum Li(const RayDifferential &ray, const Scene &scene,
-                Sampler &sampler, MemoryArena &arena, int depth) const;
+                Sampler &sampler, MemoryArena &arena, int depth) const override;
 
 private:
     // PathIntegrator Private Data
-    const int maxDepth;
-    const Float rrThreshold;
-    const std::string lightSampleStrategy;
-    std::unique_ptr<LightDistribution> lightDistribution;
+    const int mMaxDepth;
+    const Float mRRThreshold;
+    const std::string mLightSampleStrategy;
+    std::unique_ptr<LightDistribution> mLightDistribution;
 };
 
 } // namespace pbr

@@ -23,9 +23,9 @@ std::string ResolveScenePath(int argc, char *argv[])
     }
 
     const char *candidates[] = {
-        "Resources/scenes/scene07.xml",
-        "../Resources/scenes/scene07.xml",
-        "../../Resources/scenes/scene07.xml",
+        "Resources/scenes/scene09.xml",
+        "../Resources/scenes/scene09.xml",
+        "../../Resources/scenes/scene09.xml",
     };
     for (const char *candidate : candidates)
     {
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 {
     if (argc >= 2 && std::string(argv[1]) == "--check-scene")
     {
-        const char *scenePath = argc >= 3 ? argv[2] : "Resources/scenes/scene07.xml";
+        const char *scenePath = argc >= 3 ? argv[2] : "Resources/scenes/scene09.xml";
         const char *reportPath = argc >= 4 ? argv[3] : nullptr;
         return CheckScene(scenePath, reportPath);
     }

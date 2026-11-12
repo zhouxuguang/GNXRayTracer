@@ -16,7 +16,7 @@ namespace pbr
 Float FrDielectric(Float cosThetaI, Float etaI, Float etaT)
 {
     cosThetaI = Clamp(cosThetaI, -1, 1);
-    // Potentially swap indices of refraction， 判断光线是否从物体内部射入到着色点
+    // 判断光线是否从物体内部射入到着色点
     bool entering = cosThetaI > 0.f;
     if (!entering)
     {
@@ -30,7 +30,9 @@ Float FrDielectric(Float cosThetaI, Float etaI, Float etaT)
 
     // 全内反射
     if (sinThetaT >= 1)
+    {
         return 1;
+    }
     Float cosThetaT = std::sqrt(std::max((Float)0, 1 - sinThetaT * sinThetaT));
     Float Rparl = ((etaT * cosThetaI) - (etaI * cosThetaT)) /
                   ((etaT * cosThetaI) + (etaI * cosThetaT));
@@ -68,6 +70,7 @@ Spectrum FrConductor(Float cosThetaI, const Spectrum &etai, const Spectrum &etat
 Fresnel::~Fresnel()
 {
 }
+
 Spectrum FresnelConductor::Evaluate(Float cosThetaI) const
 {
     return FrConductor(std::abs(cosThetaI), etaI, etaT, k);
@@ -471,17 +474,18 @@ Spectrum BxDF::rho(int nSamples, const Point2f *u1, const Point2f *u2) const
 // BSDF Method Definitions
 Spectrum BSDF::f(const Vector3f &woW, const Vector3f &wiW, BxDFType flags) const
 {
-    //ProfilePhase pp(Prof::BSDFEvaluation);
     Vector3f wi = WorldToLocal(wiW), wo = WorldToLocal(woW);
     if (wo.z == 0)
         return 0.;
     bool reflect = Dot(wiW, ng) * Dot(woW, ng) > 0; //判断wiW和woW相对于ng是否在同一个半球方向
     Spectrum f(0.f);
     for (int i = 0; i < nBxDFs; ++i)
+    {
         if (bxdfs[i]->MatchesFlags(flags) &&
             ((reflect && (bxdfs[i]->type & BSDF_REFLECTION)) ||
              (!reflect && (bxdfs[i]->type & BSDF_TRANSMISSION))))
             f += bxdfs[i]->f(wo, wi);
+    }
     return f;
 }
 
@@ -490,8 +494,10 @@ Spectrum BSDF::rho(int nSamples, const Point2f *samples1,
 {
     Spectrum ret(0.f);
     for (int i = 0; i < nBxDFs; ++i)
+    {
         if (bxdfs[i]->MatchesFlags(flags))
             ret += bxdfs[i]->rho(nSamples, samples1, samples2);
+    }
     return ret;
 }
 
@@ -501,8 +507,10 @@ Spectrum BSDF::rho(const Vector3f &woWorld, int nSamples, const Point2f *samples
     Vector3f wo = WorldToLocal(woWorld);
     Spectrum ret(0.f);
     for (int i = 0; i < nBxDFs; ++i)
+    {
         if (bxdfs[i]->MatchesFlags(flags))
             ret += bxdfs[i]->rho(wo, nSamples, samples);
+    }
     return ret;
 }
 
@@ -518,7 +526,7 @@ Spectrum BSDF::Sample_f(const Vector3f &woWorld, Vector3f *wiWorld,
          4、计算匹配的sampledType类型的全部的Pdf(非镜面材质)
          5、计算采样方向的BSDF值(非镜面材质)
      */
-    //ProfilePhase pp(Prof::BSDFSampling);
+
     // Choose which _BxDF_ to sample
     int matchingComps = NumComponents(type);
     if (matchingComps == 0)
@@ -534,14 +542,14 @@ Spectrum BSDF::Sample_f(const Vector3f &woWorld, Vector3f *wiWorld,
     BxDF *bxdf = nullptr;
     int count = comp;
     for (int i = 0; i < nBxDFs; ++i)
+    {
         if (bxdfs[i]->MatchesFlags(type) && count-- == 0)
         {
             bxdf = bxdfs[i];
             break;
         }
+    }
     CHECK(bxdf != nullptr);
-    //    VLOG(2) << "BSDF::Sample_f chose comp = " << comp << " / matching = " <<
-    //        matchingComps << ", bxdf: " << bxdf->ToString();
 
     // Remap _BxDF_ sample _u_ to $[0,1)^2$
     Point2f uRemapped(std::min(u[0] * matchingComps - comp, OneMinusEpsilon), u[1]);
@@ -554,9 +562,7 @@ Spectrum BSDF::Sample_f(const Vector3f &woWorld, Vector3f *wiWorld,
     if (sampledType)
         *sampledType = bxdf->type;
     Spectrum f = bxdf->Sample_f(wo, &wi, uRemapped, pdf, sampledType);
-    //    VLOG(2) << "For wo = " << wo << ", sampled f = " << f << ", pdf = "
-    //            << *pdf << ", ratio = " << ((*pdf > 0) ? (f / *pdf) : Spectrum(0.))
-    //            << ", wi = " << wi;
+
     if (*pdf == 0)
     {
         if (sampledType)
@@ -577,21 +583,23 @@ Spectrum BSDF::Sample_f(const Vector3f &woWorld, Vector3f *wiWorld,
     if (!(bxdf->type & BSDF_SPECULAR))
     {
         bool reflect = Dot(*wiWorld, ng) * Dot(woWorld, ng) > 0;
-        f = 0.;
+        f = 0.0;
         for (int i = 0; i < nBxDFs; ++i)
+        {
             if (bxdfs[i]->MatchesFlags(type) &&
                 ((reflect && (bxdfs[i]->type & BSDF_REFLECTION)) ||
                  (!reflect && (bxdfs[i]->type & BSDF_TRANSMISSION))))
+            {
                 f += bxdfs[i]->f(wo, wi);
+            }
+        }
     }
-    //    VLOG(2) << "Overall f = " << f << ", pdf = " << *pdf << ", ratio = "
-    //            << ((*pdf > 0) ? (f / *pdf) : Spectrum(0.));
+
     return f;
 }
 
 Float BSDF::Pdf(const Vector3f &woWorld, const Vector3f &wiWorld, BxDFType flags) const
 {
-    //ProfilePhase pp(Prof::BSDFPdf);
     if (nBxDFs == 0.f)
         return 0.f;
     Vector3f wo = WorldToLocal(woWorld), wi = WorldToLocal(wiWorld);
@@ -600,11 +608,13 @@ Float BSDF::Pdf(const Vector3f &woWorld, const Vector3f &wiWorld, BxDFType flags
     Float pdf = 0.f;
     int matchingComps = 0;
     for (int i = 0; i < nBxDFs; ++i)
+    {
         if (bxdfs[i]->MatchesFlags(flags))
         {
             ++matchingComps;
             pdf += bxdfs[i]->Pdf(wo, wi);
         }
+    }
     Float v = matchingComps > 0 ? pdf / matchingComps : 0.f;
     return v;
 }

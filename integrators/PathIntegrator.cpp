@@ -1,9 +1,7 @@
 
 // integrators/path.cpp*
 #include "PathIntegrator.h"
-//#include "bssrdf.h"
 #include "core/Camera.h"
-//#include "film.h"
 #include "core/Interaction.h"
 #include "core/Scene.h"
 #include "core/Reflection.h"
@@ -23,15 +21,15 @@ PathIntegrator::PathIntegrator(int maxDepth,
                                Float rrThreshold,
                                const std::string &lightSampleStrategy)
     : SamplerIntegrator(sampler),
-      maxDepth(maxDepth),
-      rrThreshold(rrThreshold),
-      lightSampleStrategy(lightSampleStrategy)
+      mMaxDepth(maxDepth),
+      mRRThreshold(rrThreshold),
+      mLightSampleStrategy(lightSampleStrategy)
 {
 }
 
 void PathIntegrator::Preprocess(const Scene &scene)
 {
-    lightDistribution = CreateLightSampleDistribution(lightSampleStrategy, scene);
+    mLightDistribution = CreateLightSampleDistribution(mLightSampleStrategy, scene);
 }
 
 /**
@@ -59,6 +57,8 @@ void PathIntegrator::Preprocess(const Scene &scene)
 
  11、返回路径的辐射能量：迭代结束后，返回路径的累积辐射能量L。
  */
+
+#if 0
 
 Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
                             Sampler &sampler, MemoryArena &arena,
@@ -217,5 +217,65 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
     //ReportValue(pathLength, bounces);
     return L;
 }
+
+#else
+
+Spectrum PathIntegrator::Li(const RayDifferential& ray, const Scene& scene,
+    Sampler& sampler, MemoryArena& arena,
+    int depth) const
+{
+    if (depth > mMaxDepth)
+    {
+        return Spectrum(0);
+    }
+    
+	Spectrum Lo(0.f);
+    
+    Float rewardFactor = 1.0f;
+    if (depth >= 3)
+    {
+        Float K = sampler.Get1D();
+        if (K > mRRThreshold)
+        {
+            Float Lo;
+        }
+        rewardFactor = 1.0f / mRRThreshold;
+    }
+
+	pbr::SurfaceInteraction isect;
+	if (!scene.Intersect(ray, &isect))
+	{
+		return Lo;
+	}
+
+	// 收集物体的BRDF信息
+	isect.ComputeScatteringFunctions(ray, arena);
+
+	// 计算直接光照
+	Lo += UniformSampleOneLight(isect, scene, arena, sampler);
+    
+    // 间接光照
+    {
+        // 随机采样一个方向，并计算brdf
+        Vector3f wo = -ray.d, wi;
+        Float pdf;
+        BxDFType flags;
+        Spectrum f = isect.bsdf->Sample_f(wo, &wi, sampler.Get2D(), &pdf,
+                                          BSDF_ALL, &flags);
+        
+        RayDifferential rayNext(isect.SpawnRay(wi));
+        
+        if (!f.IsBlack() && pdf != 0.f)
+        {
+            Spectrum L = Li(rayNext, scene, sampler, arena, depth + 1);
+            
+            Lo += f * AbsDot(wi, isect.shading.n) / pdf * L;
+        }
+    }
+    
+    return Lo * rewardFactor;
+}
+
+#endif
 
 } // namespace pbr
