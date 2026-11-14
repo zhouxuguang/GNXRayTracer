@@ -86,13 +86,13 @@ Spectrum SpecularReflection::Sample_f(const Vector3f &wo, Vector3f *wi,
     // 计算完美镜面反射方向
     *wi = Vector3f(-wo.x, -wo.y, wo.z);
     *pdf = 1;
-    return fresnel->Evaluate(CosTheta(*wi)) * R / AbsCosTheta(*wi);
+    return mFresnel->Evaluate(CosTheta(*wi)) * mR / AbsCosTheta(*wi);
 }
 
 std::string SpecularReflection::ToString() const
 {
-    return std::string("[ SpecularReflection R: ") + R.ToString() +
-           std::string(" fresnel: ") + fresnel->ToString() + std::string(" ]");
+    return std::string("[ SpecularReflection R: ") + mR.ToString() +
+           std::string(" fresnel: ") + mFresnel->ToString() + std::string(" ]");
 }
 
 Spectrum SpecularTransmission::Sample_f(const Vector3f &wo, Vector3f *wi,

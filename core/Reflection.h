@@ -408,11 +408,9 @@ public:
 class SpecularReflection : public BxDF
 {
 public:
-    // SpecularReflection Public Methods
     SpecularReflection(const Spectrum &R, Fresnel *fresnel)
         : BxDF(BxDFType(BSDF_REFLECTION | BSDF_SPECULAR)),
-          R(R),
-          fresnel(fresnel)
+        mR(R), mFresnel(fresnel)
     {
     }
     Spectrum f(const Vector3f &wo, const Vector3f &wi) const
@@ -429,9 +427,8 @@ public:
     std::string ToString() const;
 
 private:
-    // SpecularReflection Private Data
-    const Spectrum R;
-    const Fresnel *fresnel;
+    const Spectrum mR;
+    const Fresnel *mFresnel;
 };
 
 class SpecularTransmission : public BxDF
