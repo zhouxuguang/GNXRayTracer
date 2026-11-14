@@ -5,6 +5,7 @@
 #include "lights/PointLight.h"
 #include "lights/SpotLight.h"
 #include "materials/MatteMaterial.h"
+#include "materials/MirrorMaterial.h"
 #include "shape/Sphere.h"
 #include "shape/Triangle.h"
 #include "textures/ConstantTexture.h"
@@ -254,6 +255,36 @@ bool AppendMaterials(XMLElement *materialNodes, MaterialMap &materials, std::str
                 std::make_shared<ConstantTexture<Spectrum>>(albedo),
                 std::make_shared<ConstantTexture<Float>>(0.f),
                 std::make_shared<ConstantTexture<Float>>(0.f));
+        }
+        else if (type == "Mirror" || type == "ConductorSpecular")
+        {
+            Spectrum reflectionColor(1.f);
+            if (!ReadRgb(node, "ReflectionColor", reflectionColor, error, false))
+            {
+                error = "material '" + name + "': " + error;
+                return false;
+            }
+            auto kr = std::make_shared<ConstantTexture<Spectrum>>(reflectionColor);
+
+            if (type == "Mirror")
+            {
+                materials[name] = std::make_shared<MirrorMaterial>(kr, nullptr);
+            }
+            else
+            {
+                Spectrum eta, absorptionCoef;
+                if (!ReadRgb(node, "Eta", eta, error) ||
+                    !ReadRgb(node, "AbsorptionCoef", absorptionCoef, error))
+                {
+                    error = "material '" + name + "': " + error;
+                    return false;
+                }
+                materials[name] = std::make_shared<MirrorMaterial>(
+                    kr,
+                    std::make_shared<ConstantTexture<Spectrum>>(eta),
+                    std::make_shared<ConstantTexture<Spectrum>>(absorptionCoef),
+                    nullptr);
+            }
         }
         else
         {
