@@ -326,20 +326,19 @@ inline std::ostream &operator<<(std::ostream &os, const Fresnel &f)
     return os;
 }
 
+// 导体菲涅耳反射率
 class FresnelConductor : public Fresnel
 {
 public:
-    // FresnelConductor Public Methods
     Spectrum Evaluate(Float cosThetaI) const;
-    FresnelConductor(const Spectrum &etaI, const Spectrum &etaT,
-                     const Spectrum &k)
-        : etaI(etaI), etaT(etaT), k(k)
+    FresnelConductor(const Spectrum &eta, const Spectrum &k)
+        : mEta(eta), mK(k)
     {
     }
     std::string ToString() const;
 
 private:
-    Spectrum etaI, etaT, k;
+    Spectrum mEta, mK;
 };
 
 class FresnelDielectric : public Fresnel

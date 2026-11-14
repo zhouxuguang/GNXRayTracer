@@ -46,7 +46,7 @@ void MetalMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
         uRough = TrowbridgeReitzDistribution::RoughnessToAlpha(uRough);
         vRough = TrowbridgeReitzDistribution::RoughnessToAlpha(vRough);
     }
-    Fresnel *frMf = ARENA_ALLOC(arena, FresnelConductor)(1., eta->Evaluate(*si),
+    Fresnel *frMf = ARENA_ALLOC(arena, FresnelConductor)(eta->Evaluate(*si),
                                                          k->Evaluate(*si));
     MicrofacetDistribution *distrib =
         ARENA_ALLOC(arena, TrowbridgeReitzDistribution)(uRough, vRough);

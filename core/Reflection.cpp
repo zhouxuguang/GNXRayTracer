@@ -42,29 +42,16 @@ Float FrDielectric(Float cosThetaI, Float etaI, Float etaT)
 }
 
 // https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/
-Spectrum FrConductor(Float cosThetaI, const Spectrum &etai, const Spectrum &etat, const Spectrum &k)
+Spectrum FrConductor(float cosi, const Spectrum &eta, const Spectrum &k)
 {
-    cosThetaI = Clamp(cosThetaI, -1, 1);
-    Spectrum eta = etat / etai;
-    Spectrum etak = k / etai;
-
-    Float cosThetaI2 = cosThetaI * cosThetaI;
-    Float sinThetaI2 = 1. - cosThetaI2;
-    Spectrum eta2 = eta * eta;
-    Spectrum etak2 = etak * etak;
-
-    Spectrum t0 = eta2 - etak2 - sinThetaI2;
-    Spectrum a2plusb2 = Sqrt(t0 * t0 + 4 * eta2 * etak2);
-    Spectrum t1 = a2plusb2 + cosThetaI2;
-    Spectrum a = Sqrt(0.5f * (a2plusb2 + t0));
-    Spectrum t2 = (Float)2 * cosThetaI * a;
-    Spectrum Rs = (t1 - t2) / (t1 + t2);
-
-    Spectrum t3 = cosThetaI2 * a2plusb2 + sinThetaI2 * sinThetaI2;
-    Spectrum t4 = t2 * sinThetaI2;
-    Spectrum Rp = Rs * (t3 - t4) / (t3 + t4);
-
-    return 0.5 * (Rp + Rs);
+    Spectrum tmp = (eta * eta + k * k) * cosi * cosi;
+    Spectrum Rparl2 = (tmp - (2.f * eta * cosi) + 1) /
+                      (tmp + (2.f * eta * cosi) + 1);
+    Spectrum tmp_f = eta * eta + k * k;
+    Spectrum Rperp2 =
+        (tmp_f - (2.f * eta * cosi) + cosi * cosi) /
+        (tmp_f + (2.f * eta * cosi) + cosi * cosi);
+    return (Rparl2 + Rperp2) / 2.f;
 }
 
 Fresnel::~Fresnel()
@@ -73,14 +60,13 @@ Fresnel::~Fresnel()
 
 Spectrum FresnelConductor::Evaluate(Float cosThetaI) const
 {
-    return FrConductor(std::abs(cosThetaI), etaI, etaT, k);
+    return FrConductor(std::abs(cosThetaI), mEta, mK);
 }
 
 std::string FresnelConductor::ToString() const
 {
-    return std::string("[ FresnelConductor etaI: ") + etaI.ToString() +
-           std::string(" etaT: ") + etaT.ToString() + std::string(" k: ") +
-           k.ToString() + std::string(" ]");
+    return std::string("[ FresnelConductor eta: ") + mEta.ToString() + std::string(" k: ") +
+            mK.ToString() + std::string(" ]");
 }
 
 Spectrum FresnelDielectric::Evaluate(Float cosThetaI) const
