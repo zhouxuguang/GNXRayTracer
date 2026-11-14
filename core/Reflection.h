@@ -341,33 +341,32 @@ private:
     Spectrum mEta, mK;
 };
 
+// 绝缘体菲涅耳反射率
 class FresnelDielectric : public Fresnel
 {
 public:
-    // FresnelDielectric Public Methods
-    Spectrum Evaluate(Float cosThetaI) const;
     FresnelDielectric(Float etaI, Float etaT)
-        : etaI(etaI), etaT(etaT)
+        : mEtaI(etaI), mEtaT(etaT)
     {
     }
+    Spectrum Evaluate(Float cosThetaI) const;
     std::string ToString() const;
 
 private:
-    Float etaI, etaT;
+    Float mEtaI, mEtaT;    // 两种物质的折射率
 };
 
 class FresnelSpecular : public BxDF
 {
 public:
-    // FresnelSpecular Public Methods
     FresnelSpecular(const Spectrum &R, const Spectrum &T, Float etaA,
                     Float etaB, TransportMode mode)
         : BxDF(BxDFType(BSDF_REFLECTION | BSDF_TRANSMISSION | BSDF_SPECULAR)),
-          R(R),
-          T(T),
-          etaA(etaA),
-          etaB(etaB),
-          mode(mode)
+          mR(R),
+          mT(T),
+          mEtaA(etaA),
+          mEtaB(etaB),
+          mMode(mode)
     {
     }
     Spectrum f(const Vector3f &wo, const Vector3f &wi) const
@@ -385,10 +384,9 @@ public:
     std::string ToString() const;
 
 private:
-    // FresnelSpecular Private Data
-    const Spectrum R, T;
-    const Float etaA, etaB;
-    const TransportMode mode;
+    const Spectrum mR, mT;
+    const Float mEtaA, mEtaB;
+    const TransportMode mMode;
 };
 
 class FresnelNoOp : public Fresnel

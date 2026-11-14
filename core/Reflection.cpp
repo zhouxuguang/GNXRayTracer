@@ -71,12 +71,12 @@ std::string FresnelConductor::ToString() const
 
 Spectrum FresnelDielectric::Evaluate(Float cosThetaI) const
 {
-    return FrDielectric(cosThetaI, etaI, etaT);
+    return FrDielectric(cosThetaI, mEtaI, mEtaT);
 }
 
 std::string FresnelDielectric::ToString() const
 {
-    return StringPrintf("[ FrenselDielectric etaI: %f etaT: %f ]", etaI, etaT);
+    return StringPrintf("[ FrenselDielectric etaI: %f etaT: %f ]", mEtaI, mEtaT);
 }
 
 Spectrum SpecularReflection::Sample_f(const Vector3f &wo, Vector3f *wi,
@@ -362,7 +362,7 @@ Float FresnelBlend::Pdf(const Vector3f &wo, const Vector3f &wi) const
 
 Spectrum FresnelSpecular::Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u, Float *pdf, BxDFType *sampledType) const
 {
-    Float F = FrDielectric(CosTheta(wo), etaA, etaB);
+    Float F = FrDielectric(CosTheta(wo), mEtaA, mEtaB);
     if (u[0] < F)
     {
         // 采样镜面反射
@@ -372,7 +372,7 @@ Spectrum FresnelSpecular::Sample_f(const Vector3f &wo, Vector3f *wi, const Point
         if (sampledType)
             *sampledType = BxDFType(BSDF_SPECULAR | BSDF_REFLECTION);
         *pdf = F;
-        return F * R / AbsCosTheta(*wi);
+        return F * mR / AbsCosTheta(*wi);
     }
     else
     {
@@ -380,16 +380,16 @@ Spectrum FresnelSpecular::Sample_f(const Vector3f &wo, Vector3f *wi, const Point
 
         // Figure out which $\eta$ is incident and which is transmitted
         bool entering = CosTheta(wo) > 0;
-        Float etaI = entering ? etaA : etaB;
-        Float etaT = entering ? etaB : etaA;
+        Float etaI = entering ? mEtaA : mEtaB;
+        Float etaT = entering ? mEtaB : mEtaA;
 
         // Compute ray direction for specular transmission
         if (!Refract(wo, Faceforward(Normal3f(0, 0, 1), wo), etaI / etaT, wi))
             return 0;
-        Spectrum ft = T * (1 - F);
+        Spectrum ft = mT * (1 - F);
 
         // Account for non-symmetry with transmission to different medium
-        if (mode == TransportMode::Radiance)
+        if (mMode == TransportMode::Radiance)
             ft *= (etaI * etaI) / (etaT * etaT);
         if (sampledType)
             *sampledType = BxDFType(BSDF_SPECULAR | BSDF_TRANSMISSION);
@@ -400,11 +400,11 @@ Spectrum FresnelSpecular::Sample_f(const Vector3f &wo, Vector3f *wi, const Point
 
 std::string FresnelSpecular::ToString() const
 {
-    return std::string("[ FresnelSpecular R: ") + R.ToString() +
-           std::string(" T: ") + T.ToString() +
-           StringPrintf(" etaA: %f etaB: %f ", etaA, etaB) +
+    return std::string("[ FresnelSpecular R: ") + mR.ToString() +
+           std::string(" T: ") + mT.ToString() +
+           StringPrintf(" etaA: %f etaB: %f ", mEtaA, mEtaB) +
            std::string(" mode : ") +
-           (mode == TransportMode::Radiance ? std::string("RADIANCE")
+           (mMode == TransportMode::Radiance ? std::string("RADIANCE")
                                             : std::string("IMPORTANCE")) +
            std::string(" ]");
 }
