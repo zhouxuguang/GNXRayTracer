@@ -221,8 +221,7 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
 #else
 
 Spectrum PathIntegrator::Li(const RayDifferential& ray, const Scene& scene,
-    Sampler& sampler, MemoryArena& arena,
-    int depth) const
+    Sampler& sampler, MemoryArena& arena, int depth) const
 {
     if (depth > mMaxDepth)
     {
@@ -237,7 +236,7 @@ Spectrum PathIntegrator::Li(const RayDifferential& ray, const Scene& scene,
         Float K = sampler.Get1D();
         if (K > mRRThreshold)
         {
-            Float Lo;
+            return Spectrum(0.f);
         }
         rewardFactor = 1.0f / mRRThreshold;
     }
@@ -250,11 +249,21 @@ Spectrum PathIntegrator::Li(const RayDifferential& ray, const Scene& scene,
 
 	// 收集物体的BRDF信息
 	isect.ComputeScatteringFunctions(ray, arena);
-
-	// 计算直接光照
-	Lo += UniformSampleOneLight(isect, scene, arena, sampler);
     
-    // 间接光照
+    if (!isect.bsdf)
+    {
+        return Lo;
+    }
+
+    bool isSpecular = !(isect.bsdf->NumComponents(BxDFType(BSDF_ALL & ~BSDF_SPECULAR)) > 0);
+    // 直接光照：纯 delta 镜面材质跳过
+    if (!isSpecular)
+    {
+        // 计算直接光照
+        Lo += UniformSampleOneLight(isect, scene, arena, sampler);
+    }
+    
+    // 间接光照，不用区分isSpecular了，因为在Sample_f中统一处理了
     {
         // 随机采样一个方向，并计算brdf
         Vector3f wo = -ray.d, wi;

@@ -83,7 +83,7 @@ Spectrum SpecularReflection::Sample_f(const Vector3f &wo, Vector3f *wi,
                                       const Point2f &sample, Float *pdf,
                                       BxDFType *sampledType) const
 {
-    // 计算完美镜面反射方向
+    // 计算完美镜面反射方向，局部坐标系中，要计算wo的反射方向，只需要将wo绕着法线（0，0，1）旋转pi个弧度
     *wi = Vector3f(-wo.x, -wo.y, wo.z);
     *pdf = 1;
     return mFresnel->Evaluate(CosTheta(*wi)) * mR / AbsCosTheta(*wi);
