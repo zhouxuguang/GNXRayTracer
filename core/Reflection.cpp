@@ -191,13 +191,13 @@ Spectrum OrenNayar::f(const Vector3f &wo, const Vector3f &wi) const
         sinAlpha = sinThetaI;
         tanBeta = sinThetaO / AbsCosTheta(wo);
     }
-    return R * InvPi * (A + B * maxCos * sinAlpha * tanBeta);
+    return mAlbedo * InvPi * (mA + mB * maxCos * sinAlpha * tanBeta);
 }
 
 std::string OrenNayar::ToString() const
 {
-    return std::string("[ OrenNayar R: ") + R.ToString() +
-           StringPrintf(" A: %f B: %f ]", A, B);
+    return std::string("[ OrenNayar R: ") + mAlbedo.ToString() +
+           StringPrintf(" A: %f B: %f ]", mA, mB);
 }
 
 Spectrum MicrofacetReflection::Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u, Float *pdf, BxDFType *sampledType) const

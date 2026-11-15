@@ -8,8 +8,6 @@
 
 namespace pbr
 {
-
-// HaltonSampler Declarations
 class HaltonSampler : public GlobalSampler
 {
 public:
@@ -21,7 +19,6 @@ public:
     std::unique_ptr<Sampler> Clone(int seed);
 
 private:
-    // HaltonSampler Private Data
     static std::vector<uint16_t> radicalInversePermutations;
     Point2i baseScales, baseExponents;
     int sampleStride;
@@ -36,9 +33,6 @@ private:
     // HaltonSampler Private Methods
     const uint16_t *PermutationForDimension(int dim) const
     {
-        //        if (dim >= PrimeTableSize)
-        //            LOG(FATAL) << StringPrintf("HaltonSampler can only sample %d "
-        //                                       "dimensions.", PrimeTableSize);
         return &radicalInversePermutations[PrimeSums[dim]];
     }
 };

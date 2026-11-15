@@ -4541,4 +4541,4 @@ Float ScrambledRadicalInverse(int baseIndex, uint64_t a, const uint16_t *perm)
     }
 }
 
-}  // namespace pbrt
+}  // namespace pbr

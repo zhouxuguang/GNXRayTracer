@@ -26987,4 +26987,4 @@ const uint64_t VdCSobolMatricesInv[][SobolMatrixSize] = {
      0x4000000040ULL, 0x2000000020ULL, 0x1000000010ULL, 0x800000008ULL,
      0x400000004ULL, 0x200000002ULL, 0x100000001ULL}};
 
-}  // namespace pbrt
+}  // namespace pbr
