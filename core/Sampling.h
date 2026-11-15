@@ -8,17 +8,13 @@
 namespace pbr
 {
 
-// Sampling Declarations
-void StratifiedSample1D(Float *samples, int nsamples, RNG &rng,
-                        bool jitter = true);
-void StratifiedSample2D(Point2f *samples, int nx, int ny, RNG &rng,
-                        bool jitter = true);
+void StratifiedSample1D(Float *samples, int nsamples, RNG &rng, bool jitter = true);
+void StratifiedSample2D(Point2f *samples, int nx, int ny, RNG &rng, bool jitter = true);
 void LatinHypercube(Float *samples, int nSamples, int nDim, RNG &rng);
 
 // 一维分布的类，它用于计算和采样一维函数的概率分布
 struct Distribution1D
 {
-    // Distribution1D Public Methods
     Distribution1D(const Float *f, int n);
 
     int Count() const;
@@ -30,12 +26,13 @@ struct Distribution1D
 
     Float DiscretePDF(int index) const;
 
-    // Distribution1D Public Data
     std::vector<Float> func, cdf;
     Float funcInt;
 };
 
 Point2f RejectionSampleDisk(RNG &rng);
+
+// 半球上均匀采样
 Vector3f UniformSampleHemisphere(const Point2f &u);
 Float UniformHemispherePdf();
 Vector3f UniformSampleSphere(const Point2f &u);
@@ -48,13 +45,13 @@ Float UniformConePdf(Float thetamax);
 //单位圆盘上均匀采样
 Point2f UniformSampleDisk(const Point2f &u);
 Point2f ConcentricSampleDisk(const Point2f &u);
+//三角形上的均匀采样
 Point2f UniformSampleTriangle(const Point2f &u);
 
 
 class Distribution2D
 {
 public:
-    // Distribution2D Public Methods
     Distribution2D(const Float *data, int nu, int nv);
 
     Point2f SampleContinuous(const Point2f &u, Float *pdf) const;
@@ -62,12 +59,10 @@ public:
     Float Pdf(const Point2f &p) const;
 
 private:
-    // Distribution2D Private Data
     std::vector<std::unique_ptr<Distribution1D>> pConditionalV;
     std::unique_ptr<Distribution1D> pMarginal;
 };
 
-// Sampling Inline Functions
 template <typename T>
 void Shuffle(T *samp, int count, int nDimensions, RNG &rng)
 {
@@ -79,10 +74,10 @@ void Shuffle(T *samp, int count, int nDimensions, RNG &rng)
     }
 }
 
-// 在余弦半球内进行采样的函数
+//在半球内进行余弦加权采样的函数
 Vector3f CosineSampleHemisphere(const Point2f &u);
 
-//计算余弦半球采样概率密度函数值
+//计算半球余弦加权采样概率密度函数值
 Float CosineHemispherePdf(Float cosTheta);
 
 // 计算平衡性采样权重

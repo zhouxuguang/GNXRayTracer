@@ -243,7 +243,9 @@ Distribution2D::Distribution2D(const Float *func, int nu, int nv)
     std::vector<Float> marginalFunc;
     marginalFunc.reserve(nv);
     for (int v = 0; v < nv; ++v)
+    {
         marginalFunc.push_back(pConditionalV[v]->funcInt);
+    }
     pMarginal.reset(new Distribution1D(&marginalFunc[0], nv));
 }
 
@@ -265,7 +267,7 @@ Float Distribution2D::Pdf(const Point2f &p) const
     return pConditionalV[iv]->func[iu] / pMarginal->funcInt;
 }
 
-// 在余弦半球内进行采样的函数
+// 在半球内进行余弦加权采样的函数
 Vector3f CosineSampleHemisphere(const Point2f &u)
 {
     Point2f d = ConcentricSampleDisk(u);
@@ -273,7 +275,7 @@ Vector3f CosineSampleHemisphere(const Point2f &u)
     return Vector3f(d.x, d.y, z);
 }
 
-//计算余弦半球采样概率密度函数值
+//计算半球余弦加权采样概率密度函数值
 Float CosineHemispherePdf(Float cosTheta)
 {
     return cosTheta * InvPi;
