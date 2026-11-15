@@ -17,13 +17,13 @@ void GlassMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
                                                bool allowMultipleLobes) const
 {
     // Perform bump mapping with _bumpMap_, if present
-    if (bumpMap)
-        Bump(bumpMap, si);
-    Float eta = index->Evaluate(*si);
-    Float urough = uRoughness->Evaluate(*si);
-    Float vrough = vRoughness->Evaluate(*si);
-    Spectrum R = Kr->Evaluate(*si).Clamp();
-    Spectrum T = Kt->Evaluate(*si).Clamp();
+    if (mBumpMap)
+        Bump(mBumpMap, si);
+    Float eta = mIndex->Evaluate(*si);
+    Float urough = mURoughness->Evaluate(*si);
+    Float vrough = mVRoughness->Evaluate(*si);
+    Spectrum R = mKr->Evaluate(*si).Clamp();
+    Spectrum T = mKt->Evaluate(*si).Clamp();
     // Initialize _bsdf_ for smooth or rough dielectric
     si->bsdf = ARENA_ALLOC(arena, BSDF)(*si, eta);
 
@@ -38,7 +38,7 @@ void GlassMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
     }
     else
     {
-        if (remapRoughness)
+        if (mRemapRoughness)
         {
             urough = TrowbridgeReitzDistribution::RoughnessToAlpha(urough);
             vrough = TrowbridgeReitzDistribution::RoughnessToAlpha(vrough);
