@@ -4,6 +4,7 @@
 #include "lights/DistantLight.h"
 #include "lights/PointLight.h"
 #include "lights/SpotLight.h"
+#include "materials/GlassMaterial.h"
 #include "materials/MatteMaterial.h"
 #include "materials/MirrorMaterial.h"
 #include "shape/Sphere.h"
@@ -285,6 +286,33 @@ bool AppendMaterials(XMLElement *materialNodes, MaterialMap &materials, std::str
                     std::make_shared<ConstantTexture<Spectrum>>(absorptionCoef),
                     nullptr);
             }
+        }
+        else if (type == "DielectricSpecular" || type == "Glass")
+        {
+            // 与教程 DielectricSpecularMaterial(eta, transmissionColor) 等价：
+            // 反射无色、理想光滑、无 bump，外侧 IOR 固定为 1
+            Float eta = 1.5f;
+            if (!ReadScalar(node, "Eta", eta, error, false))
+            {
+                error = "material '" + name + "': " + error;
+                return false;
+            }
+            // 教程 ParseVector3f(nullptr) 在字段缺失时返回 (0,0,0)
+            Spectrum transmissionColor(0.f);
+            if (!ReadRgb(node, "TransmissionColor", transmissionColor, error, false))
+            {
+                error = "material '" + name + "': " + error;
+                return false;
+            }
+            materials[name] = std::make_shared<GlassMaterial>(
+                // 教程的反射项只有 Fresnel 系数，等价于反射颜色恒为 (1,1,1)
+                std::make_shared<ConstantTexture<Spectrum>>(Spectrum(1.f)),
+                std::make_shared<ConstantTexture<Spectrum>>(transmissionColor),
+                std::make_shared<ConstantTexture<Float>>(0.f),
+                std::make_shared<ConstantTexture<Float>>(0.f),
+                std::make_shared<ConstantTexture<Float>>(eta),
+                nullptr,
+                true);
         }
         else
         {
