@@ -24,6 +24,10 @@ public:
                 Sampler &sampler, MemoryArena &arena, int depth) const override;
 
 private:
+    Spectrum LiInternal(const RayDifferential &ray, const Scene &scene,
+                        Sampler &sampler, MemoryArena &arena, int depth,
+                        Spectrum beta, bool specularBounce) const;
+
     // PathIntegrator Private Data
     const int mMaxDepth;
     const Float mRRThreshold;

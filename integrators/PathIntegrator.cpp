@@ -220,69 +220,70 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
 
 #else
 
-Spectrum PathIntegrator::Li(const RayDifferential& ray, const Scene& scene,
-    Sampler& sampler, MemoryArena& arena, int depth) const
+Spectrum PathIntegrator::Li(const RayDifferential &ray, const Scene &scene,
+                            Sampler &sampler, MemoryArena &arena,
+                            int depth) const
 {
+    return LiInternal(ray, scene, sampler, arena, depth, Spectrum(1.f), true);
+}
+
+Spectrum PathIntegrator::LiInternal(const RayDifferential &ray, const Scene &scene,
+                                    Sampler &sampler, MemoryArena &arena,
+                                    int depth, Spectrum beta,
+                                    bool specularBounce) const
+{
+    Spectrum L(0.f);
     if (depth > mMaxDepth)
+        return L;
+
+    SurfaceInteraction isect;
+    if (!scene.Intersect(ray, &isect))
     {
-        return Spectrum(0);
-    }
-    
-	Spectrum Lo(0.f);
-    
-    Float rewardFactor = 1.0f;
-    if (depth >= 3)
-    {
-        Float K = sampler.Get1D();
-        if (K > mRRThreshold)
-        {
-            return Spectrum(0.f);
-        }
-        rewardFactor = 1.0f / mRRThreshold;
+        return L;
     }
 
-	pbr::SurfaceInteraction isect;
-	if (!scene.Intersect(ray, &isect))
-	{
-		return Lo;
-	}
+    // 自发光：首跳或上一次反弹是镜面/折射
+    if (depth == 0 || specularBounce)
+        L += beta * isect.Le(-ray.d);
 
-	// 收集物体的BRDF信息
-	isect.ComputeScatteringFunctions(ray, arena);
-    
+    // 收集物体的 BRDF 信息
+    isect.ComputeScatteringFunctions(ray, arena, true);
     if (!isect.bsdf)
+        return L;
+
+    // 直接光照：纯 delta 镜面材质跳过
+    if (isect.bsdf->NumComponents(BxDFType(BSDF_ALL & ~BSDF_SPECULAR)) > 0)
     {
-        return Lo;
+        L += beta * UniformSampleOneLight(
+                                          isect, scene, arena, sampler, false,
+                                          mLightDistribution ? mLightDistribution->Lookup(isect.p)
+                                          : nullptr);
     }
 
-    bool isSpecular = !(isect.bsdf->NumComponents(BxDFType(BSDF_ALL & ~BSDF_SPECULAR)) > 0);
-    // 直接光照：纯 delta 镜面材质跳过
-    if (!isSpecular)
+    // 间接光照：镜面与漫反射统一走 BSDF 采样
+    Vector3f wo = -ray.d, wi(0.f, 0.f, 0.f);
+    Float pdf = 0.f;
+    BxDFType flags = BxDFType(0);
+    Spectrum f = isect.bsdf->Sample_f(wo, &wi, sampler.Get2D(), &pdf,
+                                      BSDF_ALL, &flags);
+    if (f.IsBlack() || pdf == 0.f)
+        return L;
+
+    beta *= f * AbsDot(wi, isect.shading.n) / pdf;
+
+    // 俄罗斯轮盘赌：按吞吐量自适应终止，避免深路径被固定概率放大
+    if (depth > 3 && beta.MaxComponentValue() < mRRThreshold)
     {
-        // 计算直接光照
-        Lo += UniformSampleOneLight(isect, scene, arena, sampler);
+        Float q = std::max((Float).05, 1 - beta.MaxComponentValue());
+        if (sampler.Get1D() < q)
+            return L;
+        beta /= 1 - q;
     }
-    
-    // 间接光照，不用区分isSpecular了，因为在Sample_f中统一处理了
-    {
-        // 随机采样一个方向，并计算brdf
-        Vector3f wo = -ray.d, wi;
-        Float pdf;
-        BxDFType flags;
-        Spectrum f = isect.bsdf->Sample_f(wo, &wi, sampler.Get2D(), &pdf,
-                                          BSDF_ALL, &flags);
-        
-        RayDifferential rayNext(isect.SpawnRay(wi));
-        
-        if (!f.IsBlack() && pdf != 0.f)
-        {
-            Spectrum L = Li(rayNext, scene, sampler, arena, depth + 1);
-            
-            Lo += f * AbsDot(wi, isect.shading.n) / pdf * L;
-        }
-    }
-    
-    return Lo * rewardFactor;
+
+    RayDifferential rayNext(isect.SpawnRay(wi));
+    L += LiInternal(rayNext, scene, sampler, arena, depth + 1, beta,
+                    (flags & BSDF_SPECULAR) != 0);
+    return L;
 }
 
 #endif
