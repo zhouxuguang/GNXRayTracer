@@ -13,11 +13,10 @@
 namespace pbr
 {
 
-// DisneyMaterial Declarations
+// Disney²ÄÖÊ
 class DisneyMaterial : public Material
 {
 public:
-    // DisneyMaterial Public Methods
     DisneyMaterial(const std::shared_ptr<Texture<Spectrum>> &color,
                    const std::shared_ptr<Texture<Float>> &metallic,
                    const std::shared_ptr<Texture<Float>> &eta,
@@ -34,22 +33,22 @@ public:
                    const std::shared_ptr<Texture<Float>> &flatness,
                    const std::shared_ptr<Texture<Float>> &diffTrans,
                    const std::shared_ptr<Texture<Float>> &bumpMap)
-        : color(color),
-          metallic(metallic),
-          eta(eta),
-          roughness(roughness),
-          specularTint(specularTint),
-          anisotropic(anisotropic),
-          sheen(sheen),
-          sheenTint(sheenTint),
-          clearcoat(clearcoat),
-          clearcoatGloss(clearcoatGloss),
-          specTrans(specTrans),
-          scatterDistance(scatterDistance),
-          thin(thin),
-          flatness(flatness),
-          diffTrans(diffTrans),
-          bumpMap(bumpMap)
+        : mColor(color),
+          mMetallic(metallic),
+          mEta(eta),
+          mRoughness(roughness),
+          mSpecularTint(specularTint),
+          mAnisotropic(anisotropic),
+          mSheen(sheen),
+          mSheenTint(sheenTint),
+          mClearcoat(clearcoat),
+          mClearcoatGloss(clearcoatGloss),
+          mSpecTrans(specTrans),
+          mScatterDistance(scatterDistance),
+          mThin(thin),
+          mFlatness(flatness),
+          mDiffTrans(diffTrans),
+          mBumpMap(bumpMap)
     {
     }
     void ComputeScatteringFunctions(SurfaceInteraction *si, MemoryArena &arena,
@@ -57,15 +56,14 @@ public:
                                     bool allowMultipleLobes) const;
 
 private:
-    // DisneyMaterial Private Data
-    std::shared_ptr<Texture<Spectrum>> color;
-    std::shared_ptr<Texture<Float>> metallic, eta;
-    std::shared_ptr<Texture<Float>> roughness, specularTint, anisotropic, sheen;
-    std::shared_ptr<Texture<Float>> sheenTint, clearcoat, clearcoatGloss;
-    std::shared_ptr<Texture<Float>> specTrans;
-    std::shared_ptr<Texture<Spectrum>> scatterDistance;
-    bool thin;
-    std::shared_ptr<Texture<Float>> flatness, diffTrans, bumpMap;
+    std::shared_ptr<Texture<Spectrum>> mColor;
+    std::shared_ptr<Texture<Float>> mMetallic, mEta;
+    std::shared_ptr<Texture<Float>> mRoughness, mSpecularTint, mAnisotropic, mSheen;
+    std::shared_ptr<Texture<Float>> mSheenTint, mClearcoat, mClearcoatGloss;
+    std::shared_ptr<Texture<Float>> mSpecTrans;
+    std::shared_ptr<Texture<Spectrum>> mScatterDistance;
+    bool mThin;
+    std::shared_ptr<Texture<Float>> mFlatness, mDiffTrans, mBumpMap;
 };
 
 } // namespace pbr

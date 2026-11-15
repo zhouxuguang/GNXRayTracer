@@ -531,38 +531,38 @@ void DisneyMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
                                                 bool allowMultipleLobes) const
 {
     // Perform bump mapping with _bumpMap_, if present
-    if (bumpMap)
-        Bump(bumpMap, si);
+    if (mBumpMap)
+        Bump(mBumpMap, si);
 
     // Evaluate textures for _DisneyMaterial_ material and allocate BRDF
     si->bsdf = ARENA_ALLOC(arena, BSDF)(*si);
 
     // Diffuse
-    Spectrum c = color->Evaluate(*si).Clamp();
-    Float metallicWeight = metallic->Evaluate(*si);
-    Float e = eta->Evaluate(*si);
-    Float strans = specTrans->Evaluate(*si);
+    Spectrum c = mColor->Evaluate(*si).Clamp();
+    Float metallicWeight = mMetallic->Evaluate(*si);
+    Float e = mEta->Evaluate(*si);
+    Float strans = mSpecTrans->Evaluate(*si);
     Float diffuseWeight = (1 - metallicWeight) * (1 - strans);
-    Float dt = diffTrans->Evaluate(*si) /
+    Float dt = mDiffTrans->Evaluate(*si) /
                2; // 0: all diffuse is reflected -> 1, transmitted
-    Float rough = roughness->Evaluate(*si);
+    Float rough = mRoughness->Evaluate(*si);
     Float lum = c.y();
     // normalize lum. to isolate hue+sat
     Spectrum Ctint = lum > 0 ? (c / lum) : Spectrum(1.);
 
-    Float sheenWeight = sheen->Evaluate(*si);
+    Float sheenWeight = mSheen->Evaluate(*si);
     Spectrum Csheen;
     if (sheenWeight > 0)
     {
-        Float stint = sheenTint->Evaluate(*si);
+        Float stint = mSheenTint->Evaluate(*si);
         Csheen = Lerp(stint, Spectrum(1.), Ctint);
     }
 
     if (diffuseWeight > 0)
     {
-        if (thin)
+        if (mThin)
         {
-            Float flat = flatness->Evaluate(*si);
+            Float flat = mFlatness->Evaluate(*si);
             // Blend between DisneyDiffuse and fake subsurface based on
             // flatness.  Additionally, weight using diffTrans.
             si->bsdf->Add(ARENA_ALLOC(arena, DisneyDiffuse)(
@@ -572,7 +572,7 @@ void DisneyMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
         }
         else
         {
-            Spectrum sd = scatterDistance->Evaluate(*si);
+            Spectrum sd = mScatterDistance->Evaluate(*si);
             if (sd.IsBlack())
                 // No subsurface scattering; use regular (Fresnel modified)
                 // diffuse.
@@ -594,20 +594,22 @@ void DisneyMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
 
         // Sheen (if enabled)
         if (sheenWeight > 0)
+        {
             si->bsdf->Add(ARENA_ALLOC(arena, DisneySheen)(
                 diffuseWeight * sheenWeight * Csheen));
+        }
     }
 
     // Create the microfacet distribution for metallic and/or specular
     // transmission.
-    Float aspect = std::sqrt(1 - anisotropic->Evaluate(*si) * .9);
+    Float aspect = std::sqrt(1 - mAnisotropic->Evaluate(*si) * .9);
     Float ax = std::max(Float(.001), sqr(rough) / aspect);
     Float ay = std::max(Float(.001), sqr(rough) * aspect);
     MicrofacetDistribution *distrib =
         ARENA_ALLOC(arena, DisneyMicrofacetDistribution)(ax, ay);
 
     // Specular is Trowbridge-Reitz with a modified Fresnel function.
-    Float specTint = specularTint->Evaluate(*si);
+    Float specTint = mSpecularTint->Evaluate(*si);
     Spectrum Cspec0 =
         Lerp(metallicWeight,
              SchlickR0FromEta(e) * Lerp(specTint, Spectrum(1.), Ctint), c);
@@ -617,11 +619,11 @@ void DisneyMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
         ARENA_ALLOC(arena, MicrofacetReflection)(Spectrum(1.), distrib, fresnel));
 
     // Clearcoat
-    Float cc = clearcoat->Evaluate(*si);
+    Float cc = mClearcoat->Evaluate(*si);
     if (cc > 0)
     {
         si->bsdf->Add(ARENA_ALLOC(arena, DisneyClearcoat)(
-            cc, Lerp(clearcoatGloss->Evaluate(*si), .1, .001)));
+            cc, Lerp(mClearcoatGloss->Evaluate(*si), .1, .001)));
     }
 
     // BTDF
@@ -631,7 +633,7 @@ void DisneyMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
         // by sqrt(color), so that after two refractions, we're back to the
         // provided color.
         Spectrum T = strans * Sqrt(c);
-        if (thin)
+        if (mThin)
         {
             // Scale roughness based on IOR (Burley 2015, Figure 15).
             Float rscaled = (0.65f * e - 0.35f) * rough;
@@ -643,10 +645,12 @@ void DisneyMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
                 T, scaledDistrib, 1., e, mode));
         }
         else
+        {
             si->bsdf->Add(ARENA_ALLOC(arena, MicrofacetTransmission)(
                 T, distrib, 1., e, mode));
+        }
     }
-    if (thin)
+    if (mThin)
     {
         // Lambertian, weighted by (1 - diffTrans)
         si->bsdf->Add(ARENA_ALLOC(arena, LambertianTransmission)(dt * c));

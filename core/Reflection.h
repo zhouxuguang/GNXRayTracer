@@ -304,8 +304,12 @@ inline int BSDF::NumComponents(BxDFType flags) const
 {
     int num = 0;
     for (int i = 0; i < nBxDFs; ++i)
+    {
         if (bxdfs[i]->MatchesFlags(flags))
+        {
             ++num;
+        }
+    }
     return num;
 }
 
