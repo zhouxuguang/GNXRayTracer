@@ -34,17 +34,27 @@ Point2f RejectionSampleDisk(RNG &rng);
 
 // 半球上均匀采样
 Vector3f UniformSampleHemisphere(const Point2f &u);
+
 Float UniformHemispherePdf();
+
+// 球面上均匀采样
 Vector3f UniformSampleSphere(const Point2f &u);
+
 Float UniformSpherePdf();
+
 Vector3f UniformSampleCone(const Point2f &u, Float thetamax);
+
 Vector3f UniformSampleCone(const Point2f &u, Float thetamax, const Vector3f &x,
                            const Vector3f &y, const Vector3f &z);
+
 Float UniformConePdf(Float thetamax);
 
 //单位圆盘上均匀采样
 Point2f UniformSampleDisk(const Point2f &u);
+
+// 单位圆盘的同心圆采样
 Point2f ConcentricSampleDisk(const Point2f &u);
+
 //三角形上的均匀采样
 Point2f UniformSampleTriangle(const Point2f &u);
 

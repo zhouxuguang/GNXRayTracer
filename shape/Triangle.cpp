@@ -2,11 +2,7 @@
 #include "Triangle.h"
 #include "core/Interaction.h"
 #include "core/Texture.h"
-//#include "textures/constant.h"
-//#include "paramset.h"
 #include "core/Sampling.h"
-//#include "efloat.h"
-//#include "ext/rply.h"
 #include <array>
 
 namespace pbr
@@ -54,9 +50,9 @@ TriangleMesh::TriangleMesh(const Transform &ObjectToWorld, int nTriangles,
 Bounds3f Triangle::ObjectBound() const
 {
     // Get triangle vertices in _p0_, _p1_, and _p2_
-    const Point3f &p0 = mesh->p[v[0]];
-    const Point3f &p1 = mesh->p[v[1]];
-    const Point3f &p2 = mesh->p[v[2]];
+    const Point3f &p0 = mMesh->p[mV[0]];
+    const Point3f &p1 = mMesh->p[mV[1]];
+    const Point3f &p2 = mMesh->p[mV[2]];
     return Union(Bounds3f((*WorldToObject)(p0), (*WorldToObject)(p1)),
                  (*WorldToObject)(p2));
 }
@@ -64,20 +60,18 @@ Bounds3f Triangle::ObjectBound() const
 Bounds3f Triangle::WorldBound() const
 {
     // Get triangle vertices in _p0_, _p1_, and _p2_
-    const Point3f &p0 = mesh->p[v[0]];
-    const Point3f &p1 = mesh->p[v[1]];
-    const Point3f &p2 = mesh->p[v[2]];
+    const Point3f &p0 = mMesh->p[mV[0]];
+    const Point3f &p1 = mMesh->p[mV[1]];
+    const Point3f &p2 = mMesh->p[mV[2]];
     return Union(Bounds3f(p0, p1), p2);
 }
 
 bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect, bool testAlphaTexture) const
 {
-    //    ProfilePhase p(Prof::TriIntersect);
-    //    ++nTests;
     // Get triangle vertices in _p0_, _p1_, and _p2_
-    const Point3f &p0 = mesh->p[v[0]];
-    const Point3f &p1 = mesh->p[v[1]];
-    const Point3f &p2 = mesh->p[v[2]];
+    const Point3f &p0 = mMesh->p[mV[0]];
+    const Point3f &p1 = mMesh->p[mV[1]];
+    const Point3f &p2 = mMesh->p[mV[2]];
 
     // Perform ray--triangle intersection test
 
@@ -215,12 +209,12 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
     Point3f pHit = b0 * p0 + b1 * p1 + b2 * p2;
 
     // Test intersection against alpha texture, if present
-    if (testAlphaTexture && mesh->alphaMask)
+    if (testAlphaTexture && mMesh->alphaMask)
     {
         SurfaceInteraction isectLocal(pHit, Vector3f(0, 0, 0), uvHit, -ray.d,
                                       dpdu, dpdv, Normal3f(0, 0, 0),
                                       Normal3f(0, 0, 0), ray.time, this);
-        if (mesh->alphaMask->Evaluate(isectLocal) == 0)
+        if (mMesh->alphaMask->Evaluate(isectLocal) == 0)
             return false;
     }
 
@@ -228,7 +222,7 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
     // Fill in _SurfaceInteraction_ from triangle hit
     *isect = SurfaceInteraction(pHit, pError, uvHit, -ray.d, dpdu, dpdv,
                                 Normal3f(0, 0, 0), Normal3f(0, 0, 0), ray.time,
-                                this, faceIndex);
+                                this, mFaceIndex);
 
     // Override surface normal in _isect_ for triangle
     isect->n = isect->shading.n = Normal3f(Normalize(Cross(dp02, dp12)));
@@ -236,15 +230,15 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
     if (reverseOrientation ^ transformSwapsHandedness)
         isect->n = isect->shading.n = -isect->n;
 
-    if (mesh->n || mesh->s)
+    if (mMesh->n || mMesh->s)
     {
         // Initialize _Triangle_ shading geometry
 
         // Compute shading normal _ns_ for triangle
         Normal3f ns;
-        if (mesh->n)
+        if (mMesh->n)
         {
-            ns = (b0 * mesh->n[v[0]] + b1 * mesh->n[v[1]] + b2 * mesh->n[v[2]]);
+            ns = (b0 * mMesh->n[mV[0]] + b1 * mMesh->n[mV[1]] + b2 * mMesh->n[mV[2]]);
             if (ns.LengthSquared() > 0)
                 ns = Normalize(ns);
             else
@@ -255,9 +249,9 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
 
         // Compute shading tangent _ss_ for triangle
         Vector3f ss;
-        if (mesh->s)
+        if (mMesh->s)
         {
-            ss = (b0 * mesh->s[v[0]] + b1 * mesh->s[v[1]] + b2 * mesh->s[v[2]]);
+            ss = (b0 * mMesh->s[mV[0]] + b1 * mMesh->s[mV[1]] + b2 * mMesh->s[mV[2]]);
             if (ss.LengthSquared() > 0)
                 ss = Normalize(ss);
             else
@@ -278,13 +272,13 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
 
         // Compute $\dndu$ and $\dndv$ for triangle shading geometry
         Normal3f dndu, dndv;
-        if (mesh->n)
+        if (mMesh->n)
         {
             // Compute deltas for triangle partial derivatives of normal
             Vector2f duv02 = uv[0] - uv[2];
             Vector2f duv12 = uv[1] - uv[2];
-            Normal3f dn1 = mesh->n[v[0]] - mesh->n[v[2]];
-            Normal3f dn2 = mesh->n[v[1]] - mesh->n[v[2]];
+            Normal3f dn1 = mMesh->n[mV[0]] - mMesh->n[mV[2]];
+            Normal3f dn2 = mMesh->n[mV[1]] - mMesh->n[mV[2]];
             Float determinant = duv02[0] * duv12[1] - duv02[1] * duv12[0];
             bool degenerateUV = std::abs(determinant) < 1e-8;
             if (degenerateUV)
@@ -295,8 +289,8 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
                 // (rather than giving up) so that ray differentials for
                 // rays reflected from triangles with degenerate
                 // parameterizations are still reasonable.
-                Vector3f dn = Cross(Vector3f(mesh->n[v[2]] - mesh->n[v[0]]),
-                                    Vector3f(mesh->n[v[1]] - mesh->n[v[0]]));
+                Vector3f dn = Cross(Vector3f(mMesh->n[mV[2]] - mMesh->n[mV[0]]),
+                                    Vector3f(mMesh->n[mV[1]] - mMesh->n[mV[0]]));
                 if (dn.LengthSquared() == 0)
                     dndu = dndv = Normal3f(0, 0, 0);
                 else
@@ -322,19 +316,16 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
     }
 
     *tHit = t;
-    //++nHits;
 
     return true;
 }
 
 bool Triangle::IntersectP(const Ray &ray, bool testAlphaTexture) const
 {
-    //    ProfilePhase p(Prof::TriIntersectP);
-    //++nTests;
     // Get triangle vertices in _p0_, _p1_, and _p2_
-    const Point3f &p0 = mesh->p[v[0]];
-    const Point3f &p1 = mesh->p[v[1]];
-    const Point3f &p2 = mesh->p[v[2]];
+    const Point3f &p0 = mMesh->p[mV[0]];
+    const Point3f &p1 = mMesh->p[mV[1]];
+    const Point3f &p2 = mMesh->p[mV[2]];
 
     // Perform ray--triangle intersection test
 
@@ -438,7 +429,7 @@ bool Triangle::IntersectP(const Ray &ray, bool testAlphaTexture) const
         return false;
 
     // Test shadow ray intersection against alpha texture, if present
-    if (testAlphaTexture && (mesh->alphaMask || mesh->shadowAlphaMask))
+    if (testAlphaTexture && (mMesh->alphaMask || mMesh->shadowAlphaMask))
     {
         // Compute triangle partial derivatives
         Vector3f dpdu, dpdv;
@@ -474,13 +465,12 @@ bool Triangle::IntersectP(const Ray &ray, bool testAlphaTexture) const
         SurfaceInteraction isectLocal(pHit, Vector3f(0, 0, 0), uvHit, -ray.d,
                                       dpdu, dpdv, Normal3f(0, 0, 0),
                                       Normal3f(0, 0, 0), ray.time, this);
-        if (mesh->alphaMask && mesh->alphaMask->Evaluate(isectLocal) == 0)
+        if (mMesh->alphaMask && mMesh->alphaMask->Evaluate(isectLocal) == 0)
             return false;
-        if (mesh->shadowAlphaMask &&
-            mesh->shadowAlphaMask->Evaluate(isectLocal) == 0)
+        if (mMesh->shadowAlphaMask &&
+            mMesh->shadowAlphaMask->Evaluate(isectLocal) == 0)
             return false;
     }
-    //++nHits;
 
     return true;
 }
@@ -488,9 +478,9 @@ bool Triangle::IntersectP(const Ray &ray, bool testAlphaTexture) const
 Float Triangle::Area() const
 {
     // Get triangle vertices in _p0_, _p1_, and _p2_
-    const Point3f &p0 = mesh->p[v[0]];
-    const Point3f &p1 = mesh->p[v[1]];
-    const Point3f &p2 = mesh->p[v[2]];
+    const Point3f &p0 = mMesh->p[mV[0]];
+    const Point3f &p1 = mMesh->p[mV[1]];
+    const Point3f &p2 = mMesh->p[mV[2]];
     return 0.5 * Cross(p1 - p0, p2 - p0).Length();
 }
 
@@ -498,19 +488,23 @@ Interaction Triangle::Sample(const Point2f &u, Float *pdf) const
 {
     Point2f b = UniformSampleTriangle(u);
     // Get triangle vertices in _p0_, _p1_, and _p2_
-    const Point3f &p0 = mesh->p[v[0]];
-    const Point3f &p1 = mesh->p[v[1]];
-    const Point3f &p2 = mesh->p[v[2]];
+    const Point3f &p0 = mMesh->p[mV[0]];
+    const Point3f &p1 = mMesh->p[mV[1]];
+    const Point3f &p2 = mMesh->p[mV[2]];
     Interaction it;
     it.p = b[0] * p0 + b[1] * p1 + (1 - b[0] - b[1]) * p2;
-    // Compute surface normal for sampled point on triangle
+
+    // 计算三角形采样点上的面法线
     it.n = Normalize(Normal3f(Cross(p1 - p0, p2 - p0)));
-    // Ensure correct orientation of the geometric normal; follow the same
-    // approach as was used in Triangle::Intersect().
-    if (mesh->n)
+
+    // 让面光源采样得到的法线与 Triangle::Intersect 光线求交得到的法线保持一致。
+    if (mMesh->n)
     {
-        Normal3f ns(b[0] * mesh->n[v[0]] + b[1] * mesh->n[v[1]] +
-                    (1 - b[0] - b[1]) * mesh->n[v[2]]);
+        // 重心坐标插值出三角形采样点上的法线
+        Normal3f ns(b[0] * mMesh->n[mV[0]] + b[1] * mMesh->n[mV[1]] +
+                    (1 - b[0] - b[1]) * mMesh->n[mV[2]]);
+
+        // 让几何法线翻到与插值法线同向的一侧
         it.n = Faceforward(it.n, ns);
     }
     else if (reverseOrientation ^ transformSwapsHandedness)
@@ -529,8 +523,8 @@ Float Triangle::SolidAngle(const Point3f &p, int nSamples) const
     // Project the vertices into the unit sphere around p.
     std::array<Vector3f, 3> pSphere =
         {
-            Normalize(mesh->p[v[0]] - p), Normalize(mesh->p[v[1]] - p),
-            Normalize(mesh->p[v[2]] - p)};
+            Normalize(mMesh->p[mV[0]] - p), Normalize(mMesh->p[mV[1]] - p),
+            Normalize(mMesh->p[mV[2]] - p)};
 
     // http://math.stackexchange.com/questions/9819/area-of-a-spherical-triangle
     // Girard's theorem: surface area of a spherical triangle on a unit

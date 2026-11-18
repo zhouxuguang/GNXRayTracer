@@ -11,36 +11,32 @@ namespace pbr
 // 三角网格定义
 struct TriangleMesh
 {
-    // TriangleMesh Public Methods
     TriangleMesh(const Transform &ObjectToWorld, int nTriangles,
                  const int *vertexIndices, int nVertices, const Point3f *P,
                  const Vector3f *S, const Normal3f *N, const Point2f *uv,
                  const int *faceIndices);
 
-    // TriangleMesh Data
-    const int nTriangles, nVertices;
-    std::vector<int> vertexIndices;
-    std::unique_ptr<Point3f[]> p;
-    std::unique_ptr<Normal3f[]> n;
-    std::unique_ptr<Vector3f[]> s;
-    std::unique_ptr<Point2f[]> uv;
-    std::shared_ptr<Texture<Float>> alphaMask, shadowAlphaMask;
-    std::vector<int> faceIndices;
+    const int nTriangles, nVertices;   //三角形数量和顶点数量
+    std::vector<int> vertexIndices;    //顶点索引数组
+    std::unique_ptr<Point3f[]> p;      //顶点位置数组
+    std::unique_ptr<Normal3f[]> n;     //顶点法线数组
+    std::unique_ptr<Vector3f[]> s;     //顶点切线数组
+    std::unique_ptr<Point2f[]> uv;     //顶点纹理坐标数组
+    std::shared_ptr<Texture<Float>> alphaMask, shadowAlphaMask;  //遮罩纹理
+    std::vector<int> faceIndices;      //三角形索引数组
 };
 
 //三角形定义
 class Triangle : public Shape
 {
 public:
-    // Triangle Public Methods
     Triangle(const Transform *ObjectToWorld, const Transform *WorldToObject,
              bool reverseOrientation, const std::shared_ptr<TriangleMesh> &mesh,
              int triNumber)
-        : Shape(ObjectToWorld, WorldToObject, reverseOrientation), mesh(mesh)
+        : Shape(ObjectToWorld, WorldToObject, reverseOrientation), mMesh(mesh)
     {
-        v = &mesh->vertexIndices[3 * triNumber];
-        //triMeshBytes += sizeof(*this);
-        faceIndex = mesh->faceIndices.size() ? mesh->faceIndices[triNumber] : 0;
+        mV = &mesh->vertexIndices[3 * triNumber];
+        mFaceIndex = mesh->faceIndices.size() ? mesh->faceIndices[triNumber] : 0;
     }
     Bounds3f ObjectBound() const;
     Bounds3f WorldBound() const;
@@ -60,11 +56,11 @@ private:
     // Triangle Private Methods
     void GetUVs(Point2f uv[3]) const
     {
-        if (mesh->uv)
+        if (mMesh->uv)
         {
-            uv[0] = mesh->uv[v[0]];
-            uv[1] = mesh->uv[v[1]];
-            uv[2] = mesh->uv[v[2]];
+            uv[0] = mMesh->uv[mV[0]];
+            uv[1] = mMesh->uv[mV[1]];
+            uv[2] = mMesh->uv[mV[2]];
         }
         else
         {
@@ -74,10 +70,9 @@ private:
         }
     }
 
-    // Triangle Private Data
-    std::shared_ptr<TriangleMesh> mesh;
-    const int *v;
-    int faceIndex;
+    std::shared_ptr<TriangleMesh> mMesh;  //所在的mesh
+    const int *mV;
+    int mFaceIndex;
 };
 
 }
