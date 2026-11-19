@@ -34,7 +34,7 @@ Interaction Shape::Sample(const Interaction &ref, const Point2f &u, Float *pdf) 
     else
     {
         wi = Normalize(wi);
-        // 将面积的pdf转换为方向的pdf，直接的用处就是对面积光源进行直接光源采样
+        // 将面积的pdf转换为方向的pdf，直接的用处就是对面积光源进行直接光源采样,也就是公式 pw = |pa|距离 * pdf(a) / cos(theta_a)
         *pdf *= DistanceSquared(ref.p, intr.p) / AbsDot(intr.n, -wi);
         if (std::isinf(*pdf))
             *pdf = 0.f;
