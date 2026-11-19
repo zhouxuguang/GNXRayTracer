@@ -242,9 +242,11 @@ Spectrum PathIntegrator::LiInternal(const RayDifferential &ray, const Scene &sce
         return L;
     }
 
-    // 自发光：首跳或上一次反弹是镜面/折射
+    // 自发光：首跳或上一次反弹是镜面/折射,避免采样面积光源的时候采样多次，导致最后的Le加了很多次的问题
     if (depth == 0 || specularBounce)
+    {
         L += beta * isect.Le(-ray.d);
+    }
 
     // 收集物体的 BRDF 信息
     isect.ComputeScatteringFunctions(ray, arena, true);
