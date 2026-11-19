@@ -116,7 +116,7 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
         }
 
         // 若光线逃逸当前场景或者达到最大递归深度，则结束路径追踪
-        if (!foundIntersection || bounces >= maxDepth)
+        if (!foundIntersection || bounces >= mMaxDepth)
         {
             break;
         }
@@ -131,7 +131,7 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
             continue;
         }
 
-        const Distribution1D *distrib = lightDistribution->Lookup(isect.p);
+        const Distribution1D *distrib = mLightDistribution->Lookup(isect.p);
 
         // 采样直接光照
         // (But skip this for perfectly specular BSDFs.)
@@ -205,7 +205,7 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
         //终止路径的追踪：如果路径的权重beta经过一定的迭代次数后的最大分量小于某个阈值（rrThreshold），并且迭代次数超过了一定的阈
         //值（3），就有一定概率直接终止路径的追踪，这是通过俄罗斯转盘法则实现的。
         Spectrum rrBeta = beta * etaScale;
-        if (rrBeta.MaxComponentValue() < rrThreshold && bounces > 3)
+        if (rrBeta.MaxComponentValue() < mRRThreshold && bounces > 3)
         {
             Float q = std::max((Float).05, 1 - rrBeta.MaxComponentValue());
             if (sampler.Get1D() < q)

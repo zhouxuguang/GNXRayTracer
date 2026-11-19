@@ -13,7 +13,6 @@ namespace pbr
 // 四元数类的声明
 struct Quaternion
 {
-    // Quaternion Public Methods
     Quaternion()
         : v(0, 0, 0), w(1)
     {
@@ -83,14 +82,13 @@ struct Quaternion
         return os;
     }
 
-    // Quaternion Public Data
     Vector3f v;
     Float w;
 };
 
+// 球面线性插值
 Quaternion Slerp(Float t, const Quaternion &q1, const Quaternion &q2);
 
-// Quaternion Inline Functions
 inline Quaternion operator*(Float f, const Quaternion &q)
 {
     return q * f;

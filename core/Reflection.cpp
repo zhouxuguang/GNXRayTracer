@@ -161,8 +161,7 @@ Spectrum LambertianTransmission::f(const Vector3f &wo, const Vector3f &wi) const
 
 std::string LambertianTransmission::ToString() const
 {
-    return std::string("[ LambertianTransmission T: ") + T.ToString() +
-           std::string(" ]");
+    return std::string("[ LambertianTransmission T: ") + T.ToString() + std::string(" ]");
 }
 
 Spectrum OrenNayar::f(const Vector3f &wo, const Vector3f &wi) const

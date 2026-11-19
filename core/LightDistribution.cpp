@@ -2,7 +2,6 @@
 
 #include "LightDistribution.h"
 #include "samplers/LowDiscrepancy.h"
-//#include "parallel.h"
 #include "Scene.h"
 #include "Integrator.h"
 #include <numeric>

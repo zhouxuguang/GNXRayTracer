@@ -30,11 +30,10 @@ inline bool IsDeltaLight(int flags)
 // attenuations.x = A(二次项), .y = B(一次项), .z = C(常数项)。
 Float DistanceAttenuation(Float distanceSquared, const Vector3f& attenuations);
 
-// Light Declarations
+// 光源基类
 class Light
 {
 public:
-    // Light Interface
     virtual ~Light();
     Light(int flags, const Transform &LightToWorld,
           const MediumInterface &mediumInterface, int nSamples = 1);
@@ -53,7 +52,6 @@ public:
     virtual void Pdf_Le(const Ray &ray, const Normal3f &nLight, Float *pdfPos,
                         Float *pdfDir) const = 0;
 
-    // Light Public Data
     const int flags;
     const int nSamples;
     const MediumInterface mediumInterface;
@@ -92,10 +90,10 @@ private:
     Interaction p0, p1;
 };
 
+// 面积光基类
 class AreaLight : public Light
 {
 public:
-    // AreaLight Interface
     AreaLight(const Transform &LightToWorld, const MediumInterface &medium, int nSamples);
     virtual Spectrum L(const Interaction &intr, const Vector3f &w) const = 0;
 };

@@ -1515,6 +1515,7 @@ inline T AbsDot(const Normal3<T> &n1, const Normal3<T> &n2)
     return std::abs(n1.x * n2.x + n1.y * n2.y + n1.z * n2.z);
 }
 
+// 法线翻转，也就是面翻转
 template <typename T>
 inline Normal3<T> Faceforward(const Normal3<T> &n, const Vector3<T> &v)
 {
@@ -1823,6 +1824,6 @@ inline Float SphericalPhi(const Vector3f &v)
     return (p < 0) ? (p + 2 * Pi) : p;
 }
 
-} // namespace pbrt
+} // namespace pbr
 
 #endif // GNX_CORE_GEOMETRY_H

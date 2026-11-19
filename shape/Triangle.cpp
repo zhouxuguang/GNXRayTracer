@@ -511,8 +511,7 @@ Interaction Triangle::Sample(const Point2f &u, Float *pdf) const
         it.n *= -1;
 
     // Compute error bounds for sampled point on triangle
-    Point3f pAbsSum =
-        Abs(b[0] * p0) + Abs(b[1] * p1) + Abs((1 - b[0] - b[1]) * p2);
+    Point3f pAbsSum = Abs(b[0] * p0) + Abs(b[1] * p1) + Abs((1 - b[0] - b[1]) * p2);
     it.pError = gamma(6) * Vector3f(pAbsSum.x, pAbsSum.y, pAbsSum.z);
     *pdf = 1 / Area();
     return it;

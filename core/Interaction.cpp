@@ -4,7 +4,6 @@
 namespace pbr
 {
 
-// SurfaceInteraction Method Definitions
 SurfaceInteraction::SurfaceInteraction(
     const Point3f &p, const Vector3f &pError, const Point2f &uv,
     const Vector3f &wo, const Vector3f &dpdu, const Vector3f &dpdv,

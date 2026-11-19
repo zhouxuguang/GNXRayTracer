@@ -5,7 +5,6 @@
 #include "Interaction.h"
 #include "Sampling.h"
 #include "Sampler.h"
-#include "Integrator.h"
 #include "Camera.h"
 #include "Reflection.h"
 #include "Light.h"

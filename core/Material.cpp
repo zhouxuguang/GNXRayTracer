@@ -2,7 +2,6 @@
 
 // core/material.cpp*
 #include "Material.h"
-//#include "Primitive.h"
 #include "Texture.h"
 #include "Spectrum.h"
 #include "Reflection.h"

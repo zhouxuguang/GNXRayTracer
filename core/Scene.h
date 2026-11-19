@@ -13,18 +13,18 @@ namespace pbr
 class Scene
 {
 public:
-    // Scene Public Methods
     Scene(std::shared_ptr<Primitive> aggregate, const std::vector<std::shared_ptr<Light>> &lights)
         : mAggregate(aggregate), lights(lights)
     {
-        // Scene Constructor Implementation
         mWorldBound = aggregate->WorldBound();
 
         for (const auto &light : lights)
         {
             light->Preprocess(*this);
             if (light->flags & (int)LightFlags::Infinite)
+            {
                 infiniteLights.push_back(light);
+            }
         }
     }
 
@@ -44,7 +44,6 @@ public:
     std::vector<std::shared_ptr<Light>> infiniteLights;
 
 private:
-    // Scene Private Data
     std::shared_ptr<Primitive> mAggregate;   // 聚合结构，目前也就是BVH加速结构
     Bounds3f mWorldBound;                    //世界范围
 };
