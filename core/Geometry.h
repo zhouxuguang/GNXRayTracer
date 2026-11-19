@@ -1638,23 +1638,9 @@ inline Float Distance(const Point3<T> &p, const Bounds3<U> &b)
     return std::sqrt(DistanceSquared(p, b));
 }
 
-inline Bounds2iIterator begin(const Bounds2i &b)
-{
-    return Bounds2iIterator(b, b.pMin);
-}
+Bounds2iIterator begin(const Bounds2i &b);
 
-inline Bounds2iIterator end(const Bounds2i &b)
-{
-    // Normally, the ending point is at the minimum x value and one past
-    // the last valid y value.
-    Point2i pEnd(b.pMin.x, b.pMax.y);
-    // However, if the bounds are degenerate, override the end point to
-    // equal the start point so that any attempt to iterate over the bounds
-    // exits out immediately.
-    if (b.pMin.x >= b.pMax.x || b.pMin.y >= b.pMax.y)
-        pEnd = b.pMin;
-    return Bounds2iIterator(b, pEnd);
-}
+Bounds2iIterator end(const Bounds2i &b);
 
 template <typename T>
 Bounds2<T> Union(const Bounds2<T> &b, const Point2<T> &p)
@@ -1780,49 +1766,34 @@ inline bool Bounds3<T>::IntersectP(const Ray &ray, const Vector3f &invDir, const
     return (tMin < ray.tMax) && (tMax > 0);
 }
 
-inline Point3f OffsetRayOrigin(const Point3f &p, const Vector3f &pError,
-                               const Normal3f &n, const Vector3f &w)
+inline Point3f OffsetRayOrigin(const Point3f& p, const Vector3f& pError,
+	const Normal3f& n, const Vector3f& w)
 {
-    Float d = Dot(Abs(n), pError);
-    Vector3f offset = d * Vector3f(n);
-    if (Dot(w, n) < 0)
-        offset = -offset;
-    Point3f po = p + offset;
-    // Round offset point _po_ away from _p_
-    for (int i = 0; i < 3; ++i)
-    {
-        if (offset[i] > 0)
-            po[i] = NextFloatUp(po[i]);
-        else if (offset[i] < 0)
-            po[i] = NextFloatDown(po[i]);
-    }
-    return po;
+	Float d = Dot(Abs(n), pError);
+	Vector3f offset = d * Vector3f(n);
+	if (Dot(w, n) < 0)
+		offset = -offset;
+	Point3f po = p + offset;
+	// Round offset point _po_ away from _p_
+	for (int i = 0; i < 3; ++i)
+	{
+		if (offset[i] > 0)
+			po[i] = NextFloatUp(po[i]);
+		else if (offset[i] < 0)
+			po[i] = NextFloatDown(po[i]);
+	}
+	return po;
 }
 
-inline Vector3f SphericalDirection(Float sinTheta, Float cosTheta, Float phi)
-{
-    return Vector3f(sinTheta * std::cos(phi), sinTheta * std::sin(phi),
-                    cosTheta);
-}
+Vector3f SphericalDirection(Float sinTheta, Float cosTheta, Float phi);
 
-inline Vector3f SphericalDirection(Float sinTheta, Float cosTheta, Float phi,
-                                   const Vector3f &x, const Vector3f &y,
-                                   const Vector3f &z)
-{
-    return sinTheta * std::cos(phi) * x + sinTheta * std::sin(phi) * y +
-           cosTheta * z;
-}
+Vector3f SphericalDirection(Float sinTheta, Float cosTheta, Float phi,
+                            const Vector3f &x, const Vector3f &y,
+                            const Vector3f &z);
 
-inline Float SphericalTheta(const Vector3f &v)
-{
-    return std::acos(Clamp(v.z, -1, 1));
-}
+Float SphericalTheta(const Vector3f &v);
 
-inline Float SphericalPhi(const Vector3f &v)
-{
-    Float p = std::atan2(v.y, v.x);
-    return (p < 0) ? (p + 2 * Pi) : p;
-}
+Float SphericalPhi(const Vector3f &v);
 
 } // namespace pbr
 
