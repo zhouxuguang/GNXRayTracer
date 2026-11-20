@@ -1,6 +1,7 @@
 #include "SceneLoader.h"
 #include "thirdparty/tinyxml2/tinyxml2.h"
 #include "accelerator/BVHAccel.h"
+#include "lights/DiffuseAreaLight.h"
 #include "lights/DistantLight.h"
 #include "lights/PointLight.h"
 #include "lights/SpotLight.h"
@@ -325,7 +326,8 @@ bool AppendMaterials(XMLElement *materialNodes, MaterialMap &materials, std::str
 
 bool AppendObject(XMLElement *object, const MaterialMap &materials,
                   const std::shared_ptr<Material> &defaultMaterial,
-                  std::vector<std::shared_ptr<Primitive>> &prims, std::string &error)
+                  std::vector<std::shared_ptr<Primitive>> &prims,
+                  std::vector<std::shared_ptr<Light>> &lights, std::string &error)
 {
     std::shared_ptr<Material> material = defaultMaterial;
     const char *materialText = ChildText(object, "Material");
@@ -345,6 +347,11 @@ bool AppendObject(XMLElement *object, const MaterialMap &materials,
         }
         material = it->second;
     }
+
+    // <Emissive> 让该对象的形状同时充当漫反射面光源，值为出射辐射亮度 Le
+    Spectrum emissive(0.f);
+    if (!ReadRgb(object, "Emissive", emissive, error, false))
+        return false;
 
     Transform objectToWorld;
     if (!ReadTransform(object->FirstChildElement("Transform"), objectToWorld, error))
@@ -398,8 +405,14 @@ bool AppendObject(XMLElement *object, const MaterialMap &materials,
         for (int i = 0; i < nTriangles; ++i)
         {
             auto shape = std::make_shared<Triangle>(&Identity(), &Identity(), false, mesh, i);
+            std::shared_ptr<DiffuseAreaLight> areaLight;
+            if (!emissive.IsBlack())
+                areaLight = std::make_shared<DiffuseAreaLight>(
+                    Identity(), MediumInterface(), emissive, 1, shape);
             prims.push_back(std::make_shared<GeometricPrimitive>(
-                shape, material, nullptr, MediumInterface()));
+                shape, material, areaLight, MediumInterface()));
+            if (areaLight)
+                lights.push_back(areaLight);
         }
     }
 
@@ -420,8 +433,14 @@ bool AppendObject(XMLElement *object, const MaterialMap &materials,
         if (scaleFactor <= 0)
             scaleFactor = 1.f;
         auto shape = std::make_shared<Sphere>(radius * scaleFactor, center);
+        std::shared_ptr<DiffuseAreaLight> areaLight;
+        if (!emissive.IsBlack())
+            areaLight = std::make_shared<DiffuseAreaLight>(
+                Identity(), MediumInterface(), emissive, 1, shape);
         prims.push_back(std::make_shared<GeometricPrimitive>(
-            shape, material, nullptr, MediumInterface()));
+            shape, material, areaLight, MediumInterface()));
+        if (areaLight)
+            lights.push_back(areaLight);
     }
     return true;
 }
@@ -559,11 +578,12 @@ bool LoadSceneFromXml(const std::string &filePath, LoadedScene &out, std::string
         return fail("<Materials>: " + detail);
 
     std::vector<std::shared_ptr<Primitive>> prims;
+    std::vector<std::shared_ptr<Light>> lights;
     std::size_t objectCount = 0;
     for (XMLElement *object = objects->FirstChildElement("SceneObject"); object;
          object = object->NextSiblingElement("SceneObject"))
     {
-        if (!AppendObject(object, materials, defaultMaterial, prims, detail))
+        if (!AppendObject(object, materials, defaultMaterial, prims, lights, detail))
             return fail("<SceneObject> #" + std::to_string(objectCount + 1) + ": " + detail);
         ++objectCount;
     }
@@ -571,7 +591,6 @@ bool LoadSceneFromXml(const std::string &filePath, LoadedScene &out, std::string
     if (prims.empty())
         return fail("scene contains no primitives: " + filePath);
 
-    std::vector<std::shared_ptr<Light>> lights;
     XMLElement *lightNodes = root->FirstChildElement("Lights");
     if (lightNodes && !AppendLights(lightNodes, lights, detail))
         return fail("<Lights>: " + detail);
