@@ -236,9 +236,13 @@ if (APPLE)
     set_xcode_property(GNXRayTracer GCC_ENABLE_CPP_RTTI NO)
 elseif(WIN32)
     if(MSVC AND MSVC_VERSION GREATER_EQUAL 1913)
-        #target_compile_options(GNXRayTracer ${visibility} "-Zc:__cplusplus" "-permissive-")
-        #target_compile_options(GNXRayTracer ${visibility} "/utf-8 /Zc:__cplusplus")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8 /Zc:__cplusplus /permissive-")
+        # /utf-8 = /source-charset:utf-8 /execution-charset:utf-8
+        # 不加此项时，无 BOM 的 UTF-8 源文件会按系统 ANSI 代码页（中文 Windows 为 GBK/936）解析，
+        # 导致中文注释乱码、C4819，甚至中文尾字节 0x5C 被当成续行符而报 "newline in constant"
+        target_compile_options(GNXRayTracer PRIVATE
+            "$<$<COMPILE_LANGUAGE:C,CXX>:/utf-8>"
+            "$<$<COMPILE_LANGUAGE:CXX>:/Zc:__cplusplus>"
+            "$<$<COMPILE_LANGUAGE:CXX>:/permissive->")
     endif()
 endif (APPLE)
 
