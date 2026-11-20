@@ -494,17 +494,17 @@ Interaction Triangle::Sample(const Point2f &u, Float *pdf) const
     Interaction it;
     it.p = b[0] * p0 + b[1] * p1 + (1 - b[0] - b[1]) * p2;
 
-    // ¼ÆËãÈı½ÇĞÎ²ÉÑùµãÉÏµÄÃæ·¨Ïß
+    // è®¡ç®—ä¸‰è§’å½¢é‡‡æ ·ç‚¹ä¸Šçš„é¢æ³•çº¿
     it.n = Normalize(Normal3f(Cross(p1 - p0, p2 - p0)));
 
-    // ÈÃÃæ¹âÔ´²ÉÑùµÃµ½µÄ·¨ÏßÓë Triangle::Intersect ¹âÏßÇó½»µÃµ½µÄ·¨Ïß±£³ÖÒ»ÖÂ¡£
+    // è®©é¢å…‰æºé‡‡æ ·å¾—åˆ°çš„æ³•çº¿ä¸ Triangle::Intersect å…‰çº¿æ±‚äº¤å¾—åˆ°çš„æ³•çº¿ä¿æŒä¸€è‡´ã€‚
     if (mMesh->n)
     {
-        // ÖØĞÄ×ø±ê²åÖµ³öÈı½ÇĞÎ²ÉÑùµãÉÏµÄ·¨Ïß
+        // é‡å¿ƒåæ ‡æ’å€¼å‡ºä¸‰è§’å½¢é‡‡æ ·ç‚¹ä¸Šçš„æ³•çº¿
         Normal3f ns(b[0] * mMesh->n[mV[0]] + b[1] * mMesh->n[mV[1]] +
                     (1 - b[0] - b[1]) * mMesh->n[mV[2]]);
 
-        // ÈÃ¼¸ºÎ·¨Ïß·­µ½Óë²åÖµ·¨ÏßÍ¬ÏòµÄÒ»²à
+        // è®©å‡ ä½•æ³•çº¿ç¿»åˆ°ä¸æ’å€¼æ³•çº¿åŒå‘çš„ä¸€ä¾§
         it.n = Faceforward(it.n, ns);
     }
     else if (reverseOrientation ^ transformSwapsHandedness)

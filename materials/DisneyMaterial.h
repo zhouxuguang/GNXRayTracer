@@ -13,7 +13,7 @@
 namespace pbr
 {
 
-// Disney²ÄÖÊ
+// Disneyæè´¨
 class DisneyMaterial : public Material
 {
 public:

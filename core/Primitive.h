@@ -10,7 +10,7 @@
 namespace pbr
 {
 
-// ͼԪ����
+// 图元基类
 class Primitive
 {
 public:
@@ -26,7 +26,7 @@ public:
                                             bool allowMultipleLobes) const = 0;
 };
 
-// ����ͼԪ
+// 几何图元
 class GeometricPrimitive : public Primitive
 {
 public:
@@ -51,7 +51,7 @@ private:
     MediumInterface mediumInterface;
 };
 
-// �任ͼԪ
+// 变换图元
 class TransformedPrimitive : public Primitive
 {
 public:
@@ -82,7 +82,7 @@ private:
     const AnimatedTransform PrimitiveToWorld;
 };
 
-// ���ٽṹͼԪ
+// 加速结构图元
 class Aggregate : public Primitive
 {
 public:

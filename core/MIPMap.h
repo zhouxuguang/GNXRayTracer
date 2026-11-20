@@ -100,7 +100,7 @@ private:
     const Float maxAnisotropy;
     const ImageWrap wrapMode;
     Point2i resolution;
-    std::vector<std::unique_ptr<BlockedArray<T>>> pyramid; //´æ´¢Ã¿Ò»²ãµÄÍ¼Ïñ
+    std::vector<std::unique_ptr<BlockedArray<T>>> pyramid; //å­˜å‚¨æ¯ä¸€å±‚çš„å›¾åƒ
     static constexpr int WeightLUTSize = 128;
     static Float weightLut[WeightLUTSize];
 };
@@ -116,7 +116,7 @@ MIPMap<T>::MIPMap(const Point2i &res, const T *img, bool doTrilinear,
 {
     //ProfilePhase _(Prof::MIPMapCreation);
 
-    //Èç¹û²»ÊÇ2µÄn´Î·½£¬ÔòÀ©Õ¹µ½2µÄn´Î·½
+    //å¦‚æœä¸æ˜¯2çš„næ¬¡æ–¹ï¼Œåˆ™æ‰©å±•åˆ°2çš„næ¬¡æ–¹
     std::unique_ptr<T[]> resampledImage = nullptr;
     if (!IsPowerOf2(resolution[0]) || !IsPowerOf2(resolution[1]))
     {
@@ -129,7 +129,7 @@ MIPMap<T>::MIPMap(const Point2i &res, const T *img, bool doTrilinear,
         std::unique_ptr<ResampleWeight[]> sWeights = resampleWeights(resolution[0], resPow2[0]);
         resampledImage.reset(new T[resPow2[0] * resPow2[1]]);
 
-        // Apply _sWeights_ to zoom in $s$ direction  ÕâÀï¿ÉÒÔ²ÉÓÃ²¢ĞĞ»¯µÄ²ßÂÔ
+        // Apply _sWeights_ to zoom in $s$ direction  è¿™é‡Œå¯ä»¥é‡‡ç”¨å¹¶è¡ŒåŒ–çš„ç­–ç•¥
         for (int64_t t = 0; t < resolution[1]; ++t)
         {
             for (int s = 0; s < resPow2[0]; ++s)
@@ -184,7 +184,7 @@ MIPMap<T>::MIPMap(const Point2i &res, const T *img, bool doTrilinear,
         //for (auto ptr : resampleBufs) delete[] ptr;
         resolution = resPow2;
     }
-    // ¼ÆËã²ã¼¶ÊıÄ¿
+    // è®¡ç®—å±‚çº§æ•°ç›®
     int nLevels = 1 + Log2Int(std::max(resolution[0], resolution[1]));
     pyramid.resize(nLevels);
 
@@ -198,7 +198,7 @@ MIPMap<T>::MIPMap(const Point2i &res, const T *img, bool doTrilinear,
         int tRes = std::max(1, pyramid[i - 1]->vSize() / 2);
         pyramid[i].reset(new BlockedArray<T>(sRes, tRes));
 
-        // Filter four texels from finer level of pyramid ,ÕâÀïÒ²¿ÉÒÔÓÃ²¢ĞĞ¼ÓËÙ
+        // Filter four texels from finer level of pyramid ,è¿™é‡Œä¹Ÿå¯ä»¥ç”¨å¹¶è¡ŒåŠ é€Ÿ
         for (int t = 0; t < tRes; t++)
         {
             for (int s = 0; s < sRes; ++s)

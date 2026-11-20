@@ -26,7 +26,7 @@ Interaction Shape::Sample(const Interaction &ref, const Point2f &u, Float *pdf) 
 {
     Interaction intr = Sample(u, pdf);
     Vector3f wi = intr.p - ref.p;
-    if (wi.LengthSquared() == 0)    // Èç¹ûÏà½»µãºÍ¹âÔ´¾àÀë·Ç³£½ü£¬ÔòÖ±½Ó·µ»Ø0
+    if (wi.LengthSquared() == 0)    // å¦‚æœç›¸äº¤ç‚¹å’Œå…‰æºè·ç¦»éå¸¸è¿‘ï¼Œåˆ™ç›´æ¥è¿”å›0
     {
         *pdf = 0;
         return intr;
@@ -34,7 +34,7 @@ Interaction Shape::Sample(const Interaction &ref, const Point2f &u, Float *pdf) 
     else
     {
         wi = Normalize(wi);
-        // ½«Ãæ»ıµÄpdf×ª»»Îª·½ÏòµÄpdf£¬Ö±½ÓµÄÓÃ´¦¾ÍÊÇ¶ÔÃæ»ı¹âÔ´½øĞĞÖ±½Ó¹âÔ´²ÉÑù,Ò²¾ÍÊÇ¹«Ê½ pw = |pa|¾àÀë * pdf(a) / cos(theta_a)
+        // å°†é¢ç§¯çš„pdfè½¬æ¢ä¸ºæ–¹å‘çš„pdfï¼Œç›´æ¥çš„ç”¨å¤„å°±æ˜¯å¯¹é¢ç§¯å…‰æºè¿›è¡Œç›´æ¥å…‰æºé‡‡æ ·,ä¹Ÿå°±æ˜¯å…¬å¼ pw = |pa|è·ç¦» * pdf(a) / cos(theta_a)
         *pdf *= DistanceSquared(ref.p, intr.p) / AbsDot(intr.n, -wi);
         if (std::isinf(*pdf))
             *pdf = 0.f;

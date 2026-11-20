@@ -10,7 +10,7 @@
 namespace pbr
 {
 
-// Diffuse面积光源
+// Diffuse闈㈢Н鍏夋簮
 class DiffuseAreaLight : public AreaLight
 {
 public:
@@ -29,9 +29,9 @@ public:
                 Float *pdfDir) const;
 
 private:
-    const Spectrum mLemit;             // 发光强度
-    std::shared_ptr<Shape> mShape;     // 光源形状
-    const Float mArea;                 // 光源面积
+    const Spectrum mLemit;             // 鍙戝厜寮哄害
+    std::shared_ptr<Shape> mShape;     // 鍏夋簮褰㈢姸
+    const Float mArea;                 // 鍏夋簮闈㈢Н
 };
 
 } // namespace pbr
