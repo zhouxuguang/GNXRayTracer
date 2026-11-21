@@ -57,6 +57,7 @@ void Renderer::Run()
 
     // 屏幕/窗口/视口上每个像素点的颜色，以32位整数表示，格式为0xAARRGGBB（Alpha, Red, Green, Blue）
     mBuffer = (uint32_t *)malloc(mViewportWidth * mViewportHeight * 4);
+    memset(mBuffer, 0, mViewportWidth * mViewportHeight * 4);
 
     int numThreads = std::thread::hardware_concurrency();
     std::vector<std::thread> renderThreads(numThreads);
