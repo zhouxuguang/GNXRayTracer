@@ -38,8 +38,7 @@ public:
         : WorldToTexture(WorldToTexture)
     {
     }
-    Point2f Map(const SurfaceInteraction &si, Vector2f *dstdx,
-                Vector2f *dstdy) const;
+    Point2f Map(const SurfaceInteraction &si, Vector2f *dstdx, Vector2f *dstdy) const;
 
 private:
     Point2f sphere(const Point3f &P) const;
