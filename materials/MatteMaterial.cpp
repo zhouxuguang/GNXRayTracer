@@ -18,7 +18,14 @@ void MatteMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
 {
     // Perform bump mapping with _bumpMap_, if present
     if (mBumpMap)
+    {
         Bump(mBumpMap, si);
+    }
+    
+    if (mNormalMap)
+    {
+        NormalMap(mNormalMap, si);
+    }
 
     // Evaluate textures for _MatteMaterial_ material and allocate BRDF
     si->bsdf = ARENA_ALLOC(arena, BSDF)(*si);

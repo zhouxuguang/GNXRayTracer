@@ -10,25 +10,24 @@
 namespace pbr
 {
 
-// TransportMode Declarations
 enum class TransportMode
 {
     Radiance,
     Importance
 };
 
-// Material Declarations
+// 材质基类
 class Material
 {
 public:
-    // Material Interface
     virtual void ComputeScatteringFunctions(SurfaceInteraction *si,
                                             MemoryArena &arena,
                                             TransportMode mode,
                                             bool allowMultipleLobes) const = 0;
     virtual ~Material();
-    static void Bump(const std::shared_ptr<Texture<Float>> &d,
-                     SurfaceInteraction *si);
+    static void Bump(const std::shared_ptr<Texture<Float>> &d, SurfaceInteraction *si);
+    
+    static void NormalMap(const std::shared_ptr<Texture<Spectrum>> &normalMap, SurfaceInteraction *si);
 };
 
 } // namespace pbr

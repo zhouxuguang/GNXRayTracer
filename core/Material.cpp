@@ -9,7 +9,6 @@
 namespace pbr
 {
 
-// Material Method Definitions
 Material::~Material()
 {
 }
@@ -52,6 +51,41 @@ void Material::Bump(const std::shared_ptr<Texture<Float>> &d, SurfaceInteraction
                     (vDisplace - displace) / dv * Vector3f(si->shading.n) +
                     displace * Vector3f(si->shading.dndv);
     si->SetShadingGeometry(dpdu, dpdv, si->shading.dndu, si->shading.dndv, false);
+}
+
+void Material::NormalMap(const std::shared_ptr<Texture<Spectrum>> &normalMap, SurfaceInteraction *si)
+{
+    // 1) 取切空间法线
+    Float rgb[3];
+    normalMap->Evaluate(*si).ToRGB(rgb);
+    Vector3f nT(2.f * rgb[0] - 1.f, 2.f * rgb[1] - 1.f, 2.f * rgb[2] - 1.f);
+    if (nT.LengthSquared() < 1e-8f)
+        return;
+    nT = Normalize(nT);
+    
+    // 2) 获得TBN矩阵
+    const Normal3f &shadingNormal = si->shading.n;
+    Vector3f ns = Vector3f(Normalize(shadingNormal));
+    Vector3f ts = Normalize(si->shading.dpdu - Dot(si->shading.dpdu, ns) * ns);
+    Vector3f bs = Cross(ns, ts);
+    
+    // 3) 切空间 → 世界空间
+    Vector3f n = Vector3f(ts.x * nT.x + bs.x * nT.y + ns.x * nT.z,
+                          ts.y * nT.x + bs.y * nT.y + ns.y * nT.z,
+                          ts.z * nT.x + bs.z * nT.y + ns.z * nT.z);
+    if (n.LengthSquared() == 0.f)
+    {
+        return;
+    }
+    
+    // 4) 写回 shading 几何：法线与几何法线同半球，切线重新正交化到新法线。
+    //    BSDF 用 ss = Normalize(shading.dpdu)、ts = Cross(ns, ss) 建局部基，
+    //    法线被贴图偏转后若不同步切线，ss 与 ns 不再正交，局部基会被拉伸。
+    Vector3f newNs = Faceforward(Normalize(n), si->n);
+    Vector3f newSs = si->shading.dpdu - Dot(si->shading.dpdu, newNs) * newNs;
+    if (newSs.LengthSquared() > 1e-8f)
+        si->shading.dpdu = newSs;
+    si->shading.n = Normal3f(newNs);
 }
 
 } // namespace pbr

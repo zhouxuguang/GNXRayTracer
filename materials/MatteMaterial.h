@@ -15,8 +15,9 @@ public:
     // MatteMaterial Public Methods
     MatteMaterial(const std::shared_ptr<Texture<Spectrum>> &Kd,
                   const std::shared_ptr<Texture<Float>> &sigma,
-                  const std::shared_ptr<Texture<Float>> &bumpMap)
-        : mKd(Kd), mSigma(sigma), mBumpMap(bumpMap)
+                  const std::shared_ptr<Texture<Float>> &bumpMap,
+                  const std::shared_ptr<Texture<Spectrum>> &normalMap = nullptr)
+        : mKd(Kd), mSigma(sigma), mBumpMap(bumpMap), mNormalMap(normalMap)
     {
     }
     void ComputeScatteringFunctions(SurfaceInteraction *si, MemoryArena &arena,
@@ -24,9 +25,9 @@ public:
                                     bool allowMultipleLobes) const;
 
 private:
-    // MatteMaterial Private Data
     std::shared_ptr<Texture<Spectrum>> mKd;      // diffuse reflectance
     std::shared_ptr<Texture<Float>> mSigma, mBumpMap;  // 粗糙度和凹凸贴图
+    std::shared_ptr<Texture<Spectrum>> mNormalMap;      // 法线贴图
 };
 
 } // namespace pbr

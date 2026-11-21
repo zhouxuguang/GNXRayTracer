@@ -17,7 +17,7 @@ static RGBSpectrum *loadImage(const std::string &filename, Point2i &resolution)
     RGBSpectrum *data_s;
     if (filename != "")
     {
-        stbi_ldr_to_hdr_gamma(1.0f);
+        stbi_ldr_to_hdr_gamma(0.45f);
         int imageWidth, imageHeight, nrComponents;
         data = stbi_loadf(filename.c_str(), &imageWidth, &imageHeight, &nrComponents, 0);
         if (!data)
@@ -74,15 +74,15 @@ MIPMap<Tmemory> *ImageTexture<Tmemory, Treturn>::GetTexture(
     }
 
     // 上下颠倒，使得（0，0）点在图像的左下角
-    for (int y = 0; y < resolution.y / 2; ++y)
-    {
-        for (int x = 0; x < resolution.x; ++x)
-        {
-            int o1 = y * resolution.x + x;
-            int o2 = (resolution.y - 1 - y) * resolution.x + x;
-            std::swap(texels[o1], texels[o2]);
-        }
-    }
+//    for (int y = 0; y < resolution.y / 2; ++y)
+//    {
+//        for (int x = 0; x < resolution.x; ++x)
+//        {
+//            int o1 = y * resolution.x + x;
+//            int o2 = (resolution.y - 1 - y) * resolution.x + x;
+//            std::swap(texels[o1], texels[o2]);
+//        }
+//    }
 
     MIPMap<Tmemory> *mipmap = nullptr;
     if (texels)

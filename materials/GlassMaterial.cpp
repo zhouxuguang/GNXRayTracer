@@ -19,6 +19,9 @@ void GlassMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
     // Perform bump mapping with _bumpMap_, if present
     if (mBumpMap)
         Bump(mBumpMap, si);
+    // 法线贴图必须作用在 BSDF 构造之前，否则着色法线不会进入 _bsdf_ 的局部坐标系
+    if (mNormalMap)
+        NormalMap(mNormalMap, si);
     Float eta = mIndex->Evaluate(*si);
     Float urough = mURoughness->Evaluate(*si);
     Float vrough = mVRoughness->Evaluate(*si);

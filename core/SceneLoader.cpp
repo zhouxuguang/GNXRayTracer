@@ -262,14 +262,40 @@ std::shared_ptr<Texture<Spectrum>> MakeAlbedoTexture(const XMLElement *node,
     return std::make_shared<ConstantTexture<Spectrum>>(albedo);
 }
 
+// 读取 <NormalMap>：法线贴图是数据贴图，必须按原始值加载，不能做 sRGB 解码。
+// 缺 <NormalMap> 或文件不存在时返回 nullptr，材质退化为不使用法线贴图。
+std::shared_ptr<Texture<Spectrum>> MakeNormalTexture(const XMLElement *node,
+                                                     const std::string &materialName,
+                                                     const std::string &textureDir)
+{
+    const std::string normalMap = TrimText(ChildText(node, "NormalMap"));
+    if (normalMap.empty())
+        return nullptr;
+
+    const std::string path = textureDir + normalMap;
+    if (!FileExists(path))
+    {
+        std::fprintf(stderr, "warning: material '%s': normal map not found: %s\n",
+                     materialName.c_str(), path.c_str());
+        return nullptr;
+    }
+
+    // gamma=false：loadImage 已调用 stbi_ldr_to_hdr_gamma(1.0f)，解码结果是 8bit/255 的
+    //               原始值，正是法线贴图需要的线性数据；再解一次 sRGB 会把法线完全扭曲
+    // doTri=false：走 EWA 各向异性过滤，掠射角下比三线性更稳定
+    return std::make_shared<ImageTexture<RGBSpectrum, Spectrum>>(
+        std::make_unique<UVMapping2D>(), path, false, 8.f,
+        ImageWrap::Repeat, 1.f, false);
+}
+
 using MaterialMap = std::map<std::string, std::shared_ptr<Material>>;
 
 std::shared_ptr<Material> MakeDefaultMaterial()
 {
     auto kd = std::make_shared<ConstantTexture<Spectrum>>(Spectrum(0.8f));
     auto sigma = std::make_shared<ConstantTexture<Float>>(0.f);
-    auto bumpMap = std::make_shared<ConstantTexture<Float>>(0.f);
-    return std::make_shared<MatteMaterial>(kd, sigma, bumpMap);
+    // 不传 bump：ConstantTexture(0) 是非空的，会让 MatteMaterial 在每个交点白跑一遍 Bump
+    return std::make_shared<MatteMaterial>(kd, sigma, nullptr);
 }
 
 // 解析 <Materials> 下的具名材质，供 <SceneObject> 的 <Material> 按名称引用。
@@ -322,7 +348,8 @@ bool AppendMaterials(XMLElement *materialNodes, const std::string &textureDir,
             materials[name] = std::make_shared<MatteMaterial>(
                 kd,
                 std::make_shared<ConstantTexture<Float>>(sigma),
-                std::make_shared<ConstantTexture<Float>>(0.f));
+                nullptr,
+                MakeNormalTexture(node, name, textureDir));
         }
         else if (type == "Mirror" || type == "ConductorSpecular")
         {
@@ -379,6 +406,7 @@ bool AppendMaterials(XMLElement *materialNodes, const std::string &textureDir,
                 std::make_shared<ConstantTexture<Float>>(0.f),
                 std::make_shared<ConstantTexture<Float>>(eta),
                 nullptr,
+                MakeNormalTexture(node, name, textureDir),
                 true);
         }
         else
