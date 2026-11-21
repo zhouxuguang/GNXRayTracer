@@ -12,6 +12,7 @@
 namespace pbr
 {
 
+// 2d映射
 class TextureMapping2D
 {
 public:
@@ -20,17 +21,18 @@ public:
                         Vector2f *dstdy) const = 0;
 };
 
+// uv映射，普通的三角形网格的纹理映射用这个
 class UVMapping2D : public TextureMapping2D
 {
 public:
     UVMapping2D(Float su = 1, Float sv = 1, Float du = 0, Float dv = 0);
-    Point2f Map(const SurfaceInteraction &si, Vector2f *dstdx,
-                Vector2f *dstdy) const;
+    Point2f Map(const SurfaceInteraction &si, Vector2f *dstdx, Vector2f *dstdy) const;
 
 private:
     const Float su, sv, du, dv;
 };
 
+// 球体映射
 class SphericalMapping2D : public TextureMapping2D
 {
 public:
@@ -84,8 +86,7 @@ class TextureMapping3D
 {
 public:
     virtual ~TextureMapping3D();
-    virtual Point3f Map(const SurfaceInteraction &si, Vector3f *dpdx,
-                        Vector3f *dpdy) const = 0;
+    virtual Point3f Map(const SurfaceInteraction &si, Vector3f *dpdx, Vector3f *dpdy) const = 0;
 };
 
 class IdentityMapping3D : public TextureMapping3D

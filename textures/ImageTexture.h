@@ -2,7 +2,6 @@
 #ifndef PBR_TEXTURES_IMAGEMAP_H
 #define PBR_TEXTURES_IMAGEMAP_H
 
-// textures/imagemap.h*
 #include "core/Texture.h"
 #include "core/MIPMap.h"
 #include <map>
@@ -10,7 +9,7 @@
 namespace pbr
 {
 
-// TexInfo Declarations
+// 纹理信息结构-元数据信息
 struct TexInfo
 {
     TexInfo(const std::string &f, bool dt, Float ma, ImageWrap wm, Float sc,
@@ -45,33 +44,31 @@ struct TexInfo
     }
 };
 
-// ImageTexture Declarations
+// 图像纹理
 template <typename Tmemory, typename Treturn>
 class ImageTexture : public Texture<Treturn>
 {
 public:
-    // ImageTexture Public Methods
     ImageTexture(std::unique_ptr<TextureMapping2D> m,
                  const std::string &filename, bool doTri, Float maxAniso,
                  ImageWrap wm, Float scale, bool gamma);
 
     static void ClearCache()
     {
-        textures.erase(textures.begin(), textures.end());
+        mTextures.erase(mTextures.begin(), mTextures.end());
     }
 
     Treturn Evaluate(const SurfaceInteraction &si) const
     {
         Vector2f dstdx, dstdy;
-        Point2f st = mapping->Map(si, &dstdx, &dstdy);
-        Tmemory mem = mipmap->Lookup(st, dstdx, dstdy);
+        Point2f st = mMapping->Map(si, &dstdx, &dstdy);
+        Tmemory mem = mMipmap->Lookup(st, dstdx, dstdy);
         Treturn ret;
         convertOut(mem, &ret);
         return ret;
     }
 
 private:
-    // ImageTexture Private Methods
     static MIPMap<Tmemory> *GetTexture(const std::string &filename,
                                        bool doTrilinear, Float maxAniso,
                                        ImageWrap wm, Float scale, bool gamma);
@@ -97,10 +94,9 @@ private:
         *to = from;
     }
 
-    // ImageTexture Private Data
-    std::unique_ptr<TextureMapping2D> mapping;
-    MIPMap<Tmemory> *mipmap;
-    static std::map<TexInfo, std::unique_ptr<MIPMap<Tmemory>>> textures;
+    std::unique_ptr<TextureMapping2D> mMapping;     //对应的映射
+    MIPMap<Tmemory> *mMipmap;
+    static std::map<TexInfo, std::unique_ptr<MIPMap<Tmemory>>> mTextures;   //纹理缓存
 };
 
 extern template class ImageTexture<Float, Float>;

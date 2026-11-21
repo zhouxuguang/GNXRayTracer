@@ -116,9 +116,7 @@ MIPMap<T>::MIPMap(const Point2i &res, const T *img, bool doTrilinear,
     {
         // Resample image to power-of-two resolution
         Point2i resPow2(RoundUpPow2(resolution[0]), RoundUpPow2(resolution[1]));
-        /*LOG(INFO) << "Resampling MIPMap from " << resolution << " to " <<
-            resPow2 << ". Ratio= " << (Float(resPow2.x * resPow2.y) /
-                                       Float(resolution.x * resolution.y));*/
+        
         // Resample image in $s$ direction
         std::unique_ptr<ResampleWeight[]> sWeights = resampleWeights(resolution[0], resPow2[0]);
         resampledImage.reset(new T[resPow2[0] * resPow2[1]]);
@@ -147,10 +145,6 @@ MIPMap<T>::MIPMap(const Point2i &res, const T *img, bool doTrilinear,
 
         // Resample image in $t$ direction
         std::unique_ptr<ResampleWeight[]> tWeights = resampleWeights(resolution[1], resPow2[1]);
-        /*std::vector<T *> resampleBufs;
-        int nThreads = MaxThreadIndex();
-        for (int i = 0; i < nThreads; ++i)
-            resampleBufs.push_back(new T[resPow2[1]]);*/
 
         T *workData = new T[resPow2[1]];
         for (int64_t s = 0; s < resPow2[0]; ++s)
@@ -268,6 +262,7 @@ T MIPMap<T>::Lookup(const Point2f &st, Float width) const
 template <typename T>
 T MIPMap<T>::triangle(int level, const Point2f &st) const
 {
+    // 纹理双线性插值
     level = Clamp(level, 0, Levels() - 1);
     Float s = st[0] * pyramid[level]->uSize() - 0.5f;
     Float t = st[1] * pyramid[level]->vSize() - 0.5f;
