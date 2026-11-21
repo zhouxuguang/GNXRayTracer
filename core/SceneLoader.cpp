@@ -245,7 +245,9 @@ bool AppendMaterials(XMLElement *materialNodes, MaterialMap &materials, std::str
             return false;
         }
 
-        if (type == "Lambert")
+        // Lambert 与 OrenNayar 共用 MatteMaterial：<Sigma> 为 0 时退化为 Lambertian，
+        // 大于 0 时由 MatteMaterial 换成 Oren-Nayar 粗糙漫反射
+        if (type == "Lambert" || type == "OrenNayar")
         {
             Spectrum albedo;
             if (!ReadRgb(node, "Albedo", albedo, error))
@@ -253,9 +255,22 @@ bool AppendMaterials(XMLElement *materialNodes, MaterialMap &materials, std::str
                 error = "material '" + name + "': " + error;
                 return false;
             }
+            // <Sigma> 是粗糙度（角度制），缺省 0 表示理想漫反射
+            Float sigma = 0.f;
+            if (type == "OrenNayar" &&
+                !ReadScalar(node, "Sigma", sigma, error, false))
+            {
+                error = "material '" + name + "': " + error;
+                return false;
+            }
+            if (sigma < 0.f || sigma > 90.f)
+            {
+                error = "material '" + name + "': <Sigma> must be within [0, 90] degrees";
+                return false;
+            }
             materials[name] = std::make_shared<MatteMaterial>(
                 std::make_shared<ConstantTexture<Spectrum>>(albedo),
-                std::make_shared<ConstantTexture<Float>>(0.f),
+                std::make_shared<ConstantTexture<Float>>(sigma),
                 std::make_shared<ConstantTexture<Float>>(0.f));
         }
         else if (type == "Mirror" || type == "ConductorSpecular")
