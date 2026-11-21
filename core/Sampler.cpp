@@ -7,7 +7,6 @@
 namespace pbr
 {
 
-// Sampler Method Definitions
 Sampler::~Sampler()
 {
 }
@@ -187,4 +186,4 @@ Point2f GlobalSampler::Get2D()
     return p;
 }
 
-} // namespace pbrt
+} // namespace pbr

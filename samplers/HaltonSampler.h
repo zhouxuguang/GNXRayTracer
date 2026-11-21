@@ -11,7 +11,6 @@ namespace pbr
 class HaltonSampler : public GlobalSampler
 {
 public:
-    // HaltonSampler Public Methods
     HaltonSampler(int nsamp, const Bounds2i &sampleBounds,
                   bool sampleAtCenter = false);
     int64_t GetIndexForSample(int64_t sampleNum) const;
@@ -30,14 +29,11 @@ private:
     // center of the pixel area.
     bool sampleAtPixelCenter;
 
-    // HaltonSampler Private Methods
     const uint16_t *PermutationForDimension(int dim) const
     {
         return &radicalInversePermutations[PrimeSums[dim]];
     }
 };
-
-HaltonSampler *CreateHaltonSampler(const Bounds2i &sampleBounds);
 
 } // namespace pbr
 

@@ -111,15 +111,4 @@ std::unique_ptr<Sampler> HaltonSampler::Clone(int seed)
     return std::unique_ptr<Sampler>(new HaltonSampler(*this));
 }
 
-HaltonSampler *CreateHaltonSampler(const Bounds2i &sampleBounds)
-{
-    //    int nsamp = params.FindOneInt("pixelsamples", 16);
-    //    if (PbrtOptions.quickRender) nsamp = 1;
-    //    bool sampleAtCenter = params.FindOneBool("samplepixelcenter", false);
-
-    int nsamp = 1;
-    bool sampleAtCenter = false;
-    return new HaltonSampler(nsamp, sampleBounds, sampleAtCenter);
-}
-
 } // namespace pbr

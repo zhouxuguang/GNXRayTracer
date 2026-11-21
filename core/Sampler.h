@@ -10,11 +10,10 @@
 namespace pbr
 {
 
-// Sampler Declarations
+// 采样器
 class Sampler
 {
 public:
-    // Sampler Interface
     virtual ~Sampler();
     Sampler(int64_t samplesPerPixel);
     virtual void StartPixel(const Point2i &p);
@@ -42,11 +41,9 @@ public:
         return currentPixelSampleIndex;
     }
 
-    // Sampler Public Data
     const int64_t samplesPerPixel;
 
 protected:
-    // Sampler Protected Data
     Point2i currentPixel;
     int64_t currentPixelSampleIndex;
     std::vector<int> samples1DArraySizes, samples2DArraySizes;
@@ -54,7 +51,6 @@ protected:
     std::vector<std::vector<Point2f>> sampleArray2D;
 
 private:
-    // Sampler Private Data
     size_t array1DOffset, array2DOffset;
 };
 
@@ -62,7 +58,6 @@ private:
 class PixelSampler : public Sampler
 {
 public:
-    // PixelSampler Public Methods
     PixelSampler(int64_t samplesPerPixel, int nSampledDimensions);
     bool StartNextSample();
     bool SetSampleNumber(int64_t);
@@ -70,7 +65,6 @@ public:
     Point2f Get2D();
 
 protected:
-    // PixelSampler Protected Data
     std::vector<std::vector<Float>> samples1D;
     std::vector<std::vector<Point2f>> samples2D;
     int current1DDimension = 0, current2DDimension = 0;
@@ -81,7 +75,6 @@ protected:
 class GlobalSampler : public Sampler
 {
 public:
-    // GlobalSampler Public Methods
     bool StartNextSample();
     void StartPixel(const Point2i &);
     bool SetSampleNumber(int64_t sampleNum);
@@ -95,45 +88,10 @@ public:
     virtual Float SampleDimension(int64_t index, int dimension) const = 0;
 
 private:
-    // GlobalSampler Private Data
     int dimension;
     int64_t intervalSampleIndex;
     static const int arrayStartDim = 5;
     int arrayEndDim;
-};
-
-inline void ClockRandomInit()
-{
-    srand((unsigned)time(NULL));
-}
-
-inline double getClockRandom()
-{
-    return rand() / (RAND_MAX + 1.0);
-}
-
-// 随机采样器
-class ClockRandSampler : public GlobalSampler
-{
-public:
-    // HaltonSampler Public Methods
-    ClockRandSampler(int samplesPerPixel = 16, const Bounds2i &sampleBounds = Bounds2i(Point2i(0, 0), Point2i(100, 100)))
-        : GlobalSampler(samplesPerPixel)
-    {
-        ClockRandomInit();
-    }
-    std::unique_ptr<Sampler> Clone(int seed)
-    {
-        return std::unique_ptr<Sampler>(new ClockRandSampler(*this));
-    }
-    int64_t GetIndexForSample(int64_t sampleNum) const
-    {
-        return 0;
-    }
-    float SampleDimension(int64_t index, int dimension) const
-    {
-        return getClockRandom();
-    }
 };
 
 } // namespace pbr

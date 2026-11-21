@@ -81,7 +81,7 @@ bool Sphere::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
                         Vector3f(ShadowEpsilon, ShadowEpsilon, ShadowEpsilon);
         isect->wo = -ray.d;
         isect->n = Normal3f(normal.x, normal.y, normal.z);
-        isect->uv = Point2f(phi / (2 * Pi), theta / Pi);
+        isect->uv = Point2f(phi * Inv2Pi, theta * InvPi);
         isect->dpdu = tangent;
         isect->dpdv = bitangent;
         isect->dndu = Normal3f(0, 0, 0);
