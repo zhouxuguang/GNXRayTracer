@@ -1,4 +1,5 @@
 #include "SceneLoader.h"
+#include "core/Texture.h"
 #include "thirdparty/tinyxml2/tinyxml2.h"
 #include "accelerator/BVHAccel.h"
 #include "lights/DiffuseAreaLight.h"
@@ -11,7 +12,9 @@
 #include "shape/Sphere.h"
 #include "shape/Triangle.h"
 #include "textures/ConstantTexture.h"
+#include "textures/ImageTexture.h"
 #include <cmath>
+#include <cstdio>
 #include <cstdlib>
 #include <map>
 #include <vector>
@@ -210,6 +213,55 @@ std::string TrimText(const char *text)
     return value.substr(begin, end - begin + 1);
 }
 
+// 材质贴图统一放在场景文件同级的 texture/ 子目录下
+std::string SceneTextureDir(const std::string &scenePath)
+{
+    const std::size_t slash = scenePath.find_last_of("/\\");
+    const std::string dir =
+        slash == std::string::npos ? std::string() : scenePath.substr(0, slash + 1);
+    return dir + "texture/";
+}
+
+bool FileExists(const std::string &path)
+{
+    FILE *file = std::fopen(path.c_str(), "rb");
+    if (!file)
+        return false;
+    std::fclose(file);
+    return true;
+}
+
+// 读取 <AlbedoMap>：贴图存在就用贴图（丢弃 XML 里的数值），
+// 缺 <AlbedoMap> 或文件不存在则回退到 <Albedo> 常量。
+std::shared_ptr<Texture<Spectrum>> MakeAlbedoTexture(const XMLElement *node,
+                                                     const std::string &materialName,
+                                                     const std::string &textureDir,
+                                                     std::string &error)
+{
+    const std::string albedoMap = TrimText(ChildText(node, "AlbedoMap"));
+    if (!albedoMap.empty())
+    {
+        const std::string path = textureDir + albedoMap;
+        if (FileExists(path))
+        {
+            // 反照率贴图按 sRGB 解码，三线性过滤 + 8x 各向异性
+            return std::make_shared<ImageTexture<RGBSpectrum, Spectrum>>(
+                std::make_unique<UVMapping2D>(), path, true, 8.f,
+                ImageWrap::Repeat, 1.f, true);
+        }
+        std::fprintf(stderr, "warning: material '%s': albedo map not found: %s\n",
+                     materialName.c_str(), path.c_str());
+    }
+
+    Spectrum albedo;
+    if (!ReadRgb(node, "Albedo", albedo, error))
+    {
+        error = "material '" + materialName + "': " + error;
+        return nullptr;
+    }
+    return std::make_shared<ConstantTexture<Spectrum>>(albedo);
+}
+
 using MaterialMap = std::map<std::string, std::shared_ptr<Material>>;
 
 std::shared_ptr<Material> MakeDefaultMaterial()
@@ -221,7 +273,8 @@ std::shared_ptr<Material> MakeDefaultMaterial()
 }
 
 // 解析 <Materials> 下的具名材质，供 <SceneObject> 的 <Material> 按名称引用。
-bool AppendMaterials(XMLElement *materialNodes, MaterialMap &materials, std::string &error)
+bool AppendMaterials(XMLElement *materialNodes, const std::string &textureDir,
+                     MaterialMap &materials, std::string &error)
 {
     for (XMLElement *node = materialNodes->FirstChildElement("Material"); node;
          node = node->NextSiblingElement("Material"))
@@ -249,12 +302,10 @@ bool AppendMaterials(XMLElement *materialNodes, MaterialMap &materials, std::str
         // 大于 0 时由 MatteMaterial 换成 Oren-Nayar 粗糙漫反射
         if (type == "Lambert" || type == "OrenNayar")
         {
-            Spectrum albedo;
-            if (!ReadRgb(node, "Albedo", albedo, error))
-            {
-                error = "material '" + name + "': " + error;
+            std::shared_ptr<Texture<Spectrum>> kd =
+                MakeAlbedoTexture(node, name, textureDir, error);
+            if (!kd)
                 return false;
-            }
             // <Sigma> 是粗糙度（角度制），缺省 0 表示理想漫反射
             Float sigma = 0.f;
             if (type == "OrenNayar" &&
@@ -269,7 +320,7 @@ bool AppendMaterials(XMLElement *materialNodes, MaterialMap &materials, std::str
                 return false;
             }
             materials[name] = std::make_shared<MatteMaterial>(
-                std::make_shared<ConstantTexture<Spectrum>>(albedo),
+                kd,
                 std::make_shared<ConstantTexture<Float>>(sigma),
                 std::make_shared<ConstantTexture<Float>>(0.f));
         }
@@ -380,11 +431,15 @@ bool AppendObject(XMLElement *object, const MaterialMap &materials,
     }
 
     std::vector<Point3f> vertices;
+    std::vector<Point2f> uvs;
     std::vector<int> indices;
+    // <Vertex> 写成 "x,y,z" 或 "x,y,z,u,v"；只有所有顶点都带 uv 时才启用纹理坐标
+    bool hasUV = true;
     for (XMLElement *triangle = shapes->FirstChildElement("Triangle"); triangle;
          triangle = triangle->NextSiblingElement("Triangle"))
     {
         Point3f v[3];
+        Point2f uv[3];
         int count = 0;
         for (XMLElement *vertex = triangle->FirstChildElement("Vertex");
              vertex && count < 3; vertex = vertex->NextSiblingElement("Vertex"))
@@ -395,7 +450,12 @@ bool AppendObject(XMLElement *object, const MaterialMap &materials,
                 error = "invalid <Vertex> in <Triangle>";
                 return false;
             }
-            v[count++] = Point3f(values[0], values[1], values[2]);
+            v[count] = Point3f(values[0], values[1], values[2]);
+            if (values.size() >= 5)
+                uv[count] = Point2f(values[3], values[4]);
+            else
+                hasUV = false;
+            ++count;
         }
         if (count != 3)
         {
@@ -407,6 +467,7 @@ bool AppendObject(XMLElement *object, const MaterialMap &materials,
         for (int i = 0; i < 3; ++i)
         {
             vertices.push_back(objectToWorld(v[i]));
+            uvs.push_back(uv[i]);
             indices.push_back(base + i);
         }
     }
@@ -416,7 +477,7 @@ bool AppendObject(XMLElement *object, const MaterialMap &materials,
     {
         auto mesh = std::make_shared<TriangleMesh>(
             Identity(), nTriangles, indices.data(), static_cast<int>(vertices.size()),
-            vertices.data(), nullptr, nullptr, nullptr, nullptr);
+            vertices.data(), nullptr, nullptr, hasUV ? uvs.data() : nullptr, nullptr);
         for (int i = 0; i < nTriangles; ++i)
         {
             auto shape = std::make_shared<Triangle>(&Identity(), &Identity(), false, mesh, i);
@@ -588,8 +649,9 @@ bool LoadSceneFromXml(const std::string &filePath, LoadedScene &out, std::string
 
     std::shared_ptr<Material> defaultMaterial = MakeDefaultMaterial();
     MaterialMap materials;
+    const std::string textureDir = SceneTextureDir(filePath);
     XMLElement *materialNodes = root->FirstChildElement("Materials");
-    if (materialNodes && !AppendMaterials(materialNodes, materials, detail))
+    if (materialNodes && !AppendMaterials(materialNodes, textureDir, materials, detail))
         return fail("<Materials>: " + detail);
 
     std::vector<std::shared_ptr<Primitive>> prims;
