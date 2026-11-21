@@ -90,6 +90,7 @@ Float Noise(const Point3f &p)
 {
     return Noise(p.x, p.y, p.z);
 }
+
 inline Float Grad(int x, int y, int z, Float dx, Float dy, Float dz)
 {
     int h = NoisePerm[NoisePerm[NoisePerm[x] + y] + z];

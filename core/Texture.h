@@ -12,11 +12,9 @@
 namespace pbr
 {
 
-// Texture Declarations
 class TextureMapping2D
 {
 public:
-    // TextureMapping2D Interface
     virtual ~TextureMapping2D();
     virtual Point2f Map(const SurfaceInteraction &si, Vector2f *dstdx,
                         Vector2f *dstdy) const = 0;
@@ -25,7 +23,6 @@ public:
 class UVMapping2D : public TextureMapping2D
 {
 public:
-    // UVMapping2D Public Methods
     UVMapping2D(Float su = 1, Float sv = 1, Float du = 0, Float dv = 0);
     Point2f Map(const SurfaceInteraction &si, Vector2f *dstdx,
                 Vector2f *dstdy) const;
@@ -37,7 +34,6 @@ private:
 class SphericalMapping2D : public TextureMapping2D
 {
 public:
-    // SphericalMapping2D Public Methods
     SphericalMapping2D(const Transform &WorldToTexture)
         : WorldToTexture(WorldToTexture)
     {
@@ -53,7 +49,6 @@ private:
 class CylindricalMapping2D : public TextureMapping2D
 {
 public:
-    // CylindricalMapping2D Public Methods
     CylindricalMapping2D(const Transform &WorldToTexture)
         : WorldToTexture(WorldToTexture)
     {
@@ -62,7 +57,6 @@ public:
                 Vector2f *dstdy) const;
 
 private:
-    // CylindricalMapping2D Private Methods
     Point2f cylinder(const Point3f &p) const
     {
         Vector3f vec = Normalize(WorldToTexture(p) - Point3f(0, 0, 0));
@@ -74,7 +68,6 @@ private:
 class PlanarMapping2D : public TextureMapping2D
 {
 public:
-    // PlanarMapping2D Public Methods
     Point2f Map(const SurfaceInteraction &si, Vector2f *dstdx,
                 Vector2f *dstdy) const;
     PlanarMapping2D(const Vector3f &vs, const Vector3f &vt, Float ds = 0,
@@ -91,7 +84,6 @@ private:
 class TextureMapping3D
 {
 public:
-    // TextureMapping3D Interface
     virtual ~TextureMapping3D();
     virtual Point3f Map(const SurfaceInteraction &si, Vector3f *dpdx,
                         Vector3f *dpdy) const = 0;
@@ -100,7 +92,6 @@ public:
 class IdentityMapping3D : public TextureMapping3D
 {
 public:
-    // IdentityMapping3D Public Methods
     IdentityMapping3D(const Transform &WorldToTexture)
         : WorldToTexture(WorldToTexture)
     {
@@ -112,11 +103,11 @@ private:
     const Transform WorldToTexture;
 };
 
+// 纹理的模板基类
 template <typename T>
 class Texture
 {
 public:
-    // Texture Interface
     virtual T Evaluate(const SurfaceInteraction &) const = 0;
     virtual ~Texture()
     {

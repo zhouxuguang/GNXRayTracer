@@ -9,12 +9,11 @@
 namespace pbr
 {
 
-// ConstantTexture Declarations
+// 常量纹理
 template <typename T>
 class ConstantTexture : public Texture<T>
 {
 public:
-    // ConstantTexture Public Methods
     ConstantTexture(const T &value)
         : value(value)
     {

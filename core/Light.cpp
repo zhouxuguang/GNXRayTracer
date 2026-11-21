@@ -24,7 +24,6 @@ Float DistanceAttenuation(Float distanceSquared, const Vector3f &attenuations)
     return 1 / denominator;
 }
 
-// Light Method Definitions
 Light::Light(int flags, const Transform &LightToWorld,
              const MediumInterface &mediumInterface, int nSamples)
     : flags(flags),

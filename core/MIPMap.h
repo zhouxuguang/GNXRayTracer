@@ -14,7 +14,6 @@ static uint64_t nEWALookups = 0;
 static uint64_t nTrilerpLookups = 0;
 static uint64_t mipMapMemory = 0;
 
-// MIPMap Helper Declarations
 enum class ImageWrap
 {
     Repeat,
@@ -28,12 +27,10 @@ struct ResampleWeight
     Float weight[4];
 };
 
-// MIPMap Declarations
 template <typename T>
 class MIPMap
 {
 public:
-    // MIPMap Public Methods
     MIPMap(const Point2i &resolution, const T *data, bool doTri = false,
            Float maxAniso = 8.f, ImageWrap wrapMode = ImageWrap::Repeat);
     int Width() const
@@ -53,7 +50,6 @@ public:
     T Lookup(const Point2f &st, Vector2f dstdx, Vector2f dstdy) const;
 
 private:
-    // MIPMap Private Methods
     std::unique_ptr<ResampleWeight[]> resampleWeights(int oldRes, int newRes)
     {
         CHECK_GE(newRes, oldRes);
@@ -114,8 +110,6 @@ MIPMap<T>::MIPMap(const Point2i &res, const T *img, bool doTrilinear,
       wrapMode(wrapMode),
       resolution(res)
 {
-    //ProfilePhase _(Prof::MIPMapCreation);
-
     //如果不是2的n次方，则扩展到2的n次方
     std::unique_ptr<T[]> resampledImage = nullptr;
     if (!IsPowerOf2(resolution[0]) || !IsPowerOf2(resolution[1]))
@@ -181,7 +175,6 @@ MIPMap<T>::MIPMap(const Point2i &res, const T *img, bool doTrilinear,
         }
         delete[] workData;
 
-        //for (auto ptr : resampleBufs) delete[] ptr;
         resolution = resPow2;
     }
     // 计算层级数目
@@ -296,7 +289,7 @@ T MIPMap<T>::Lookup(const Point2f &st, Vector2f dst0, Vector2f dst1) const
         return Lookup(st, width);
     }
     ++nEWALookups;
-    //ProfilePhase p(Prof::TexFiltEWA);
+    
     // Compute ellipse minor and major axes
     if (dst0.LengthSquared() < dst1.LengthSquared())
         std::swap(dst0, dst1);

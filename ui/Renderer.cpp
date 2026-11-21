@@ -36,24 +36,21 @@ Renderer::Renderer(int w, int h, const char *filePath)
     mCamera = std::shared_ptr<const pbr::Camera>(
         pbr::CreatePerspectiveCamera(mViewportWidth, mViewportHeight, cameraMotion, cam.fov));
 
-    // 确定性采样器：每像素 1000 个样本，且固定只采像素中心 (x + 0.5, y + 0.5)
     const pbr::Bounds2i sampleBounds(
         pbr::Point2i(0, 0), pbr::Point2i(mViewportWidth, mViewportHeight));
-    mSampler = std::shared_ptr<pbr::Sampler>(
-        new pbr::HaltonSampler(1000, sampleBounds, true));
+    mSampler = std::make_shared<pbr::HaltonSampler>(500, sampleBounds, false);
 
     // 直接光照积分器：相机与像素坐标在调用 Render 时传入，积分器只持有采样器
-    mIntegrator = std::make_shared<pbr::PathIntegrator>(15, mSampler, 0.8);
+    mIntegrator = std::make_shared<pbr::PathIntegrator>(8, mSampler, 0.8);
+
+    if (mScene)
+    {
+        mIntegrator->Preprocess(*mScene);
+    }
 }
 
 void Renderer::Run()
 {
-    // 积分器预处理
-	if (mIntegrator)
-	{
-		mIntegrator->Preprocess(*mScene);
-	}
-
     struct mfb_window *window = mfb_open_ex("GNXRaytracer", mViewportWidth, mViewportHeight, MFB_WF_RESIZABLE);
     if (window == NULL)
         return;

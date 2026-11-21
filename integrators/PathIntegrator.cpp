@@ -131,7 +131,8 @@ Spectrum PathIntegrator::Li(const RayDifferential &r, const Scene &scene,
             continue;
         }
 
-        const Distribution1D *distrib = mLightDistribution->Lookup(isect.p);
+        const Distribution1D *distrib =
+            mLightDistribution ? mLightDistribution->Lookup(isect.p) : nullptr;
 
         // 采样直接光照
         // (But skip this for perfectly specular BSDFs.)

@@ -15,6 +15,11 @@ LightDistribution::~LightDistribution()
 
 std::unique_ptr<LightDistribution> CreateLightSampleDistribution(const std::string &name, const Scene &scene)
 {
+    // 没有光源时三种实现都无法构造（Uniform/Spatial 会对空数组取 &vec[0]），
+    // 直接返回空指针，调用方按“无光源分布”处理
+    if (scene.lights.empty())
+        return nullptr;
+
     if (name == "uniform" || scene.lights.size() == 1)
         return std::unique_ptr<LightDistribution>{
             new UniformLightDistribution(scene)};
@@ -26,9 +31,6 @@ std::unique_ptr<LightDistribution> CreateLightSampleDistribution(const std::stri
             new SpatialLightDistribution(scene)};
     else
     {
-        //        Error(
-        //            "Light sample distribution type \"%s\" unknown. Using \"spatial\".",
-        //            name.c_str());
         return std::unique_ptr<LightDistribution>{
             new SpatialLightDistribution(scene)};
     }
@@ -57,11 +59,6 @@ const Distribution1D *PowerLightDistribution::Lookup(const Point3f &p) const
 
 ///////////////////////////////////////////////////////////////////////////
 // SpatialLightDistribution
-
-//STAT_COUNTER("SpatialLightDistribution/Distributions created", nCreated);
-//STAT_RATIO("SpatialLightDistribution/Lookups per distribution", nLookups, nDistributions);
-//STAT_INT_DISTRIBUTION("SpatialLightDistribution/Hash probes per lookup", nProbesPerLookup);
-
 
 static int nCreated = 0;
 static int nLookups = 0;
@@ -99,10 +96,6 @@ SpatialLightDistribution::SpatialLightDistribution(const Scene &scene,
         hashTable[i].packedPos.store(invalidPackedPos);
         hashTable[i].distribution.store(nullptr);
     }
-
-    //    LOG(INFO) << "SpatialLightDistribution: scene bounds " << b <<
-    //        ", voxel res (" << nVoxels[0] << ", " << nVoxels[1] << ", " <<
-    //        nVoxels[2] << ")";
 }
 
 SpatialLightDistribution::~SpatialLightDistribution()
@@ -119,7 +112,6 @@ SpatialLightDistribution::~SpatialLightDistribution()
 
 const Distribution1D *SpatialLightDistribution::Lookup(const Point3f &p) const
 {
-    //ProfilePhase _(Prof::LightDistribLookup);
     ++nLookups;
 
     // First, compute integer voxel coordinates for the given point |p|
@@ -216,7 +208,6 @@ const Distribution1D *SpatialLightDistribution::Lookup(const Point3f &p) const
                 // written.
                 Distribution1D *dist = ComputeDistribution(pi);
                 entry.distribution.store(dist, std::memory_order_release);
-                //ReportValue(nProbesPerLookup, nProbes);
                 return dist;
             }
         }
@@ -226,7 +217,6 @@ const Distribution1D *SpatialLightDistribution::Lookup(const Point3f &p) const
 Distribution1D *
 SpatialLightDistribution::ComputeDistribution(Point3i pi) const
 {
-    //ProfilePhase _(Prof::LightDistribCreation);
     ++nCreated;
     ++nDistributions;
 
@@ -286,15 +276,11 @@ SpatialLightDistribution::ComputeDistribution(Point3i pi) const
     Float minContrib = (avgContrib > 0) ? .001 * avgContrib : 1;
     for (size_t i = 0; i < lightContrib.size(); ++i)
     {
-        //        VLOG(2) << "Voxel pi = " << pi << ", light " << i << " contrib = "
-        //                << lightContrib[i];
         lightContrib[i] = std::max(lightContrib[i], minContrib);
     }
-    //    LOG(INFO) << "Initialized light distribution in voxel pi= " <<  pi <<
-    //        ", avgContrib = " << avgContrib;
 
     // Compute a sampling distribution from the accumulated contributions.
     return new Distribution1D(&lightContrib[0], int(lightContrib.size()));
 }
 
-} // namespace pbrt
+} // namespace pbr

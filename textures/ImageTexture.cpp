@@ -65,13 +65,10 @@ MIPMap<Tmemory> *ImageTexture<Tmemory, Treturn>::GetTexture(
         return textures[texInfo].get();
 
     // Create _MIPMap_ for _filename_
-    //ProfilePhase _(Prof::TextureLoading);
     Point2i resolution;
     std::unique_ptr<RGBSpectrum[]> texels(loadImage(filename, resolution));
     if (!texels)
     {
-        //        Warning("Creating a constant grey texture to replace \"%s\".",
-        //                filename.c_str());
         resolution.x = resolution.y = 1;
         RGBSpectrum *rgb = new RGBSpectrum[1];
         *rgb = RGBSpectrum(0.5f);
