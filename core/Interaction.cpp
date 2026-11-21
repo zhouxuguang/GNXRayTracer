@@ -25,8 +25,7 @@ SurfaceInteraction::SurfaceInteraction(
     shading.dndv = dndv;
 
     // Adjust normal based on orientation and handedness
-    if (shape &&
-        (shape->reverseOrientation ^ shape->transformSwapsHandedness))
+    if (shape && (shape->reverseOrientation ^ shape->transformSwapsHandedness))
     {
         n *= -1;
         shading.n *= -1;

@@ -45,7 +45,6 @@ public:
     bool IntersectP(const Ray &ray, bool testAlphaTexture = true) const;
     Float Area() const;
 
-    //using Shape::Sample;  // Bring in the other Sample() overload.
     Interaction Sample(const Point2f &u, Float *pdf) const;
 
     // Returns the solid angle subtended by the triangle w.r.t. the given
@@ -53,7 +52,6 @@ public:
     Float SolidAngle(const Point3f &p, int nSamples = 0) const;
 
 private:
-    // Triangle Private Methods
     void GetUVs(Point2f uv[3]) const
     {
         if (mMesh->uv)

@@ -168,12 +168,12 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
     if (t <= deltaT)
         return false;
 
-    // Compute triangle partial derivatives
+    // 求三角形的坐标对uv的偏倒数
     Vector3f dpdu, dpdv;
     Point2f uv[3];
     GetUVs(uv);
 
-    // Compute deltas for triangle partial derivatives
+    // 为计算偏倒数先计算差分
     Vector2f duv02 = uv[0] - uv[2], duv12 = uv[1] - uv[2];
     Vector3f dp02 = p0 - p2, dp12 = p1 - p2;
     Float determinant = duv02[0] * duv12[1] - duv02[1] * duv12[0];
@@ -186,17 +186,16 @@ bool Triangle::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
     }
     if (degenerateUV || Cross(dpdu, dpdv).LengthSquared() == 0)
     {
-        // Handle zero determinant for triangle partial derivative matrix
         Vector3f ng = Cross(p2 - p0, p1 - p0);
         if (ng.LengthSquared() == 0)
-            // The triangle is actually degenerate; the intersection is
-            // bogus.
+        {
             return false;
+        }
 
         CoordinateSystem(Normalize(ng), &dpdu, &dpdv);
     }
 
-    // Compute error bounds for triangle intersection
+    // 计算三角形的交点处的误差界限
     float xAbsSum =
         (std::abs(b0 * p0.x) + std::abs(b1 * p1.x) + std::abs(b2 * p2.x));
     float yAbsSum =
