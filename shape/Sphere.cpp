@@ -83,8 +83,7 @@ bool Sphere::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
         isect->time = rayLocal.time;
         // 交点误差界：非零才能驱动 OffsetRayOrigin 把阴影射线推离球面，
         // 否则起点精确落在表面上会自相交，产生阴影粉刺。
-        isect->pError = gamma(5) * Vector3f(std::abs(pHit.x), std::abs(pHit.y), std::abs(pHit.z)) +
-                        Vector3f(ShadowEpsilon, ShadowEpsilon, ShadowEpsilon);
+        isect->pError = gamma(5) * Abs(pHit);
         isect->wo = -ray.d;
         isect->n = (*ObjectToWorld)(Normal3f(n.x, n.y, n.z));
         
