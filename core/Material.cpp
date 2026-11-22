@@ -61,7 +61,7 @@ void Material::NormalMap(const std::shared_ptr<Texture<Spectrum>> &normalMap,
     normalMap->Evaluate(*si).ToRGB(rgb);
     Vector3f nT(2.f * rgb[0] - 1.f, 2.f * rgb[1] - 1.f, 2.f * rgb[2] - 1.f);
 
-    // <BumpScale>：等价于教程里的 mix((0,0,1), n, bumpScale)。
+    // <BumpScale>： mix((0,0,1), n, bumpScale)。
     // 0 表示完全平坦（退化为几何法线），1 为贴图原始强度，>1 放大凹凸
     nT = Vector3f(nT.x * bumpScale, nT.y * bumpScale,
                  (1.f - bumpScale) + nT.z * bumpScale);
@@ -69,10 +69,9 @@ void Material::NormalMap(const std::shared_ptr<Texture<Spectrum>> &normalMap,
         return;
     nT = Normalize(nT);
     
-    // 2) 获得TBN矩阵
-    const Normal3f &shadingNormal = si->shading.n;
-    Vector3f ns = Vector3f(Normalize(shadingNormal));
-    Vector3f ts = Normalize(si->shading.dpdu - Dot(si->shading.dpdu, ns) * ns);
+    // 2) 用几何法线与几何切线构造 TBN
+    Vector3f ns = Normalize(Vector3f(si->n));
+    Vector3f ts = Normalize(si->dpdu - Dot(si->dpdu, ns) * ns);
     Vector3f bs = Cross(ns, ts);
     
     // 3) 切空间 → 世界空间
@@ -84,13 +83,8 @@ void Material::NormalMap(const std::shared_ptr<Texture<Spectrum>> &normalMap,
         return;
     }
     
-    // 4) 写回 shading 几何：法线与几何法线同半球，切线重新正交化到新法线。
-    //    BSDF 用 ss = Normalize(shading.dpdu)、ts = Cross(ns, ss) 建局部基，
-    //    法线被贴图偏转后若不同步切线，ss 与 ns 不再正交，局部基会被拉伸。
+    // 4) 只更新着色法线
     Vector3f newNs = Faceforward(Normalize(n), si->n);
-    Vector3f newSs = si->shading.dpdu - Dot(si->shading.dpdu, newNs) * newNs;
-    if (newSs.LengthSquared() > 1e-8f)
-        si->shading.dpdu = newSs;
     si->shading.n = Normal3f(newNs);
 }
 
