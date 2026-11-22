@@ -24,13 +24,14 @@ void MatteMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
     
     if (mNormalMap)
     {
-        NormalMap(mNormalMap, si);
+        NormalMap(mNormalMap, si, mBumpScale);
     }
 
     // Evaluate textures for _MatteMaterial_ material and allocate BRDF
     si->bsdf = ARENA_ALLOC(arena, BSDF)(*si);
     Spectrum r = mKd->Evaluate(*si).Clamp();
-    Float sig = Clamp(mSigma->Evaluate(*si), 0, 90);
+    // sigma 为弧度，上界取 90 度
+    Float sig = Clamp(mSigma->Evaluate(*si), 0, PiOver2);
     if (!r.IsBlack())
     {
         if (sig == 0)

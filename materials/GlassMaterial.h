@@ -20,6 +20,7 @@ public:
                   const std::shared_ptr<Texture<Float>> &index,
                   const std::shared_ptr<Texture<Float>> &bumpMap,
                   const std::shared_ptr<Texture<Spectrum>> &normalMap = nullptr,
+                  Float bumpScale = 1.f,
                   bool remapRoughness = true)
         : mKr(Kr),
           mKt(Kt),
@@ -28,6 +29,7 @@ public:
           mIndex(index),
           mBumpMap(bumpMap),
           mNormalMap(normalMap),
+          mBumpScale(bumpScale),
           mRemapRoughness(remapRoughness)
     {
     }
@@ -41,6 +43,7 @@ private:
     std::shared_ptr<Texture<Float>> mIndex;
     std::shared_ptr<Texture<Float>> mBumpMap;
     std::shared_ptr<Texture<Spectrum>> mNormalMap;
+    Float mBumpScale;
     bool mRemapRoughness;
 };
 

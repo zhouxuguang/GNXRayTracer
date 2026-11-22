@@ -53,12 +53,18 @@ void Material::Bump(const std::shared_ptr<Texture<Float>> &d, SurfaceInteraction
     si->SetShadingGeometry(dpdu, dpdv, si->shading.dndu, si->shading.dndv, false);
 }
 
-void Material::NormalMap(const std::shared_ptr<Texture<Spectrum>> &normalMap, SurfaceInteraction *si)
+void Material::NormalMap(const std::shared_ptr<Texture<Spectrum>> &normalMap,
+                         SurfaceInteraction *si, Float bumpScale)
 {
     // 1) 取切空间法线
     Float rgb[3];
     normalMap->Evaluate(*si).ToRGB(rgb);
     Vector3f nT(2.f * rgb[0] - 1.f, 2.f * rgb[1] - 1.f, 2.f * rgb[2] - 1.f);
+
+    // <BumpScale>：等价于教程里的 mix((0,0,1), n, bumpScale)。
+    // 0 表示完全平坦（退化为几何法线），1 为贴图原始强度，>1 放大凹凸
+    nT = Vector3f(nT.x * bumpScale, nT.y * bumpScale,
+                 (1.f - bumpScale) + nT.z * bumpScale);
     if (nT.LengthSquared() < 1e-8f)
         return;
     nT = Normalize(nT);

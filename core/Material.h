@@ -27,7 +27,8 @@ public:
     virtual ~Material();
     static void Bump(const std::shared_ptr<Texture<Float>> &d, SurfaceInteraction *si);
     
-    static void NormalMap(const std::shared_ptr<Texture<Spectrum>> &normalMap, SurfaceInteraction *si);
+    static void NormalMap(const std::shared_ptr<Texture<Spectrum>> &normalMap,
+                          SurfaceInteraction *si, Float bumpScale = 1.f);
 };
 
 } // namespace pbr
