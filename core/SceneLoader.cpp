@@ -32,6 +32,15 @@ const Transform &Identity()
     return identity;
 }
 
+// Shape 只保存变换指针，生命周期必须不短于形状本身；
+// 把场景里用到的世界变换登记到进程级存储，避免指向栈上临时量
+const Transform *RegisterTransform(const Transform &transform)
+{
+    static std::vector<std::unique_ptr<Transform>> registered;
+    registered.push_back(std::make_unique<Transform>(transform));
+    return registered.back().get();
+}
+
 bool ParseNumbers(const char *text, std::vector<Float> &values)
 {
     values.clear();
@@ -324,6 +333,14 @@ bool AppendMaterials(XMLElement *materialNodes, const std::string &textureDir,
             return false;
         }
 
+        // <BumpScale>：法线贴图强度。0 表示完全平坦，1 为贴图原始强度
+        Float bumpScale = 1.f;
+        if (!ReadScalar(node, "BumpScale", bumpScale, error, false))
+        {
+            error = "material '" + name + "': " + error;
+            return false;
+        }
+
         // Lambert 与 OrenNayar 共用 MatteMaterial：<Sigma> 为 0 时退化为 Lambertian，
         // 大于 0 时由 MatteMaterial 换成 Oren-Nayar 粗糙漫反射
         if (type == "Lambert" || type == "OrenNayar")
@@ -332,7 +349,7 @@ bool AppendMaterials(XMLElement *materialNodes, const std::string &textureDir,
                 MakeAlbedoTexture(node, name, textureDir, error);
             if (!kd)
                 return false;
-            // <Sigma> 是粗糙度（角度制），缺省 0 表示理想漫反射
+            // <Sigma> 是 Oren-Nayar 粗糙度，单位为弧度，缺省 0 表示理想漫反射
             Float sigma = 0.f;
             if (type == "OrenNayar" &&
                 !ReadScalar(node, "Sigma", sigma, error, false))
@@ -340,16 +357,17 @@ bool AppendMaterials(XMLElement *materialNodes, const std::string &textureDir,
                 error = "material '" + name + "': " + error;
                 return false;
             }
-            if (sigma < 0.f || sigma > 90.f)
+            if (sigma < 0.f || sigma > PiOver2)
             {
-                error = "material '" + name + "': <Sigma> must be within [0, 90] degrees";
+                error = "material '" + name + "': <Sigma> must be within [0, pi/2] radians";
                 return false;
             }
             materials[name] = std::make_shared<MatteMaterial>(
                 kd,
                 std::make_shared<ConstantTexture<Float>>(sigma),
                 nullptr,
-                MakeNormalTexture(node, name, textureDir));
+                MakeNormalTexture(node, name, textureDir),
+                bumpScale);
         }
         else if (type == "Mirror" || type == "ConductorSpecular")
         {
@@ -407,6 +425,7 @@ bool AppendMaterials(XMLElement *materialNodes, const std::string &textureDir,
                 std::make_shared<ConstantTexture<Float>>(eta),
                 nullptr,
                 MakeNormalTexture(node, name, textureDir),
+                bumpScale,
                 true);
         }
         else
@@ -520,6 +539,16 @@ bool AppendObject(XMLElement *object, const MaterialMap &materials,
         }
     }
 
+    // 球的几何已烘焙到世界空间，世界变换仍交给 Shape 用于球面参数化；
+    // 每个对象只登记一次，供该对象下所有球共享
+    const Transform *objectToWorldPtr = &Identity();
+    const Transform *worldToObjectPtr = &Identity();
+    if (shapes->FirstChildElement("Sphere"))
+    {
+        objectToWorldPtr = RegisterTransform(objectToWorld);
+        worldToObjectPtr = RegisterTransform(Inverse(objectToWorld));
+    }
+
     for (XMLElement *sphere = shapes->FirstChildElement("Sphere"); sphere;
          sphere = sphere->NextSiblingElement("Sphere"))
     {
@@ -536,7 +565,10 @@ bool AppendObject(XMLElement *object, const MaterialMap &materials,
         Float scaleFactor = objectToWorld(Vector3f(1.f, 0.f, 0.f)).Length();
         if (scaleFactor <= 0)
             scaleFactor = 1.f;
-        auto shape = std::make_shared<Sphere>(radius * scaleFactor, center);
+        // center / radius 已把 <Position> / <Scale> 烘焙到世界空间，交点与包围盒都在世界空间算；
+        // 世界变换只用于球面参数化，让 <Rotation> 能改变 UV 极点与纹理走向
+        auto shape = std::make_shared<Sphere>(objectToWorldPtr, worldToObjectPtr,
+                                              radius * scaleFactor, center);
         std::shared_ptr<DiffuseAreaLight> areaLight;
         if (!emissive.IsBlack())
             areaLight = std::make_shared<DiffuseAreaLight>(
