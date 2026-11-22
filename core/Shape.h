@@ -14,8 +14,7 @@ class Shape
 {
 public:
     // Shape Interface
-    Shape(const Transform *ObjectToWorld, const Transform *WorldToObject,
-          bool reverseOrientation);
+    Shape(const Transform *ObjectToWorld, const Transform *WorldToObject, bool reverseOrientation);
     virtual ~Shape();
     virtual Bounds3f ObjectBound() const = 0;
     virtual Bounds3f WorldBound() const;
@@ -48,7 +47,7 @@ public:
     //    // used in this case.
     //virtual Float SolidAngle(const Point3f &p, int nSamples = 512) const;
 
-    const Transform *ObjectToWorld, *WorldToObject;
+    const Transform *ObjectToWorld, *WorldToObject;   //局部空间和世界空间转换的矩阵
     const bool reverseOrientation;
     const bool transformSwapsHandedness;
 };

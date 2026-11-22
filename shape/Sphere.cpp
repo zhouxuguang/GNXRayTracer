@@ -6,17 +6,8 @@
 namespace pbr
 {
 
-namespace
-{
-const Transform &Identity()
-{
-    static const Transform identity;
-    return identity;
-}
-} // namespace
-
-Sphere::Sphere(Float radius, const Point3f &center)
-    : Shape(&Identity(), &Identity(), false),
+Sphere::Sphere(const Transform *ObjectToWorld, const Transform *WorldToObject, Float radius, const Point3f &center)
+    : Shape(ObjectToWorld, WorldToObject, false),
       radius(radius),
       center(center)
 {
@@ -26,6 +17,11 @@ Bounds3f Sphere::ObjectBound() const
 {
     return Bounds3f(Point3f(center.x - radius, center.y - radius, center.z - radius),
                     Point3f(center.x + radius, center.y + radius, center.z + radius));
+}
+
+Bounds3f Sphere::WorldBound() const
+{
+    return ObjectBound();
 }
 
 Float Sphere::Area() const
@@ -62,16 +58,23 @@ bool Sphere::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
 
     if (isect)
     {
-        Vector3f tangent = Cross(Vector3f(0, 0, 1), rel);
+        // 球面参数化在物体空间进行：<Rotation> 会带动 UV 极点与纹理走向；
+        // 几何（center/radius）已是世界空间量，交点位置与外法线仍按世界空间算
+        Vector3f relLocal = (*WorldToObject)(rel);
+        Vector3f dirLocal = Normalize(relLocal);
+        Vector3f tangent = Cross(Vector3f(0, 0, 1), relLocal);
         if (tangent.LengthSquared() < 1e-12f)
-            tangent = Cross(Vector3f(0, 1, 0), rel);
-        Vector3f bitangent = Cross(rel, tangent);
-        Vector3f normal = Normalize(Cross(tangent, bitangent));
+            tangent = Cross(Vector3f(0, 1, 0), relLocal);
+        Vector3f bitangent = Cross(relLocal, tangent);
+        Vector3f normal = Normalize(rel);
+        // 参数化切向回到世界空间，供纹理微分使用
+        Vector3f dpdu = (*ObjectToWorld)(tangent);
+        Vector3f dpdv = (*ObjectToWorld)(bitangent);
 
-        Float phi = std::atan2(rel.y, rel.x);
+        Float phi = std::atan2(dirLocal.y, dirLocal.x);
         if (phi < 0)
             phi += 2 * Pi;
-        Float theta = std::acos(Clamp(rel.z / radius, -1.f, 1.f));
+        Float theta = std::acos(Clamp(dirLocal.z, -1.f, 1.f));
 
         isect->p = pHit;
         isect->time = ray.time;
@@ -82,14 +85,14 @@ bool Sphere::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
         isect->wo = -ray.d;
         isect->n = Normal3f(normal.x, normal.y, normal.z);
         isect->uv = Point2f(phi * Inv2Pi, theta * InvPi);
-        isect->dpdu = tangent;
-        isect->dpdv = bitangent;
+        isect->dpdu = dpdu;
+        isect->dpdv = dpdv;
         isect->dndu = Normal3f(0, 0, 0);
         isect->dndv = Normal3f(0, 0, 0);
         isect->shape = this;
         isect->shading.n = isect->n;
-        isect->shading.dpdu = tangent;
-        isect->shading.dpdv = bitangent;
+        isect->shading.dpdu = dpdu;
+        isect->shading.dpdv = dpdv;
         isect->shading.dndu = Normal3f(0, 0, 0);
         isect->shading.dndv = Normal3f(0, 0, 0);
     }

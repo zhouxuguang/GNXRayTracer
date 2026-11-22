@@ -6,15 +6,16 @@
 namespace pbr
 {
 
-// 球体（世界空间）
-// XML 场景加载器把 <Transform> 烘焙进 center 与 radius，
-// 因此这里不依赖外部的 ObjectToWorld / WorldToObject 变换。
+// 球体
 class Sphere : public Shape
 {
 public:
-    Sphere(Float radius, const Point3f &center = Point3f(0.f, 0.f, 0.f));
+    Sphere(const Transform *ObjectToWorld, const Transform *WorldToObject, Float radius, const Point3f &center = Point3f(0.f, 0.f, 0.f));
 
     Bounds3f ObjectBound() const override;
+    // center / radius 已是世界空间量（加载器烘焙了平移与缩放），ObjectToWorld 只用于
+    // 球面参数化，因此世界包围盒直接取自 ObjectBound()，不再做二次变换
+    Bounds3f WorldBound() const override;
     bool Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
                    bool testAlphaTexture = true) const override;
     bool IntersectP(const Ray &ray, bool testAlphaTexture = true) const override;
@@ -22,8 +23,8 @@ public:
     Interaction Sample(const Point2f &u, Float *pdf) const override;
 
 private:
-    Float radius;
-    Point3f center;
+    Float radius;      //半径
+    Point3f center;    //球心
 };
 
 } // namespace pbr
