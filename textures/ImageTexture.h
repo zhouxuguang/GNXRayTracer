@@ -72,16 +72,16 @@ private:
     static MIPMap<Tmemory> *GetTexture(const std::string &filename,
                                        bool doTrilinear, Float maxAniso,
                                        ImageWrap wm, Float scale, bool gamma);
-    static void convertIn(const RGBSpectrum &from, RGBSpectrum *to, Float scale,
-                          bool gamma)
+    static void convertIn(const RGBSpectrum &from, RGBSpectrum *to, Float scale)
     {
         for (int i = 0; i < RGBSpectrum::nSamples; ++i)
-            (*to)[i] = scale * (gamma ? InverseGammaCorrect(from[i]) : from[i]);
+        {
+            (*to)[i] = scale * from[i];
+        }
     }
-    static void convertIn(const RGBSpectrum &from, Float *to, Float scale,
-                          bool gamma)
+    static void convertIn(const RGBSpectrum &from, Float *to, Float scale)
     {
-        *to = scale * (gamma ? InverseGammaCorrect(from.y()) : from.y());
+        *to = scale * from.y();
     }
     static void convertOut(const RGBSpectrum &from, Spectrum *to)
     {

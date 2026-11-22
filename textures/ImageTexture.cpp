@@ -11,35 +11,47 @@ template <typename Tmemory, typename Treturn>
 std::map<TexInfo, std::unique_ptr<MIPMap<Tmemory>>>
     ImageTexture<Tmemory, Treturn>::mTextures;
 
-static RGBSpectrum *loadImage(const std::string &filename, Point2i &resolution)
+// gamma 解码只在这里做一次：
+//   1) stb 的 ldr→hdr 转换固定关掉，统一拿到 8bit 原始值 v/255；
+//   2) 颜色贴图（srgb=true）在这里做标准 sRGB 解码；
+//   3) 法线/粗糙度这类数据贴图传 srgb=false，保持原始值；
+//   4) .hdr 本身是线性浮点，不做解码。
+// 下游的 convertIn 只负责 scale，不再参与 gamma，避免同一个纹理被解码两次。
+static RGBSpectrum *loadImage(const std::string &filename, Point2i &resolution, bool srgb)
 {
-    float *data = nullptr;
-    RGBSpectrum *data_s;
-    if (filename != "")
+    if (filename.empty())
+        return nullptr;
+
+    stbi_ldr_to_hdr_gamma(1.0f);
+
+    int imageWidth, imageHeight, fileChannels;
+    float *data = stbi_loadf(filename.c_str(), &imageWidth, &imageHeight,
+                             &fileChannels, 3); // 强制 3 通道，避免灰度/双通道图越界
+    if (!data)
+        return nullptr;
+
+    bool decodeSRGB = srgb && !stbi_is_hdr(filename.c_str());
+    decodeSRGB = false;
+
+    RGBSpectrum *data_s = new RGBSpectrum[imageWidth * imageHeight];
+    for (int j = 0; j < imageHeight; ++j)
     {
-        stbi_ldr_to_hdr_gamma(0.45f);
-        int imageWidth, imageHeight, nrComponents;
-        data = stbi_loadf(filename.c_str(), &imageWidth, &imageHeight, &nrComponents, 0);
-        if (!data)
-            return nullptr;
-        data_s = new RGBSpectrum[imageWidth * imageHeight];
-        for (int j = 0; j < imageHeight; j++)
+        for (int i = 0; i < imageWidth; ++i)
         {
-            for (int i = 0; i < imageWidth; i++)
+            const int base = (i + j * imageWidth) * 3;
+            RGBSpectrum r;
+            for (int k = 0; k < 3; ++k)
             {
-                RGBSpectrum r;
-                r[0] = data[(i + j * imageWidth) * nrComponents + 0];
-                r[1] = data[(i + j * imageWidth) * nrComponents + 1];
-                r[2] = data[(i + j * imageWidth) * nrComponents + 2];
-                data_s[i + j * imageWidth] = r;
+                const Float v = data[base + k];
+                r[k] = decodeSRGB ? GammaCorrect(v) : v;
             }
+            data_s[i + j * imageWidth] = r;
         }
-        resolution.x = imageWidth;
-        resolution.y = imageHeight;
-        stbi_image_free(data);
-        return data_s;
     }
-    return nullptr;
+    resolution.x = imageWidth;
+    resolution.y = imageHeight;
+    stbi_image_free(data);
+    return data_s;
 }
 
 template <typename Tmemory, typename Treturn>
@@ -64,7 +76,7 @@ MIPMap<Tmemory> *ImageTexture<Tmemory, Treturn>::GetTexture(
 
     // Create _MIPMap_ for _filename_
     Point2i resolution;
-    std::unique_ptr<RGBSpectrum[]> texels(loadImage(filename, resolution));
+    std::unique_ptr<RGBSpectrum[]> texels(loadImage(filename, resolution, gamma));
     if (!texels)
     {
         resolution.x = resolution.y = 1;
@@ -91,7 +103,7 @@ MIPMap<Tmemory> *ImageTexture<Tmemory, Treturn>::GetTexture(
         std::unique_ptr<Tmemory[]> convertedTexels(
             new Tmemory[resolution.x * resolution.y]);
         for (int i = 0; i < resolution.x * resolution.y; ++i)
-            convertIn(texels[i], &convertedTexels[i], scale, gamma);
+            convertIn(texels[i], &convertedTexels[i], scale);
         mipmap = new MIPMap<Tmemory>(resolution, convertedTexels.get(),
                                      doTrilinear, maxAniso, wrap);
     }
