@@ -32,59 +32,70 @@ Float Sphere::Area() const
 bool Sphere::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
                        bool testAlphaTexture) const
 {
-    Vector3f oc = ray.o - center;
-    Float a = Dot(ray.d, ray.d);
-    if (a <= 0)
-        return false;
+    // 将射线转换到局部坐标系
+    Ray rayLocal = (*WorldToObject)(ray);
 
-    Float b = 2 * Dot(oc, ray.d);
-    Float c = Dot(oc, oc) - radius * radius;
-    Float discriminant = b * b - 4 * a * c;
-    if (discriminant <= 0)
-        return false;
+    // 计算一元二次方程的系数
+    Float ox(rayLocal.o.x), oy(rayLocal.o.y), oz(rayLocal.o.z);
+    Float dx(rayLocal.d.x), dy(rayLocal.d.y), dz(rayLocal.d.z);
+    Float a = dx * dx + dy * dy + dz * dz;
+    Float b = 2 * (dx * ox + dy * oy + dz * oz);
+    Float c = ox * ox + oy * oy + oz * oz - (radius * radius);
+    
+    // 解出t
+    Float t0, t1;
+    if (!Quadratic(a, b, c, &t0, &t1)) return false;
 
-    Float root = std::sqrt(discriminant);
-    Float t = (-b - root) / (2 * a);
-    if (t <= 0)
-        t = (-b + root) / (2 * a);
-    if (t <= 0 || t >= ray.tMax)
-        return false;
-
-    Point3f pHit = ray(t);
-    Vector3f rel = pHit - center;
+    // 检查最近的交点
+    if (t0 > rayLocal.tMax || t1 <= 0) return false;
+    Float tShapeHit = t0;
+    if (tShapeHit <= 0)
+    {
+        tShapeHit = t1;
+        if (tShapeHit > rayLocal.tMax) return false;
+    }
+    
     if (tHit)
-        *tHit = t;
-    ray.tMax = t;
+    {
+        *tHit = tShapeHit;
+    }
 
     if (isect)
     {
-        // 球面参数化在物体空间进行：<Rotation> 会带动 UV 极点与纹理走向；
-        // 几何（center/radius）已是世界空间量，交点位置与外法线仍按世界空间算
-        Vector3f relLocal = (*WorldToObject)(rel);
-        Vector3f dirLocal = Normalize(relLocal);
-        Vector3f tangent = Cross(Vector3f(0, 0, 1), relLocal);
-        if (tangent.LengthSquared() < 1e-12f)
-            tangent = Cross(Vector3f(0, 1, 0), relLocal);
-        Vector3f bitangent = Cross(relLocal, tangent);
-        Vector3f normal = Normalize(rel);
-        // 参数化切向回到世界空间，供纹理微分使用
-        Vector3f dpdu = (*ObjectToWorld)(tangent);
-        Vector3f dpdv = (*ObjectToWorld)(bitangent);
+        // 计算局部空间中的交点位置和法线
+        Vector3f pHit = Vector3f(rayLocal.o + tShapeHit * rayLocal.d); // 交点位置（局部空间）
+        Vector3f n = Normalize(pHit); // 交点法线（局部空间）
+        
+        // 计算切线和副切线方向
+        Float zRadius = std::sqrt(pHit.x * pHit.x + pHit.y * pHit.y);
+        Float invZRadius = 1 / zRadius;
+        Float cosPhi = pHit.x * invZRadius;
+        Float sinPhi = pHit.y * invZRadius;
+        Vector3f dpdu(-pHit.y, pHit.x, 0);
+        
+        float theta = std::acosf(n.z);
+        Vector3f dpdv = (-Pi) * Vector3f(pHit.z * cosPhi, pHit.z * sinPhi, -radius * std::sin(theta));
+        
+        dpdu = (*ObjectToWorld)(dpdu);
+        dpdv = (*ObjectToWorld)(dpdv);
 
-        Float phi = std::atan2(dirLocal.y, dirLocal.x);
-        if (phi < 0)
-            phi += 2 * Pi;
-        Float theta = std::acos(Clamp(dirLocal.z, -1.f, 1.f));
-
-        isect->p = pHit;
-        isect->time = ray.time;
+        isect->p = (*ObjectToWorld)(Point3f(pHit.x, pHit.y, pHit.z));
+        isect->time = rayLocal.time;
         // 交点误差界：非零才能驱动 OffsetRayOrigin 把阴影射线推离球面，
         // 否则起点精确落在表面上会自相交，产生阴影粉刺。
         isect->pError = gamma(5) * Vector3f(std::abs(pHit.x), std::abs(pHit.y), std::abs(pHit.z)) +
                         Vector3f(ShadowEpsilon, ShadowEpsilon, ShadowEpsilon);
         isect->wo = -ray.d;
-        isect->n = Normal3f(normal.x, normal.y, normal.z);
+        isect->n = (*ObjectToWorld)(Normal3f(n.x, n.y, n.z));
+        
+        // 计算交点处的uv坐标
+        float phi = std::atan2f(pHit.y, pHit.x); // [-pi, pi]
+        if (phi < 0)
+        {
+            phi += 2 * Pi; // [0, 2pi]
+        }
         isect->uv = Point2f(phi * Inv2Pi, theta * InvPi);
+        
         isect->dpdu = dpdu;
         isect->dpdv = dpdv;
         isect->dndu = Normal3f(0, 0, 0);
