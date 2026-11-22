@@ -62,22 +62,23 @@ void Material::NormalMap(const std::shared_ptr<Texture<Spectrum>> &normalMap,
     Vector3f nT(2.f * rgb[0] - 1.f, 2.f * rgb[1] - 1.f, 2.f * rgb[2] - 1.f);
 
     // <BumpScale>： mix((0,0,1), n, bumpScale)。
-    // 0 表示完全平坦（退化为几何法线），1 为贴图原始强度，>1 放大凹凸
-    nT = Vector3f(nT.x * bumpScale, nT.y * bumpScale,
-                 (1.f - bumpScale) + nT.z * bumpScale);
+    nT = Vector3f(0, 0, 1) * (1.0 - bumpScale) + nT * bumpScale;
+    
     if (nT.LengthSquared() < 1e-8f)
         return;
     nT = Normalize(nT);
     
     // 2) 用几何法线与几何切线构造 TBN
     Vector3f ns = Normalize(Vector3f(si->n));
-    Vector3f ts = Normalize(si->dpdu - Dot(si->dpdu, ns) * ns);
-    Vector3f bs = Cross(ns, ts);
+    Vector3f bs = Normalize(Cross(ns, si->dpdu));
+    Vector3f ts = Normalize(Cross(bs, ns));
+    bs = Normalize(bs);
     
     // 3) 切空间 → 世界空间
-    Vector3f n = Vector3f(ts.x * nT.x + bs.x * nT.y + ns.x * nT.z,
+    Vector3f n = Normalize(Vector3f(ts.x * nT.x + bs.x * nT.y + ns.x * nT.z,
                           ts.y * nT.x + bs.y * nT.y + ns.y * nT.z,
-                          ts.z * nT.x + bs.z * nT.y + ns.z * nT.z);
+                          ts.z * nT.x + bs.z * nT.y + ns.z * nT.z));
+
     if (n.LengthSquared() == 0.f)
     {
         return;
