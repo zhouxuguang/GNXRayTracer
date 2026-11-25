@@ -99,7 +99,6 @@ Spectrum SpecularTransmission::Sample_f(const Vector3f &wo, Vector3f *wi,
                                         const Point2f &sample, Float *pdf,
                                         BxDFType *sampledType) const
 {
-    // Figure out which $\eta$ is incident and which is transmitted
     bool entering = CosTheta(wo) > 0; //大于0表示从外部进入到介质内
     Float etaI = entering ? etaA : etaB;
     Float etaT = entering ? etaB : etaA;
@@ -324,41 +323,6 @@ std::string MicrofacetTransmission::ToString() const
            std::string(" ]");
 }
 
-Spectrum FresnelBlend::Sample_f(const Vector3f &wo, Vector3f *wi,
-                                const Point2f &uOrig, Float *pdf,
-                                BxDFType *sampledType) const
-{
-    Point2f u = uOrig;
-    if (u[0] < .5)
-    {
-        u[0] = std::min(2 * u[0], OneMinusEpsilon);
-        // Cosine-sample the hemisphere, flipping the direction if necessary
-        *wi = CosineSampleHemisphere(u);
-        if (wo.z < 0)
-            wi->z *= -1;
-    }
-    else
-    {
-        u[0] = std::min(2 * (u[0] - .5f), OneMinusEpsilon);
-        // Sample microfacet orientation $\wh$ and reflected direction $\wi$
-        Vector3f wh = distribution->Sample_wh(wo, u);
-        *wi = Reflect(wo, wh);
-        if (!SameHemisphere(wo, *wi))
-            return Spectrum(0.f);
-    }
-    *pdf = Pdf(wo, *wi);
-    return f(wo, *wi);
-}
-
-Float FresnelBlend::Pdf(const Vector3f &wo, const Vector3f &wi) const
-{
-    if (!SameHemisphere(wo, wi))
-        return 0;
-    Vector3f wh = Normalize(wo + wi);
-    Float pdf_wh = distribution->Pdf(wo, wh);
-    return .5f * (AbsCosTheta(wi) * InvPi + pdf_wh / (4 * Dot(wo, wh)));
-}
-
 Spectrum FresnelSpecular::Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &u, Float *pdf, BxDFType *sampledType) const
 {
     Float F = FrDielectric(CosTheta(wo), mEtaA, mEtaB);
@@ -435,7 +399,9 @@ Spectrum BxDF::rho(const Vector3f &w, int nSamples, const Point2f *u) const
         Float pdf = 0;
         Spectrum f = Sample_f(w, &wi, u[i], &pdf);
         if (pdf > 0)
+        {
             r += f * AbsCosTheta(wi) / pdf;
+        }
     }
     return r / nSamples;
 }
@@ -451,7 +417,9 @@ Spectrum BxDF::rho(int nSamples, const Point2f *u1, const Point2f *u2) const
         Float pdfo = UniformHemispherePdf(), pdfi = 0;
         Spectrum f = Sample_f(wo, &wi, u2[i], &pdfi);
         if (pdfi > 0)
+        {
             r += f * AbsCosTheta(wi) * AbsCosTheta(wo) / (pdfo * pdfi);
+        }
     }
     return r / (Pi * nSamples);
 }
@@ -468,8 +436,10 @@ Spectrum BSDF::f(const Vector3f &woW, const Vector3f &wiW, BxDFType flags) const
     {
         if (bxdfs[i]->MatchesFlags(flags) &&
             ((reflect && (bxdfs[i]->type & BSDF_REFLECTION)) ||
-             (!reflect && (bxdfs[i]->type & BSDF_TRANSMISSION))))
+                (!reflect && (bxdfs[i]->type & BSDF_TRANSMISSION))))
+        {
             f += bxdfs[i]->f(wo, wi);
+        }
     }
     return f;
 }
@@ -481,7 +451,9 @@ Spectrum BSDF::rho(int nSamples, const Point2f *samples1,
     for (int i = 0; i < nBxDFs; ++i)
     {
         if (bxdfs[i]->MatchesFlags(flags))
+        {
             ret += bxdfs[i]->rho(nSamples, samples1, samples2);
+        }
     }
     return ret;
 }
@@ -494,7 +466,9 @@ Spectrum BSDF::rho(const Vector3f &woWorld, int nSamples, const Point2f *samples
     for (int i = 0; i < nBxDFs; ++i)
     {
         if (bxdfs[i]->MatchesFlags(flags))
+        {
             ret += bxdfs[i]->rho(wo, nSamples, samples);
+        }
     }
     return ret;
 }
@@ -610,6 +584,139 @@ std::string BSDF::ToString() const
     for (int i = 0; i < nBxDFs; ++i)
         s += StringPrintf("\n  bxdfs[%d]: ", i) + bxdfs[i]->ToString();
     return s + std::string(" ]");
+}
+
+pbr::Spectrum FresnelSchlick::Evaluate(Float cosThetaI) const
+{
+    return FrSchlick(mF0, cosThetaI);
+}
+
+std::string FresnelSchlick::ToString() const
+{
+    return StringPrintf("[ FresnelSchlick F0: %s ]", mF0.ToString().c_str());
+}
+
+CookTorranceBxDF::CookTorranceBxDF(const Spectrum& albedo, Float metallic, Float roughness,
+                                   MicrofacetDistribution* distrib, Fresnel* fresnel)
+    : BxDF(BxDFType(BSDF_REFLECTION | BSDF_GLOSSY)),
+      mAlbedo(albedo),
+      mMetallic(metallic),
+      mRoughness(roughness),
+      mK((roughness + 1) * (roughness + 1) / 8),
+      mDistrib(distrib),
+      mFresnel(fresnel)
+{
+}
+
+Float CookTorranceBxDF::GeometrySchlickGGX(Float NdotV) const
+{
+    Float denom = NdotV * (1 - mK) + mK;
+    if (denom <= 0)
+        return 0;
+    return NdotV / denom;
+}
+
+Float CookTorranceBxDF::GeometrySmith(const Vector3f& wo, const Vector3f& wi) const
+{
+    return GeometrySchlickGGX(std::abs(wi.z)) * GeometrySchlickGGX(std::abs(wo.z));
+}
+
+Spectrum CookTorranceBxDF::f(const Vector3f& wo, const Vector3f& wi) const
+{
+    if (!SameHemisphere(wo, wi))
+        return Spectrum(0.f);
+
+    Float cosO = AbsCosTheta(wo), cosI = AbsCosTheta(wi);
+    if (cosO == 0 || cosI == 0)
+        return Spectrum(0.f);
+
+    Vector3f whSum = wo + wi;
+    if (whSum.LengthSquared() == 0)
+        return Spectrum(0.f);
+    Vector3f wh = Normalize(whSum);
+
+    // wh 与 wi 同侧，保证 Schlick 的余弦非负
+    Float cosIH = Dot(wi, Faceforward(wh, Vector3f(0, 0, 1)));
+    Spectrum F = mFresnel->Evaluate(cosIH);
+    Float D = mDistrib->D(wh);
+    Float G = GeometrySmith(wo, wi);
+
+    // Kd = (1 - F)(1 - metallic)：F 依赖入射方向，只能在 f() 里逐方向计算
+    Spectrum kd = (Spectrum(1.f) - F) * (1.f - mMetallic);
+    return kd * mAlbedo * InvPi + F * D * G / (4 * cosI * cosO);
+}
+
+Spectrum CookTorranceBxDF::Sample_f(const Vector3f& wo, Vector3f* wi, const Point2f& uOrig,
+                                    Float* pdf, BxDFType* sampledType) const
+{
+    if (AbsCosTheta(wo) == 0)
+    {
+        *pdf = 0;
+        return Spectrum(0.f);
+    }
+
+    // 50% 余弦半球采样照顾漫反射，50% GGX 可见法线采样照顾镜面
+    Point2f u = uOrig;
+    if (u[0] < 0.5f)
+    {
+        u[0] = std::min(2 * u[0], OneMinusEpsilon);
+        Vector3f w = CosineSampleHemisphere(u);
+        if (wo.z < 0)
+            w.z *= -1;
+        *wi = w;
+    }
+    else
+    {
+        u[0] = std::min(2 * (u[0] - 0.5f), OneMinusEpsilon);
+        Vector3f wh = mDistrib->Sample_wh(wo, u);
+        if (Dot(wo, wh) <= 0)
+        {
+            *pdf = 0;
+            return Spectrum(0.f);
+        }
+        *wi = Reflect(wo, wh);
+        if (!SameHemisphere(wo, *wi))
+        {
+            *pdf = 0;
+            return Spectrum(0.f);
+        }
+    }
+
+    *pdf = Pdf(wo, *wi);
+    if (*pdf == 0)
+        return Spectrum(0.f);
+
+    if (sampledType)
+        *sampledType = BxDFType(BSDF_REFLECTION | BSDF_GLOSSY);
+    return f(wo, *wi);
+}
+
+Float CookTorranceBxDF::Pdf(const Vector3f& wo, const Vector3f& wi) const
+{
+    if (!SameHemisphere(wo, wi))
+        return 0;
+
+    if (AbsCosTheta(wo) == 0)
+        return 0;
+
+    Vector3f whSum = wo + wi;
+    if (whSum.LengthSquared() == 0)
+        return 0;
+    Vector3f wh = Normalize(whSum);
+    Float woDotWh = Dot(wo, wh);
+    if (woDotWh <= 0)
+        return 0;
+
+    // 余弦半球 pdf 与 GGX 可见法线 pdf（半程向量到入射方向的 Jacobian 为 1/(4 wo·wh)）
+    Float pdfCosine = AbsCosTheta(wi) * InvPi;
+    Float pdfGGX = mDistrib->Pdf(wo, wh) / (4 * woDotWh);
+    return 0.5f * (pdfCosine + pdfGGX);
+}
+
+std::string CookTorranceBxDF::ToString() const
+{
+    return StringPrintf("[ CookTorranceBxDF albedo: %s metallic: %f roughness: %f ]",
+                        mAlbedo.ToString().c_str(), mMetallic, mRoughness);
 }
 
 } // namespace pbr

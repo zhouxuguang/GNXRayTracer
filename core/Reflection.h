@@ -17,6 +17,29 @@ Float FrDielectric(Float cosThetaI, Float etaI, Float etaT);
 Spectrum FrConductor(Float cosThetaI, const Spectrum &etaI,
                      const Spectrum &etaT, const Spectrum &k);
 
+// https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/
+//
+// The Schlick Fresnel approximation is:
+//
+// R = R(0) + (1 - R(0)) (1 - cos theta)^5,
+//
+// where R(0) is the reflectance at normal indicence.
+inline Float SchlickWeight(Float cosTheta)
+{
+	Float m = Clamp(1 - cosTheta, 0, 1);
+	return m * m * m * m * m;
+}
+
+inline Float FrSchlick(Float R0, Float cosTheta)
+{
+	return Lerp(SchlickWeight(cosTheta), R0, 1);
+}
+
+inline Spectrum FrSchlick(const Spectrum& R0, Float cosTheta)
+{
+	return Lerp(SchlickWeight(cosTheta), R0, Spectrum(1.));
+}
+
 // BSDF Inline Functions
 inline Float CosTheta(const Vector3f &w)
 {
@@ -111,7 +134,7 @@ inline bool SameHemisphere(const Vector3f &w, const Normal3f &wp)
     return w.z * wp.z > 0;
 }
 
-// BSDF Declarations
+// BSDF的类型
 enum BxDFType
 {
     BSDF_REFLECTION = 1 << 0,
@@ -123,11 +146,10 @@ enum BxDFType
                BSDF_TRANSMISSION,
 };
 
-
+// 双向散射分布函数
 class BSDF
 {
 public:
-    // BSDF Public Methods
     BSDF(const SurfaceInteraction &si, Float eta = 1)
         : eta(eta),
           ns(si.shading.n),
@@ -170,16 +192,13 @@ public:
               BxDFType flags = BSDF_ALL) const;
     std::string ToString() const;
 
-    // BSDF Public Data
     const Float eta;
 
 private:
-    // BSDF Private Methods
     ~BSDF()
     {
     }
 
-    // BSDF Private Data
     const Normal3f ns, ng;
     const Vector3f ss, ts;
     int nBxDFs = 0;
@@ -193,11 +212,9 @@ inline std::ostream &operator<<(std::ostream &os, const BSDF &bsdf)
     return os;
 }
 
-// BxDF Declarations
 class BxDF
 {
 public:
-    // BxDF Interface
     virtual ~BxDF()
     {
     }
@@ -220,7 +237,6 @@ public:
     virtual Float Pdf(const Vector3f &wo, const Vector3f &wi) const;
     virtual std::string ToString() const = 0;
 
-    // BxDF Public Data
     const BxDFType type;
 };
 
@@ -234,7 +250,7 @@ inline std::ostream &operator<<(std::ostream &os, const BxDF &bxdf)
 class LambertianReflection : public BxDF
 {
 public:
-    LambertianReflection(const Spectrum & albedo)
+    LambertianReflection(const Spectrum &albedo)
         : BxDF(BxDFType(BSDF_REFLECTION | BSDF_DIFFUSE)), mAlbedo(albedo)
     {
     }
@@ -256,7 +272,6 @@ private:
 class LambertianTransmission : public BxDF
 {
 public:
-    // LambertianTransmission Public Methods
     LambertianTransmission(const Spectrum &T)
         : BxDF(BxDFType(BSDF_TRANSMISSION | BSDF_DIFFUSE)), T(T)
     {
@@ -276,7 +291,6 @@ public:
     std::string ToString() const;
 
 private:
-    // LambertianTransmission Private Data
     Spectrum T;
 };
 
@@ -299,7 +313,6 @@ private:
     Float mA, mB;
 };
 
-// BSDF Inline Method Definitions
 inline int BSDF::NumComponents(BxDFType flags) const
 {
     int num = 0;
@@ -316,7 +329,6 @@ inline int BSDF::NumComponents(BxDFType flags) const
 class Fresnel
 {
 public:
-    // Fresnel Interface
     virtual ~Fresnel();
     virtual Spectrum Evaluate(Float cosI) const = 0;
     virtual std::string ToString() const = 0;
@@ -356,6 +368,18 @@ public:
 
 private:
     Float mEtaI, mEtaT;    // 两种物质的折射率
+};
+
+// Schlick菲涅耳反射率
+class FresnelSchlick : public Fresnel
+{
+public:
+	FresnelSchlick(const Spectrum& F0) : mF0(F0) {}
+	Spectrum Evaluate(Float cosThetaI) const;
+	std::string ToString() const;
+
+private:
+	const Spectrum mF0;
 };
 
 class FresnelSpecular : public BxDF
@@ -434,7 +458,6 @@ private:
 class SpecularTransmission : public BxDF
 {
 public:
-    // SpecularTransmission Public Methods
     SpecularTransmission(const Spectrum &T, Float etaA, Float etaB,
                          TransportMode mode)
         : BxDF(BxDFType(BSDF_TRANSMISSION | BSDF_SPECULAR)),
@@ -458,7 +481,6 @@ public:
     std::string ToString() const;
 
 private:
-    // SpecularTransmission Private Data
     const Spectrum T;
     const Float etaA, etaB;
     const FresnelDielectric fresnel;
@@ -468,7 +490,6 @@ private:
 class MicrofacetReflection : public BxDF
 {
 public:
-    // MicrofacetReflection Public Methods
     MicrofacetReflection(const Spectrum &R,
                          MicrofacetDistribution *distribution, Fresnel *fresnel)
         : BxDF(BxDFType(BSDF_REFLECTION | BSDF_GLOSSY)),
@@ -484,7 +505,6 @@ public:
     std::string ToString() const;
 
 private:
-    // MicrofacetReflection Private Data
     const Spectrum R;
     const MicrofacetDistribution *distribution;
     const Fresnel *fresnel;
@@ -493,7 +513,6 @@ private:
 class MicrofacetTransmission : public BxDF
 {
 public:
-    // MicrofacetTransmission Public Methods
     MicrofacetTransmission(const Spectrum &T,
                            MicrofacetDistribution *distribution, Float etaA,
                            Float etaB, TransportMode mode)
@@ -513,7 +532,6 @@ public:
     std::string ToString() const;
 
 private:
-    // MicrofacetTransmission Private Data
     const Spectrum T;
     const MicrofacetDistribution *distribution;
     const Float etaA, etaB;
@@ -521,30 +539,29 @@ private:
     const TransportMode mode;
 };
 
-class FresnelBlend : public BxDF
+// Cook-Torrance：漫反射项与镜面 DFG 项写在同一个 f() 里。
+// 不能拆成 LambertianReflection + MicrofacetReflection 两个 BxDF 叠加，因为漫反射
+// 权重 Kd = (1 - F)(1 - metallic) 中的 F 依赖入射方向，而材质在生成 BSDF 时还拿不到 wi
+class CookTorranceBxDF : public BxDF
 {
 public:
-    // FresnelBlend Public Methods
-    FresnelBlend(const Spectrum &Rd, const Spectrum &Rs,
-                 MicrofacetDistribution *distrib);
-    Spectrum f(const Vector3f &wo, const Vector3f &wi) const;
-    Spectrum SchlickFresnel(Float cosTheta) const
-    {
-        auto pow5 = [](Float v)
-        {
-            return (v * v) * (v * v) * v;
-        };
-        return Rs + pow5(1 - cosTheta) * (Spectrum(1.) - Rs);
-    }
-    Spectrum Sample_f(const Vector3f &wi, Vector3f *sampled_f, const Point2f &u,
-                      Float *pdf, BxDFType *sampledType) const;
-    Float Pdf(const Vector3f &wo, const Vector3f &wi) const;
-    std::string ToString() const;
-
+	CookTorranceBxDF(const Spectrum& albedo, Float metallic, Float roughness,
+		MicrofacetDistribution* distrib, Fresnel* fresnel);
+	Spectrum f(const Vector3f& wo, const Vector3f& wi) const;
+	Spectrum Sample_f(const Vector3f& wo, Vector3f* wi, const Point2f& u,
+		Float* pdf, BxDFType* sampledType = nullptr) const;
+	Float Pdf(const Vector3f& wo, const Vector3f& wi) const;
+	std::string ToString() const;
 private:
-    // FresnelBlend Private Data
-    const Spectrum Rd, Rs;
-    MicrofacetDistribution *distribution;
+	// Smith 遮蔽-阴影项，k = (roughness + 1)^2 / 8
+	Float GeometrySchlickGGX(Float NdotV) const;
+	Float GeometrySmith(const Vector3f& wo, const Vector3f& wi) const;
+
+	const Spectrum mAlbedo;             // 反照率
+	const Float mMetallic, mRoughness;  // 金属度和粗糙度
+	const Float mK;                     // Schlick-GGX 的 k，构造时预先算好
+	MicrofacetDistribution* mDistrib;   // 负责 D 与可见法线采样
+	Fresnel* mFresnel;                  // 一般为 FresnelSchlick(F0)
 };
 
 } // namespace pbr

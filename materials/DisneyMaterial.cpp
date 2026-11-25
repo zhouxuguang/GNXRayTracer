@@ -20,29 +20,6 @@ inline Float sqr(Float x)
     return x * x;
 }
 
-// https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/
-//
-// The Schlick Fresnel approximation is:
-//
-// R = R(0) + (1 - R(0)) (1 - cos theta)^5,
-//
-// where R(0) is the reflectance at normal indicence.
-inline Float SchlickWeight(Float cosTheta)
-{
-    Float m = Clamp(1 - cosTheta, 0, 1);
-    return (m * m) * (m * m) * m;
-}
-
-inline Float FrSchlick(Float R0, Float cosTheta)
-{
-    return Lerp(SchlickWeight(cosTheta), R0, 1);
-}
-
-inline Spectrum FrSchlick(const Spectrum &R0, Float cosTheta)
-{
-    return Lerp(SchlickWeight(cosTheta), R0, Spectrum(1.));
-}
-
 // For a dielectric, R(0) = (eta - 1)^2 / (eta + 1)^2, assuming we're
 // coming from air..
 // 从折射率计算R0，基础反射率

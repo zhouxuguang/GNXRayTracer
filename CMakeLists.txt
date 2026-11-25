@@ -147,6 +147,8 @@ materials/MirrorMaterial.h
 materials/MirrorMaterial.cpp
 materials/PlasticMaterial.h
 materials/PlasticMaterial.cpp
+materials/CookTorranceMaterial.h
+materials/CookTorranceMaterial.cpp
 )
 source_group("materials" FILES ${MATERIALS_FILES})
 
