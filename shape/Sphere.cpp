@@ -63,8 +63,8 @@ bool Sphere::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
     if (isect)
     {
         // 计算局部空间中的交点位置和法线
-        Vector3f pHit = Vector3f(rayLocal.o + tShapeHit * rayLocal.d); // 交点位置（局部空间）
-        Vector3f n = Normalize(pHit); // 交点法线（局部空间）
+        const Vector3f normal = Normalize(Vector3f(rayLocal(tShapeHit)));
+        const Vector3f pHit = radius * normal;
         
         // 计算切线和副切线方向
         Float zRadius = std::sqrt(pHit.x * pHit.x + pHit.y * pHit.y);
@@ -73,19 +73,17 @@ bool Sphere::Intersect(const Ray &ray, Float *tHit, SurfaceInteraction *isect,
         Float sinPhi = pHit.y * invZRadius;
         Vector3f dpdu(-pHit.y, pHit.x, 0);
         
-        float theta = std::acosf(n.z);
+        float theta = std::acosf(normal.z);
         Vector3f dpdv = (-Pi) * Vector3f(pHit.z * cosPhi, pHit.z * sinPhi, -radius * std::sin(theta));
         
         dpdu = (*ObjectToWorld)(dpdu);
         dpdv = (*ObjectToWorld)(dpdv);
 
-        isect->p = (*ObjectToWorld)(Point3f(pHit.x, pHit.y, pHit.z));
+        isect->p = (*ObjectToWorld)(Point3f(pHit.x, pHit.y, pHit.z),
+                                   gamma(5) * Abs(pHit), &isect->pError);
         isect->time = rayLocal.time;
-        // 交点误差界：非零才能驱动 OffsetRayOrigin 把阴影射线推离球面，
-        // 否则起点精确落在表面上会自相交，产生阴影粉刺。
-        isect->pError = gamma(5) * Abs(pHit);
         isect->wo = -ray.d;
-        isect->n = (*ObjectToWorld)(Normal3f(n.x, n.y, n.z));
+        isect->n = (*ObjectToWorld)(Normal3f(normal));
         
         // 计算交点处的uv坐标
         float phi = std::atan2f(pHit.y, pHit.x); // [-pi, pi]
