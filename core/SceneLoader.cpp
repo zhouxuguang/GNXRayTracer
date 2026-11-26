@@ -6,6 +6,7 @@
 #include "lights/DistantLight.h"
 #include "lights/PointLight.h"
 #include "lights/SpotLight.h"
+#include "materials/CookTorranceMaterial.h"
 #include "materials/GlassMaterial.h"
 #include "materials/MatteMaterial.h"
 #include "materials/MirrorMaterial.h"
@@ -297,6 +298,41 @@ std::shared_ptr<Texture<Spectrum>> MakeNormalTexture(const XMLElement *node,
         ImageWrap::Repeat, 1.f, false);
 }
 
+// 读取粗糙度/金属度这类标量贴图：<XxxMap> 存在且文件可读就用贴图，
+// 否则回退到 <Xxx> 的常量值（缺 <Xxx> 时用 defaultValue）。
+std::shared_ptr<Texture<Float>> MakeScalarTexture(const XMLElement *node,
+                                                  const char *valueName,
+                                                  const char *mapName,
+                                                  Float defaultValue,
+                                                  const std::string &materialName,
+                                                  const std::string &textureDir,
+                                                  std::string &error)
+{
+    const std::string map = TrimText(ChildText(node, mapName));
+    if (!map.empty())
+    {
+        const std::string path = textureDir + map;
+        if (FileExists(path))
+        {
+            // 粗糙度/金属度是线性数据，gamma=false 避免再做一次 sRGB 解码；
+            // doTri=false 走 EWA 各向异性过滤
+            return std::make_shared<ImageTexture<Float, Float>>(
+                std::make_unique<UVMapping2D>(), path, false, 8.f,
+                ImageWrap::Repeat, 1.f, false);
+        }
+        std::fprintf(stderr, "warning: material '%s': %s not found: %s\n",
+                     materialName.c_str(), mapName, path.c_str());
+    }
+
+    Float value = defaultValue;
+    if (!ReadScalar(node, valueName, value, error, false))
+    {
+        error = "material '" + materialName + "': " + error;
+        return nullptr;
+    }
+    return std::make_shared<ConstantTexture<Float>>(value);
+}
+
 using MaterialMap = std::map<std::string, std::shared_ptr<Material>>;
 
 std::shared_ptr<Material> MakeDefaultMaterial()
@@ -427,6 +463,30 @@ bool AppendMaterials(XMLElement *materialNodes, const std::string &textureDir,
                 MakeNormalTexture(node, name, textureDir),
                 bumpScale,
                 true);
+        }
+        else if (type == "CookTorrance")
+        {
+            // 教程 CookTorranceMaterial(albedo, roughness, metallic) 的 metallic/roughness 工作流：
+            // <Albedo>/<AlbedoMap>、<Roughness>/<RoughnessMap>、<Metallic>/<MetallicMap>
+            std::shared_ptr<Texture<Spectrum>> albedo =
+                MakeAlbedoTexture(node, name, textureDir, error);
+            if (!albedo)
+                return false;
+
+            // 缺省值与教程保持一致：roughness = 1（最粗糙），metallic = 0（绝缘体）
+            std::shared_ptr<Texture<Float>> roughness =
+                MakeScalarTexture(node, "Roughness", "RoughnessMap", 1.f, name,
+                                  textureDir, error);
+            std::shared_ptr<Texture<Float>> metallic =
+                MakeScalarTexture(node, "Metallic", "MetallicMap", 0.f, name,
+                                  textureDir, error);
+            if (!roughness || !metallic)
+                return false;
+
+            // 教程没有独立的凹凸贴图，bumpMap 固定为 nullptr，只有法线贴图
+            materials[name] = std::make_shared<CookTorranceMaterial>(
+                albedo, metallic, roughness, nullptr,
+                MakeNormalTexture(node, name, textureDir), bumpScale);
         }
         else
         {
